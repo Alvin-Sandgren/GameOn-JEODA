@@ -29,7 +29,6 @@ class Character {
         this.isDashing = false;
         this.dashTime = 0;
 
-        // Hjälpvariabel för att registrera "nytt knapptryck" för hopp
         this.jumpPressedLastFrame = false;
     }
 
@@ -115,6 +114,8 @@ function drawGround() {
     ctx.fillStyle = "green";
     ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
 }
+
+
 
 function gameLoop() {
     drawBackground();
