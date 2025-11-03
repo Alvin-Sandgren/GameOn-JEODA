@@ -1,24 +1,145 @@
-// heal function (drick mjöd)
-// välj ett target och öka dess health med heal_amount värdet
-window.heal = function(target, heal_amount) {
-    if (!target) return;
-    target.health = (target.health || 0) + heal_amount;
-    if (target.maxHealth) target.health = Math.min(target.health, target.maxHealth);
+let inCombat = false;
+let currentEnemy = null;
+let playerTurn = true;
+
+
+const PlayerActions = [
+    {
+        name: "Attack",
+        damage: () => player.damage,
+        cost: 5
+    },
+    {
+        // Nästa skada minskas med 50%
+        name: "Dodge",
+        cost: 10,
+        apply: () => {
+            player.isDodging = true;
+            console.log("Du förbereder en dodge! Nästa skada minskas med 50%");
+        }
+    },
+    {
+        name: "Heal",
+        heal: () => 20,
+        cost: 15
+    }
+];
+
+// Starta strid mot fiende
+function startCombat(enemy) {
+    inCombat = true;
+    currentEnemy = enemy;
+    playerTurn = true;
+    updateCombatUI();
+    openCombatUI();
 }
 
-// attack function
-//välj en target och minska dess health med damage värdet
-window.attack = function(target, damage) {
-    if (!target) return;
-    target.health = (target.health || 0) - (damage || 0);
+// Uppdatera combat UI 
+function updateCombatUI() {
+    console.log(`Spelare HP: ${player.health}/${player.maxHealth} | Mana: ${player.mana}/${player.maxMana}`);
+    console.log(`${currentEnemy.name} HP: ${currentEnemy.health}`);
 }
 
-// block function
-// reducerar skada med 50% 
-window.block = function(defender, attacker) {
-    if (!defender || !attacker) return;
-    let blocked_damage = (attacker.damage || 0) * 0.5;
-    defender.health = (defender.health || 0) - blocked_damage;
+// Hantera spelarens val
+function playerAction(actionIndex) {
+    if (!playerTurn) {
+        console.log("Det är inte din tur!");
+        return;
+    }
+
+    const action = PlayerActions[actionIndex];
+
+    if (player.mana < action.cost) {
+        console.log("Inte tillräckligt med mana!");
+        return;
+    }
+
+    player.mana -= action.cost;
+
+    if (action.damage) {
+        currentEnemy.health -= action.damage();
+        console.log(`Du gjorde ${action.damage()} skada på ${currentEnemy.name}`);
+    } else if (action.heal) {
+        player.health += action.heal();
+        if (player.health > player.maxHealth) player.health = player.maxHealth;
+        console.log(`Du helade ${action.heal()} HP`);
+    } else if (action.apply) {
+        action.apply();
+    }
+
+    if (currentEnemy.health <= 0) {
+        endCombat(true);
+        return;
+    }
+
+    playerTurn = false;
+    enemyTurn();
 }
 
-//unlockables abilities och nya rörelser
+// Fiendens tur
+function enemyTurn() {
+    setTimeout(() => {
+        let damage = currentEnemy.damage;
+
+        if (player.isDodging) {
+            damage = Math.floor(damage * 0.5);
+            player.isDodging = false;
+        }
+
+        player.health -= damage;
+        console.log(`${currentEnemy.name} gjorde ${damage} skada!`);
+
+        if (player.health <= 0) {
+            endCombat(false);
+            return;
+        }
+
+        playerTurn = true;
+        updateCombatUI();
+    }, 1000);
+}
+
+// Avsluta strid
+function endCombat(playerWon) {
+    if (playerWon) {
+        console.log(`Du besegrade ${currentEnemy.name}!`);
+    } else {
+        console.log("Du blev besegrad!");
+    }
+
+    inCombat = false;
+    currentEnemy = null;
+
+    closeCombatUI();
+}
+
+// Öppna UI 
+function openCombatUI() {
+    const container = document.getElementById("combat-ui");
+    container.innerHTML = ""; // rensa gamla knappar
+
+    PlayerActions.forEach((action, i) => {
+        const btn = document.createElement("button");
+        btn.innerText = action.name;
+        btn.onclick = () => playerAction(i);
+        container.appendChild(btn);
+    });
+}
+
+// Stäng UI 
+function closeCombatUI() { 
+    const container = document.getElementById("combat-ui");
+    container.innerHTML = "";
+}
+
+// startar strid om spelaren kolliderar med fienden (ska bytas till random encounter senare)
+function checkCombatTrigger() {
+    if (!inCombat &&
+        player.x < enemyGoat.x + enemyGoat.w &&
+        player.x + player.w > enemyGoat.x &&
+        player.y < enemyGoat.y + enemyGoat.h &&
+        player.y + player.h > enemyGoat.y) {
+
+        startCombat(enemyGoat);
+    }
+}
