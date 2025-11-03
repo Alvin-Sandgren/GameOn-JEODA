@@ -190,7 +190,8 @@ function drawGround() {
 
 
 const obstacles = [new obstacle(800, 600, 100, 225),
-                   new obstacle(50, 500, 150, 325)
+                   new obstacle(50, 500, 150, 325),
+                   new obstacle(1200, 200, 200, 400)
                   ]; // lägg till fler i arrayen vid behov
 
 function gameLoop() {
