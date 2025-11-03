@@ -190,14 +190,15 @@ function drawGround() {
 
 
 const obstacles = [new obstacle(800, 600, 100, 225),
-                   new obstacle(50, 500, 150, 325)
+                   new obstacle(50, 500, 150, 325),
+                   new obstacle(1200, 200, 200, 400)
                   ]; // lägg till fler i arrayen vid behov
 
 function gameLoop() {
     drawBackground();
     drawGround();
 
-    player.update(obstacles, canvas.height - 75); // OBS: skicka obstacles-array
+    player.update(obstacles, canvas.height - 95); // OBS: skicka obstacles-array
     player.draw();
 
     for (let obs of obstacles) {
