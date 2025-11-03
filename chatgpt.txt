@@ -405,4 +405,3 @@ INNEHÅLL:
 (Ej specificerat än – ska utvecklas vidare)
 
 Vill du att jag lägger det här i en .xlsx-fil (Excel) där varje person är en egen flik, eller föredrar du en tabell med kolumner (Person, Kategori, Typ, Innehåll) på ett blad?
-
