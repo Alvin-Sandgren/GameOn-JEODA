@@ -14,13 +14,6 @@ block = function(character, target) {
     defender.health -= reduced_damage;
 }
 
-//Bergsget enemy 
-Enemy_Goat = function(name, health, damage, speed) {
-    this.name = Bergsget;
-    this.health = 50;
-    this.damage = 10;
-    this.speed = 5;
-}
 //unlockables abilities och nya rörelser
 
 // keyboard input for combat actions
