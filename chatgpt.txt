@@ -1,0 +1,408 @@
+Gå vidare till innehållet
+Chatthistorik
+
+Du sade:
+Koncept:
+
+base movement, jump vänster höger, crouch
+unlockable movement, dash, doublejump, wallglide etc
+enemies, basic först en enda typ
+unlockables, abilities/movement
+spawn, tryck play och så faedar man in med en dialogruta över en. 
+stats?
+platformer map inte oändlig map
+menu, tutorial controls på sidan
+combat, kort? börja med, basic attack block heal
+musik, menu music https://www.shutterstock.com/sv/music/search/viking 
+combat music: ?
+victory music: ?
+gameover music: ? 
+sound effects: dash, jump
+Map: sidescroller, miljö? nordiskt, Biomes, skog, berg, gruva och by. fuck minimap
+friction: man rör sig snabbare 
+gravitation: dras mot marken
+game states
+viking character, ripped/fet rund med abs stora armar, börjar halvnaken bara byxor, lås upp tröja det första man gör, blond, blåa ögon, arisk. Namn: Rullande fet viking/köttbulle.
+
+Attack = rulla in i dem
+Block = Fosterställning
+Heal = Be om aloevera av gudarna (Odin kompis)
+
+Bergsgetter är base enemy
+
+
+gör kategorier för alla koncept och sätt de med sina mest liknande delar
+ChatGPT sade:
+Perfekt — här är ditt koncept sorterat i tydliga kategorier där liknande delar är grupperade tillsammans:
+
+🎮 Core Gameplay / Rörelse
+Base movement: gå vänster/höger, hoppa, ducka
+
+Unlockable movement: dash, double jump, wall glide
+
+Friction: man rör sig snabbare
+
+Gravitation: dras mot marken
+
+⚔️ Combat System
+Basic attacks:
+
+Attack = rulla in i fienden
+
+Block = fosterställning
+
+Heal = be om aloevera av gudarna (Odin kompis)
+
+Start combat mechanics: kortbaserat (attack, block, heal)
+
+Enemies:
+
+Första typen = bergsgetter (base enemy)
+
+Unlockables: abilities och nya rörelser
+
+🧍‍♂️ Karaktär
+Namn: Rullande fet viking / köttbulle
+
+Utseende:
+
+Rund men muskulös (fet med abs, stora armar)
+
+Börjar halvnaken (bara byxor)
+
+Första upplåsning = tröja
+
+Blond, blå ögon, nordiskt utseende
+
+🌍 Värld / Map
+Typ: sidescroller, inte oändlig
+
+Biomes: skog, berg, gruva, by
+
+Miljö: nordiskt tema
+
+Ingen minimap
+
+📜 Progression / System
+Unlockables: abilities, rörelser, utrustning
+
+Stats: eventuella värden (t.ex. HP, stamina, movement speed, defense)
+
+Game states: t.ex. menu, play, dialog, combat, victory, gameover
+
+🪓 UI / Menyer
+Main menu:
+
+Play-knapp
+
+Tutorial med kontroller på sidan
+
+Spawn sequence:
+
+Tryck “Play” → fade in med dialogruta över karaktären
+
+🎵 Ljud & Musik
+Menu music: Viking-tema via Shutterstock-länk
+
+Combat music: ?
+
+Victory music: ?
+
+Gameover music: ?
+
+Sound effects: dash, jump
+
+Vill du att jag hjälper dig göra nästa steg, t.ex. en design-dokumentstruktur (GDD) baserat på dessa kategorier, eller en visuell översikt (t.ex. flowchart) över spelets systemsamband?
+
+Du sade:
+fuck emojis gör som ett excel dokument tråkigt
+ChatGPT sade:
+Absolut — här är samma koncept i ett torrt, “Excel-dokument”-liknande format utan utsmyckning:
+
+KATEGORI	INNEHÅLL
+Core Gameplay / Rörelse	Base movement: gå vänster/höger, hoppa, ducka
+Unlockable movement: dash, double jump, wall glide	
+Friction: man rör sig snabbare	
+Gravitation: dras mot marken	
+Combat System	Basic attacks:
+– Attack = rulla in i fienden	
+– Block = fosterställning	
+– Heal = be om aloevera av gudarna (Odin kompis)	
+Start combat mechanics: kortbaserat (attack, block, heal)	
+Enemies: bergsgetter (base enemy)	
+Unlockables: abilities och nya rörelser	
+Karaktär	Namn: Rullande fet viking / köttbulle
+Utseende: rund men muskulös (fet med abs, stora armar)	
+Start: halvnaken (bara byxor)	
+Första upplåsning: tröja	
+Hår/ögon: blond, blå ögon, nordiskt utseende	
+Värld / Map	Typ: sidescroller, inte oändlig
+Biomes: skog, berg, gruva, by	
+Miljö: nordiskt tema	
+Ingen minimap	
+Progression / System	Unlockables: abilities, rörelser, utrustning
+Stats: HP, stamina, movement speed, defense (förslag)	
+Game states: menu, play, dialog, combat, victory, gameover	
+UI / Menyer	Main menu: play-knapp
+Tutorial: kontroller visas på sidan	
+Spawn sequence: tryck “Play” → fade in med dialogruta över karaktären	
+Ljud / Musik	Menu music: viking-tema (Shutterstock-länk)
+Combat music: ?	
+Victory music: ?	
+Gameover music: ?	
+Sound effects: dash, jump	
+Vill du att jag gör en riktig .xlsx-fil av det här så du kan öppna det i Excel/Sheets?
+
+Du sade:
+KATEGORI
+INNEHÅLL
+Core Gameplay / Rörelse System/Design
+
+Alvin
+Base movement: gå vänster/höger, hoppa, ducka
+Unlockable movement: dash, double jump, wall glide 
+
+
+Friction: man rör sig snabbare
+
+
+Gravitation: dras mot marken
+
+
+Combat System System
+
+Erik
+Basic attacks:
+– Attack = rulla in i fienden
+
+
+– Block = fosterställning
+
+
+– Heal = be om mjöd av gudarna (Odin kompis)
+
+
+Start combat mechanics: kortbaserat (attack, block, heal)
+
+
+Enemies: bergsgetter (base enemy)
+
+
+Unlockables: abilities och nya rörelser
+
+
+Karaktär Design
+
+Damien
+Namn: Rullande fet viking / köttbulle
+Utseende: rund men muskulös (fet med abs, stora armar)
+
+
+Start: halvnaken (bara byxor)
+
+
+Första upplåsning: tröja
+
+
+Hår/ögon: blond, blå ögon, nordiskt utseende
+
+
+Värld / Map Design/System
+
+Oliver/Damien/Jeffery
+Typ: sidescroller, inte oändlig
+Biomes: skog, berg, gruva, by
+
+
+Miljö: nordiskt tema
+
+
+Ingen minimap
+
+
+Progression / System
+
+Alvin
+Unlockables: abilities, rörelser, utrustning
+Stats: HP, stamina, movement speed, defense (förslag)
+
+
+Game states: menu, play, dialog, combat, victory, gameover
+
+
+UI / Menyer Design/System
+
+Oliver
+
+
+Main menu: play-knapp
+Tutorial: kontroller visas på sidan
+
+
+Spawn sequence: tryck “Play” → fade in med dialogruta över karaktären
+
+
+
+
+
+Ljud / Musik, Extra 
+
+Jeffery
+
+
+
+Menu music: viking-tema (Shutterstock-länk)
+Combat music: ?
+
+
+Victory music: ?
+
+
+Gameover music: ?
+
+
+Sound effects: dash, jump
+
+Lore
+
+Jeffery
+
+
+
+
+
+
+
+gör separata sektioner för Kategorierna med namn så Alvins kategorier står för sig Damiens för sig etc
+ChatGPT sade:
+Perfekt — här är materialet omstrukturerat så att varje persons ansvarsområden (kategorier) är samlade under deras eget namn, med deras tillhörande kategorier listade separat.
+Formatet är rakt och Excel-kompatibelt (inga utsmyckningar eller förkortningar).
+
+ALVIN
+KATEGORI: Core Gameplay / Rörelse
+TYP: System / Design
+INNEHÅLL:
+
+Base movement: gå vänster/höger, hoppa, ducka
+
+Unlockable movement: dash, double jump, wall glide
+
+Friction: man rör sig snabbare
+
+Gravitation: dras mot marken
+
+KATEGORI: Progression / System
+TYP: System
+INNEHÅLL:
+
+Unlockables: abilities, rörelser, utrustning
+
+Stats: HP, stamina, movement speed, defense (förslag)
+
+Game states: menu, play, dialog, combat, victory, gameover
+
+ERIK
+KATEGORI: Combat System
+TYP: System
+INNEHÅLL:
+
+Basic attacks:
+– Attack = rulla in i fienden
+– Block = fosterställning
+– Heal = be om mjöd av gudarna (Odin kompis)
+
+Start combat mechanics: kortbaserat (attack, block, heal)
+
+Enemies: bergsgetter (base enemy)
+
+Unlockables: abilities och nya rörelser
+
+DAMIEN
+KATEGORI: Karaktär
+TYP: Design
+INNEHÅLL:
+
+Namn: Rullande fet viking / köttbulle
+
+Utseende: rund men muskulös (fet med abs, stora armar)
+
+Start: halvnaken (bara byxor)
+
+Första upplåsning: tröja
+
+Hår/ögon: blond, blå ögon, nordiskt utseende
+
+KATEGORI: Värld / Map
+TYP: Design / System
+INNEHÅLL:
+
+Typ: sidescroller, inte oändlig
+
+Biomes: skog, berg, gruva, by
+
+Miljö: nordiskt tema
+
+Ingen minimap
+
+OLIVER
+KATEGORI: Värld / Map
+TYP: Design / System
+INNEHÅLL:
+
+(Delat ansvar med Damien och Jeffery)
+
+Typ: sidescroller, inte oändlig
+
+Biomes: skog, berg, gruva, by
+
+Miljö: nordiskt tema
+
+Ingen minimap
+
+KATEGORI: UI / Menyer
+TYP: Design / System
+INNEHÅLL:
+
+Main menu: play-knapp
+
+Tutorial: kontroller visas på sidan
+
+Spawn sequence: tryck “Play” → fade in med dialogruta över karaktären
+
+JEFFERY
+KATEGORI: Värld / Map
+TYP: Design / System
+INNEHÅLL:
+
+(Delat ansvar med Damien och Oliver)
+
+Typ: sidescroller, inte oändlig
+
+Biomes: skog, berg, gruva, by
+
+Miljö: nordiskt tema
+
+Ingen minimap
+
+KATEGORI: Ljud / Musik, Extra
+TYP: Audio / Design
+INNEHÅLL:
+
+Menu music: viking-tema (Shutterstock-länk)
+
+Combat music: ?
+
+Victory music: ?
+
+Gameover music: ?
+
+Sound effects: dash, jump
+
+KATEGORI: Lore
+TYP: Narrative
+INNEHÅLL:
+
+(Ej specificerat än – ska utvecklas vidare)
+
+Vill du att jag lägger det här i en .xlsx-fil (Excel) där varje person är en egen flik, eller föredrar du en tabell med kolumner (Person, Kategori, Typ, Innehåll) på ett blad?
+
