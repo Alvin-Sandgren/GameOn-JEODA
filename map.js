@@ -197,7 +197,7 @@ function gameLoop() {
     drawBackground();
     drawGround();
 
-    player.update(obstacles, canvas.height - 75); // OBS: skicka obstacles-array
+    player.update(obstacles, canvas.height - 95); // OBS: skicka obstacles-array
     player.draw();
 
     for (let obs of obstacles) {
