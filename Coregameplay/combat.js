@@ -15,5 +15,3 @@ block = function(character, target) {
 }
 
 //unlockables abilities och nya rörelser
-
-// keyboard input for combat actions

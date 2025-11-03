@@ -1,0 +1,11 @@
+if gamestate == "menu"{
+    Menu-music.play();
+}
+else if gamestate == "Overworld"{
+    Combat-music.pause();
+    Background-music.play();
+}
+else if gamestate == "combat"{
+    Background-music.pause();
+    Combat-music.play();
+}
