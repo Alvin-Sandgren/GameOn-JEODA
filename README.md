@@ -329,5 +329,3 @@ KATEGORI: Lore
 
 
 
-
-
