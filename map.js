@@ -9,24 +9,28 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 class Character {
-    constructor(x, y, w, h, speed, jumps, imgSrc) {
+    constructor(x, y, w, h, speed, maxJumps, imgSrc) {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
         this.speed = speed;
-        this.jumps = jumps;
+        this.maxJumps = maxJumps; // max antal hopp
+        this.jumps = maxJumps;    // nuvarande hopp kvar
         this.velY = 0;
-        this.gravity = 3;
+        this.gravity = 2;
         this.onGround = false;
         this.img = new Image();
         this.img.src = imgSrc;
 
-        // Dash-egenskaper
+        // Dash
         this.lastDirection = "right";
         this.canDash = true;
         this.isDashing = false;
         this.dashTime = 0;
+
+        // Hjälpvariabel för att registrera "nytt knapptryck" för hopp
+        this.jumpPressedLastFrame = false;
     }
 
     draw() {
@@ -38,9 +42,9 @@ class Character {
     }
 
     update(groundY) {
-        // === Om inte dashar, vanlig rörelse ===
+        // --- Dash ---
         if (!this.isDashing) {
-            // Vänster/höger rörelse
+            // Rörelse
             if (keys["a"] || keys["ArrowLeft"]) {
                 this.x -= this.speed;
                 this.lastDirection = "left";
@@ -50,49 +54,50 @@ class Character {
                 this.lastDirection = "right";
             }
 
-            // Hoppa
-            if ((keys["w"] || keys[" "]) && this.onGround) {
-                this.velY = -40;
-                this.onGround = false;
+            // Hoppa endast vid nytt knapptryck
+            if ((keys["w"] || keys[" "]) && !this.jumpPressedLastFrame) {
+                if (this.jumps > 0) {
+                    this.velY = -35; // hoppkraft
+                    this.jumps--;
+                    this.onGround = false;
+                }
             }
+            // Uppdatera senaste frame
+            this.jumpPressedLastFrame = keys["w"] || keys[" "];
 
             // Starta dash
-            if (keys["f"] && this.canDash) {
-                keys["f"] = false;
+            if (keys["q"] && this.canDash) {
+                keys["q"] = false;
                 this.isDashing = true;
                 this.canDash = false;
-                this.dashTime = 200; // dash varar i 200ms
+                this.dashTime = 200;
             }
-        } 
-        // === Om dashar, glid snabbt fram ===
-        else {
-            const dashSpeed = this.speed * 6;
 
+        } else { // Dashar
+            const dashSpeed = this.speed * 3;
             if (this.lastDirection === "left") this.x -= dashSpeed;
             if (this.lastDirection === "right") this.x += dashSpeed;
 
-            this.dashTime -= 16; // ungefär 60 FPS
+            this.dashTime -= 16;
 
             if (this.dashTime <= 0) {
                 this.isDashing = false;
-
-                // Cooldown innan nästa dash
-                setTimeout(() => {
-                    this.canDash = true;
-                }, 1000);
+                setTimeout(() => { this.canDash = true; }, 1000);
             }
         }
 
-        // === Gravitation och markkollision ===
+        // --- Gravitation ---
         if (!this.onGround) {
             this.velY += this.gravity;
             this.y += this.velY;
         }
 
+        // --- Markkollision ---
         if (this.y + this.h >= groundY) {
             this.y = groundY - this.h;
             this.velY = 0;
             this.onGround = true;
+            this.jumps = this.maxJumps; // återställ hopp när man landar
         } else {
             this.onGround = false;
         }
