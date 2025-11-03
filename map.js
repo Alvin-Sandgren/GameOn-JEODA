@@ -38,22 +38,14 @@ class Character {
         this.jumpPressedLastFrame = false;
     }
 
-    draw() {
-        if (this.img.complete) {
-            ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
-        } else {
-            this.img.onload = () => ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
-        }
-Combat-system-test
-    }
-
-
-        ctx.restore(); // Återställ canvas till ursprungsinställningar
+draw() {
+    if (this.img.complete) {
+        ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
     } else {
         this.img.onload = () => this.draw();
     }
 }
-main
+
 
     update(obstacles, groundY) {
         // Beräkna hopp / dash / uppdaterar riktning
