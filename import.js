@@ -1,5 +1,4 @@
 import './Coregameplay/enemies.js';
-import './Coregameplay/combat.js';
 import './Coregameplay/rörelse.js';
 
 
