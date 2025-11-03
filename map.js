@@ -9,7 +9,6 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 
-
 class Character {
     constructor(x, y, w, h, speed, maxJumps, imgSrc) {
         this.x = x;
@@ -29,7 +28,7 @@ class Character {
         this.lastDirection = "right";
         this.canDash = true;
         this.isDashing = false;
-        this.dashTime = 0;
+        this.dashTime = null;
 
         this.jumpPressedLastFrame = false;
     }
@@ -47,15 +46,14 @@ class Character {
             ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
         }
 
-        ctx.restore(); // Återställ canvas till normalt läge
+        ctx.restore(); // Återställ canvas till ursprungsinställningar
     } else {
         this.img.onload = () => this.draw();
     }
 }
 
-
     update(obstacles, groundY) {
-        // 1) Beräkna horisontell rörelse / dash / uppdatera riktning
+        // Beräkna hopp / dash / uppdaterar riktning
         let dx = 0;
         if (!this.isDashing) {
             if (keys["a"] || keys["ArrowLeft"]) {
@@ -68,7 +66,7 @@ class Character {
             }
 
             // Hoppa endast vid nytt knapptryck
-            if ((keys["w"] || keys[" "]) && !this.jumpPressedLastFrame) {
+            if ((keys[" "]) && !this.jumpPressedLastFrame) {
                 if (this.jumps > 0) {
                     this.velY = -35;
                     this.jumps--;
@@ -77,10 +75,10 @@ class Character {
             }
             // Starta dash
             if (keys["q"] && this.canDash) {
-                keys["q"] = false;
+                keys["q"] = false; //förhindra dashspam
                 this.isDashing = true;
-                this.canDash = false;
-                this.dashTime = 200;
+                this.canDash = false; 
+                this.dashTime = 200; // dash varar i 200 millisekunder
             }
         } else {
             const dashSpeed = this.speed * 4;
@@ -92,30 +90,35 @@ class Character {
             }
         }
 
-        // Uppdatera jumpPressedLastFrame (bör efter att vi kollat hopp)
-        this.jumpPressedLastFrame = keys["w"] || keys[" "];
+        // Uppdatera jumpPressedLastFrame för att kolla om hoppknappen är nytryckt
+        this.jumpPressedLastFrame = keys[" "];
 
-        // 2) Horisontell rörelse + kollisionskorrigering
+        // Hopp + kollisionskorrigering
         let newX = this.x + dx;
+
         if (dx !== 0) {
             for (let obs of obstacles) {
-                // kolla om spelaren vertikalt överlappar obstacle (lite padding för stabilitet)
+                // Kolla vertikal kollision
                 if (this.y + this.h > obs.y + 1 && this.y < obs.y + obs.h - 1) {
-                    // rör sig åt höger och skulle penetrera obstacle från vänster
-                    if (dx > 0 && this.x + this.w <= obs.x && newX + this.w > obs.x) {
+                    // Kolla horisontell kollision
+                    const rightEdge = this.x + this.w;
+                    const newRightEdge = newX + this.w;
+
+                    if (dx > 0 && rightEdge <= obs.x && newRightEdge > obs.x) {
+                        // Kolliderar från vänster
                         newX = obs.x - this.w;
-                    }
-                    // rör sig åt vänster och skulle penetrera obstacle från höger
-                    else if (dx < 0 && this.x >= obs.x + obs.w && newX < obs.x + obs.w) {
+                    } else if (dx < 0 && this.x >= obs.x + obs.w && newX < obs.x + obs.w) {
+                        // Kolliderar från höger
                         newX = obs.x + obs.w;
                     }
                 }
             }
         }
+
         this.x = newX;
 
-        // 3) Gravitation (uppdatera vertikal hastighet) och vertikal kollisionshantering
-        // Tillämpa gravitation om inte onGround (vi låter onGround kunna återställas nedan)
+        // Gravitation (uppdatera vertikal hastighet) och vertikal kollisionshantering
+        // Gravitation är bara om inte onGround är true (alltså i luften)
         if (!this.onGround) {
             this.velY += this.gravity;
         }
@@ -145,7 +148,7 @@ class Character {
             }
         }
 
-        // Markkollision (sista fallback)
+        // Markkollision (marken är vid groundY)
         if (newY + this.h >= groundY) {
             newY = groundY - this.h;
             this.velY = 0;
@@ -160,8 +163,7 @@ class Character {
     }
 }
 
-
-
+// Klass för hinder
 class obstacle {
     constructor(x, y, w, h) {
         this.x = x;
@@ -171,9 +173,10 @@ class obstacle {
 
     }
     
+    //Rita hindret
     draw() {
-        ctx.fillStyle = "darkgreen"; // mörkgrön färg
-        ctx.fillRect(this.x, this.y, this.w, this.h); // Rita rektangeln
+        ctx.fillStyle = "darkgreen"; 
+        ctx.fillRect(this.x, this.y, this.w, this.h);
     }
     
 }
@@ -200,25 +203,34 @@ function drawGround() {
     ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
 }
 
-
 const obstacles = [new obstacle(800, 600, 100, 225),
                    new obstacle(50, 500, 150, 325),
                    new obstacle(1200, 200, 200, 400)
-                  ]; // lägg till fler i arrayen vid behov
+                  ];
 
-function gameLoop() {
-    drawBackground();
-    drawGround();
+// Olika skärmars uppdateringsfrekvenser hanteras här, annars blir spelet för snabbt eller långsamt beroende på skärm
+let lastFrameTime = 0;
+const targetFPS = 60;
+const frameDuration = 1000 / targetFPS; // Target fps är 60
 
-    player.update(obstacles, canvas.height - 95); // OBS: skicka obstacles-array
-    player.draw();
+function gameLoop(timestamp) {
+    const elapsed = timestamp - lastFrameTime;
 
-    for (let obs of obstacles) {
-        obs.draw();
+    if (elapsed >= frameDuration) {
+        lastFrameTime = timestamp - (elapsed % frameDuration); // för att hålla timing jämn
+
+        drawBackground();
+        drawGround();
+
+        player.update(obstacles, canvas.height - 95);
+        player.draw();
+
+        for (let obs of obstacles) {
+            obs.draw();
+        }
+
+        ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
     }
-
-    // Rita get enemy
-    ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
 
     requestAnimationFrame(gameLoop);
 }
