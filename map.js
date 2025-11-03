@@ -17,6 +17,11 @@ class Character {
         this.w = w;
         this.h = h;
         this.speed = speed;
+        this.mana = 100;
+        this.maxMana = 100;
+        this.health = 100;
+        this.maxHealth = 100;
+        this.damage = 10;
         this.maxJumps = maxJumps;
         this.jumps = maxJumps;
         this.velY = 0;
@@ -35,24 +40,12 @@ class Character {
     }
 
     draw() {
-    if (this.img.complete) {
-        ctx.save(); // Spara nuvarande canvas-inställningar
-
-        if (this.lastDirection === "left") {
-            // Spegla bilden horisontellt
-            ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-            ctx.scale(-1, 1); // invertera horisontellt
-            ctx.drawImage(this.img, -this.w / 2, -this.h / 2, this.w, this.h);
-        } else {
+        if (this.img.complete) {
             ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
+        } else {
+            this.img.onload = () => ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
         }
-
-        ctx.restore(); // Återställ canvas till normalt läge
-    } else {
-        this.img.onload = () => this.draw();
     }
-}
-
 
     update(obstacles, groundY) {
         // 1) Beräkna horisontell rörelse / dash / uppdatera riktning
@@ -88,7 +81,7 @@ class Character {
             this.dashTime -= 16;
             if (this.dashTime <= 0) {
                 this.isDashing = false;
-                setTimeout(() => { this.canDash = true; }, 2000);
+                setTimeout(() => { this.canDash = true; }, 5000);
             }
         }
 
@@ -220,6 +213,7 @@ function gameLoop() {
     // Rita get enemy
     ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
 
+    if (!inCombat) checkCombatTrigger();
     requestAnimationFrame(gameLoop);
 }
 
