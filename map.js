@@ -10,4 +10,10 @@ function draw() {
     ctx.fillRect(0, 0, 1910, 920);
 }
 
+function drawCharacther() {
+    ctx.fillStyle = "#FF0000";
+    ctx.fillRect(50, 50, 50, 50);
+}
+
 draw();
+drawCharacther();
