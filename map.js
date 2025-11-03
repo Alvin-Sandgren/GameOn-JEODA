@@ -61,6 +61,12 @@ class Characther {
 
 const player = new Characther(100, 600, 100, 100, 10, 2, "meatball.png");
 
+const enemyGoat = new goat();
+enemyGoat.w = 80;
+enemyGoat.h = 80;
+enemyGoat.x = 600;
+enemyGoat.y = 740
+
 function drawBackground() {
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -78,6 +84,10 @@ function gameLoop() {
     player.update(canvas.height - 75);
     player.draw();
 
+    // Rita get enemy
+    ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
+    
+  
     requestAnimationFrame(gameLoop);
 }
 
