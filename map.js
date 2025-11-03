@@ -8,7 +8,7 @@ const keys = {};
 document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
-class Characther {
+class Character {
     constructor(x, y, w, h, speed, jumps, imgSrc) {
         this.x = x;
         this.y = y;
@@ -21,6 +21,12 @@ class Characther {
         this.onGround = false;
         this.img = new Image();
         this.img.src = imgSrc;
+
+        // Dash-egenskaper
+        this.lastDirection = "right";
+        this.canDash = true;
+        this.isDashing = false;
+        this.dashTime = 0;
     }
 
     draw() {
@@ -32,17 +38,57 @@ class Characther {
     }
 
     update(groundY) {
-        // Rörelse i sidled
-        if (keys["a"] || keys["ArrowLeft"]) this.x -= this.speed;
-        if (keys["d"] || keys["ArrowRight"]) this.x += this.speed;
+        // === Om inte dashar, vanlig rörelse ===
+        if (!this.isDashing) {
+            // Vänster/höger rörelse
+            if (keys["a"] || keys["ArrowLeft"]) {
+                this.x -= this.speed;
+                this.lastDirection = "left";
+            }
+            if (keys["d"] || keys["ArrowRight"]) {
+                this.x += this.speed;
+                this.lastDirection = "right";
+            }
 
-        // Gravitation
+            // Hoppa
+            if ((keys["w"] || keys[" "]) && this.onGround) {
+                this.velY = -40;
+                this.onGround = false;
+            }
+
+            // Starta dash
+            if (keys["f"] && this.canDash) {
+                keys["f"] = false;
+                this.isDashing = true;
+                this.canDash = false;
+                this.dashTime = 200; // dash varar i 200ms
+            }
+        } 
+        // === Om dashar, glid snabbt fram ===
+        else {
+            const dashSpeed = this.speed * 6;
+
+            if (this.lastDirection === "left") this.x -= dashSpeed;
+            if (this.lastDirection === "right") this.x += dashSpeed;
+
+            this.dashTime -= 16; // ungefär 60 FPS
+
+            if (this.dashTime <= 0) {
+                this.isDashing = false;
+
+                // Cooldown innan nästa dash
+                setTimeout(() => {
+                    this.canDash = true;
+                }, 1000);
+            }
+        }
+
+        // === Gravitation och markkollision ===
         if (!this.onGround) {
             this.velY += this.gravity;
             this.y += this.velY;
         }
 
-        // Kollision med marken
         if (this.y + this.h >= groundY) {
             this.y = groundY - this.h;
             this.velY = 0;
@@ -50,16 +96,10 @@ class Characther {
         } else {
             this.onGround = false;
         }
-
-        // Hoppa
-        if ((keys["w"] || keys[" "]) && this.onGround) {
-            this.velY = -40;
-            this.onGround = false;
-        }
     }
 }
 
-const player = new Characther(100, 600, 100, 100, 10, 2, "meatball.png");
+const player = new Character(100, 600, 100, 100, 10, 2, "meatball.png");
 
 function drawBackground() {
     ctx.fillStyle = "#000";
