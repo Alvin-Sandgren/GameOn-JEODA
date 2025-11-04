@@ -38,14 +38,24 @@ class Character {
         this.jumpPressedLastFrame = false;
     }
 
-draw() {
+    draw() {
     if (this.img.complete) {
-        ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
+        ctx.save(); // Spara nuvarande canvas-inställningar
+
+        if (this.lastDirection === "left") {
+            // Spegla bilden horisontellt
+            ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+            ctx.scale(-1, 1); // invertera horisontellt
+            ctx.drawImage(this.img, -this.w / 2, -this.h / 2, this.w, this.h);
+        } else {
+            ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
+        }
+
+        ctx.restore(); // Återställ canvas till normalt läge
     } else {
         this.img.onload = () => this.draw();
     }
 }
-
 
     update(obstacles, groundY) {
         // Beräkna hopp / dash / uppdaterar riktning
