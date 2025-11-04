@@ -91,7 +91,7 @@ class Character {
             this.dashTime -= 16;
             if (this.dashTime <= 0) {
                 this.isDashing = false;
-                setTimeout(() => { this.canDash = true; }, 5000);
+                setTimeout(() => { this.canDash = true; }, 2000);
             }
         }
 
