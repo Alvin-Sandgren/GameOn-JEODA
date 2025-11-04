@@ -5,7 +5,7 @@ canvas.width = 1910;
 canvas.height = 920;
 
 // Större värld
-const worldWidth = canvas.width * 5;
+const worldWidth = canvas.width * 6;
 const worldHeight = canvas.height * 5;
 
 // Kamerans position
@@ -102,7 +102,7 @@ class Character {
             this.dashTime -= 16;
             if (this.dashTime <= 0) {
                 this.isDashing = false;
-                setTimeout(() => { this.canDash = true; }, 2000);
+                setTimeout(() => { this.canDash = true; }, 750);
             }
         }
 
@@ -197,7 +197,7 @@ class obstacle {
     
 }
 
-const player = new Character(1800, 2500, 100, 100, 10, 2, "meatball.png");
+const player = new Character(5500, 1500, 100, 100, 10, 2, "meatball.png");
 
 const enemyGoat = new goat();
 enemyGoat.w = 80;
@@ -228,25 +228,46 @@ const obstacles = [
     //Dropper shute
     new obstacle(1800, 3000, 100, 900),
 
-    //Vänster sida plus tak på droppern
-    new obstacle(1300, 3000, 500, 100),
+    //Vänster sida plus tak på droppern och gången till dash/get nr 2
+    new obstacle(1300, 3000, 500, 100, "green"),
     
-    new obstacle(400, 2500, 2500, 100),
+    new obstacle(400, 2500, 4000, 100, "gray"),
+
+    //Cave entrance 1.Tak 2.Väggar 3. Temporär barrier
+    new obstacle(4000, 0, 2600, 1900, "gray"),
+    new obstacle(4300, 2500, 100, 200, "gray"),
+    new obstacle(4300, 2700, 2300, 200, "gray"),
+    new obstacle(6100, 1901, 20, 798, "red"),
+    new obstacle(6500, 1800, 100, 1000, "gray"),
+
+    new obstacle(6200, 2600, 275, 100, "gray"),
+    new obstacle(6250, 2550, 177, 100, "gray"),
+
+
+
+    // Vägen till nivå 5
+    new obstacle(3000, 2000, 200, 50, "green"),
+
+    //Nivå 5 plattformar
+    new obstacle(3500, 1700, 500, 200, "green"),
+    new obstacle(0, 1400, 2600, 200, "green"),
+
 
     //Obstacles mot nivå 3
-    new obstacle(950, 3000, 45, 30),
+    new obstacle(950, 3000, 45, 30, "green"),
 
     new obstacle(500, 3000, 39, 30),
     new obstacle(300, 2750, 30, 30),
 
     // Höger sida
-    new obstacle(2500, 2500, 100, 1400),
+    new obstacle(2500, 2600, 100, 1275,),
 
-    
     new obstacle(2000, 3600, 100, 50),
     new obstacle(2200, 3800, 50, 50),
     new obstacle(2000, 3400, 75, 50),
     new obstacle(2200, 3200, 100, 50),
+
+
     
 
 
@@ -255,10 +276,34 @@ const obstacles = [
     new obstacle(2800, 4250, 150, 250),
 
 
-    //Ravin block när man inte har dash
+    //Lavablock när man inte har dash
     new obstacle(3450, 4490, 50, 10, "gray"),
     new obstacle(3500, 4500, 600, 600, "red"),
 
+    //Platforms som leder till nivå 4
+    new obstacle(5000, 4300, 75, 25, "gray"),
+    new obstacle(5500, 4200, 75, 50),
+    new obstacle(5000, 4000, 75, 75, "gray"),
+
+    //Till nivå 4 trappor tillbaka
+    new obstacle(5700, 3800, 100, 1000, "gray"),
+    new obstacle(5800, 4000, 150, 700, "gray"),
+    new obstacle(5950, 4200, 150, 700, "gray"),
+    new obstacle(6100, 4400, 150, 700, "gray"),
+
+    //Nivå 4 boss arena plus double jump
+
+    new obstacle(7955, 3850, 100, 50, "gray"),
+    new obstacle(7990, 3900, 30, 600, "orange"),
+    new obstacle(8000, 3900, 10, 600, "yellow"),
+    new obstacle(8015, 3900, 5, 600, "red"),
+    new obstacle(7990, 3900, 5, 600, "red"),
+    new obstacle(7955, 4495, 100, 50, "gray"),
+
+
+    new obstacle(8500, 4400, 150, 100, "gray"),
+    new obstacle(8600, 4350, 100, 100, "gray"),
+    new obstacle(8650, 4400, 150, 100, "gray"),
 
     //Väggar på sidorna
     new obstacle(worldWidth - 30, 0, 30, 10000, "green"),
