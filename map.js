@@ -4,6 +4,15 @@ const ctx = canvas.getContext('2d');
 canvas.width = 1910;
 canvas.height = 920;
 
+// Större värld
+const worldWidth = canvas.width * 5;
+const worldHeight = canvas.height * 5;
+
+// Kamerans position
+let cameraX = 0;
+let cameraY = 0;
+
+
 const keys = {};
 document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
@@ -58,6 +67,8 @@ class Character {
 }
 
     update(obstacles, groundY) {
+
+        
         // Beräkna hopp / dash / uppdaterar riktning
         let dx = 0;
         if (!this.isDashing) {
@@ -170,27 +181,23 @@ class Character {
 
 // Klass för hinder
 class obstacle {
-    constructor(x, y, w, h) {
+    constructor(x, y, w, h, color) {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
-
+        this.color = color;
     }
     
     //Rita hindret
     draw() {
-        ctx.fillStyle = "darkgreen"; 
+        ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.w, this.h);
     }
     
 }
 
-const obstacle1 = new obstacle(800, 600, 100, 225);
-const obstacle2 = new obstacle(0, 500, 150, 325);
-
-const player = new Character(700, 600, 100, 100, 10, 2, "meatball.png");
-
+const player = new Character(1800, 2500, 100, 100, 10, 2, "meatball.png");
 
 const enemyGoat = new goat();
 enemyGoat.w = 80;
@@ -199,19 +206,76 @@ enemyGoat.x = 1200;
 enemyGoat.y = 0
 
 function drawBackground() {
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#000"; // svart himmel
+    ctx.fillRect(0, 0, worldWidth, worldHeight);
 }
 
 function drawGround() {
     ctx.fillStyle = "green";
-    ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+    ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
 }
 
-const obstacles = [new obstacle(800, 600, 100, 225),
-                   new obstacle(50, 500, 150, 325),
-                   new obstacle(1200, 200, 200, 400)
-                  ];
+
+const obstacles = [
+    // platforms spawn
+    new obstacle(700, 4300, 300, 50),
+    new obstacle(1200, 4200, 200, 50),
+    new obstacle(1600, 4000, 40, 50),
+    new obstacle(1800, 4025, 800, 475),
+
+
+
+    //Dropper shute
+    new obstacle(1800, 3000, 100, 900),
+
+    //Vänster sida plus tak på droppern
+    new obstacle(1300, 3000, 500, 100),
+    
+    new obstacle(400, 2500, 2500, 100),
+
+    //Obstacles mot nivå 3
+    new obstacle(950, 3000, 45, 30),
+
+    new obstacle(500, 3000, 39, 30),
+    new obstacle(300, 2750, 30, 30),
+
+    // Höger sida
+    new obstacle(2500, 2500, 100, 1400),
+
+    
+    new obstacle(2000, 3600, 100, 50),
+    new obstacle(2200, 3800, 50, 50),
+    new obstacle(2000, 3400, 75, 50),
+    new obstacle(2200, 3200, 100, 50),
+    
+
+
+    //Platforms efter droppern
+    new obstacle(3000, 4400, 150, 100),
+    new obstacle(2800, 4250, 150, 250),
+
+
+    //Ravin block när man inte har dash
+    new obstacle(3450, 4490, 50, 10, "gray"),
+    new obstacle(3500, 4500, 600, 600, "red"),
+
+
+    //Väggar på sidorna
+    new obstacle(worldWidth - 30, 0, 30, 10000, "green"),
+    new obstacle(0, 0, 30, 10000, "green")
+];
+
+
+function updateCamera() {
+    // Håll kameran centrerad på spelaren
+    cameraX = player.x + player.w / 2 - canvas.width / 2;
+    cameraY = player.y + player.h / 2 - canvas.height / 2;
+
+    // Förhindra att kameran går utanför världen
+    cameraX = Math.max(0, Math.min(cameraX, worldWidth - canvas.width));
+    cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
+}
+
 
 // Olika skärmars uppdateringsfrekvenser hanteras här, annars blir spelet för snabbt eller långsamt beroende på skärm
 let lastFrameTime = 0;
@@ -222,22 +286,25 @@ function gameLoop(timestamp) {
     const elapsed = timestamp - lastFrameTime;
 
     if (elapsed >= frameDuration) {
-        lastFrameTime = timestamp - (elapsed % frameDuration); // för att hålla timing jämn
+        lastFrameTime = timestamp - (elapsed % frameDuration);
+
+        updateCamera();
+
+        ctx.save();
+        ctx.translate(-cameraX, -cameraY); // Flytta allt med kameran
 
         drawBackground();
         drawGround();
 
-        player.update(obstacles, canvas.height - 95);
+        for (let obs of obstacles) obs.draw();
+        player.update(obstacles, worldHeight - 95);
         player.draw();
 
-        for (let obs of obstacles) {
-            obs.draw();
-        }
-
         ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
+
+        ctx.restore();
     }
 
-    if (!inCombat) checkCombatTrigger();
     requestAnimationFrame(gameLoop);
 }
 
