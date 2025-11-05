@@ -2,7 +2,8 @@ const btn = document.getElementById('fullscreen-btn');
 
     // Ladda menybilden
     const menuImage = new Image();
-    menuImage.src = 'meny.png';
+    menuImage.src = 'Bilder/meny.png';
+
 
     menuImage.onload = () => {
       resizeCanvas();
