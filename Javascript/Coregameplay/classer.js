@@ -1,7 +1,10 @@
-// Javascript/Coregameplay/classer.js
+// Klassen för spelkaraktären
 export class Character {
   constructor(x, y, w, h, speed, maxJumps, imgSrc) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    this.x = x; 
+    this.y = y;
+    this.w = w;
+    this.h = h;
     this.speed = speed;
     this.mana = 100; this.maxMana = 100;
     this.health = 100; this.maxHealth = 100;
@@ -21,6 +24,8 @@ export class Character {
     this.jumpPressedLastFrame = false;
   }
 
+  //Ritar gubben beroende på vilken riktning han står mot
+  //Bilden blir inverted när man byter riktning till vänster
   draw(ctx) {
     if (this.img.complete) {
       ctx.save();
@@ -37,22 +42,30 @@ export class Character {
     }
   }
 
+  // Movement funktioner
   update(obstacles, groundY, keys) {
     let dx = 0;
+    //Rörelse höger vänster
     if (!this.isDashing) {
       if (keys["a"] || keys["ArrowLeft"]) { dx -= this.speed; this.lastDirection = "left"; }
       if (keys["d"] || keys["ArrowRight"]) { dx += this.speed; this.lastDirection = "right"; }
 
-      if (keys[" "] && !this.jumpPressedLastFrame) {
+    // Funktion för hopp och vilka keys som gör det, definerar även hur högt hoppet är.
+      if (keys[" "] && !this.jumpPressedLastFrame || (keys["w"] && !this.jumpPressedLastFrame || (keys["ArrowUp"] && !this.jumpPressedLastFrame))) {
         if (this.jumps > 0) { this.velY = -35; this.jumps--; this.onGround = false; }
       }
 
-      if (keys["q"] && this.canDash) {
-        keys["q"] = false;
+      if ((keys["Shift"] || keys["ShiftLeft"] || keys["ShiftRight"]) && this.canDash) {
+        // Nollställ de shiftknappar du använder så du inte dashar konstant
+        keys["Shift"] = false;
+        keys["ShiftLeft"] = false;
+        keys["ShiftRight"] = false;
+
         this.isDashing = true;
         this.canDash = false;
         this.dashTime = 200;
-      }
+}   
+    //Uppdaterar spelarens position och löser cooldown så man inte kan abusea
     } else {
       const dashSpeed = this.speed * 4;
       dx += (this.lastDirection === "left") ? -dashSpeed : dashSpeed;
@@ -64,7 +77,7 @@ export class Character {
     }
 
     //Registrerar hopptryck från förra framen
-    this.jumpPressedLastFrame = keys[" "];
+    this.jumpPressedLastFrame = keys[" "] || keys["w"] || keys["ArrowUp"] ;
 
     // Horisontell kollisionshantering = förhindrar att spelaren går igenom hinder från vänster eller höger
     let newX = this.x + dx;

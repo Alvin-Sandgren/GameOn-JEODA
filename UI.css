@@ -30,12 +30,12 @@
       user-select: none;
     }
 
-.start-btn {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;  /* fyller hela skärmen */
-  height: 100vh; /* fyller hela skärmen */
-  cursor: pointer;
-  z-index: 1000; /* ovanpå canvas */
-}
+    .start-btn {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;  /* fyller hela skärmen */
+    height: 100vh; /* fyller hela skärmen */
+    cursor: pointer;
+    z-index: 1000; /* ovanpå canvas */
+    }

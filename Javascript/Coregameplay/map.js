@@ -1,4 +1,3 @@
-// Javascript/Coregameplay/map.js
 import { Character, obstacle, Goat } from "./classer.js";
 
 // DOM & canvas (exporteras så andra moduler kan använda dem)
@@ -29,9 +28,9 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
-export const player = new Character(200, 4200, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
+export const player = new Character(4500, 2500, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
 
-export const enemyGoat = new Goat(500, 4100, 80, 80, "goat.png");
+export const enemyGoat = new Goat(5500, 2500, 80, 80, "goat.png");
 
 // ritfunktioner
 export function drawBackground() {
@@ -50,8 +49,6 @@ export const obstacles = [
     new obstacle(1200, 4200, 200, 50),
     new obstacle(1600, 4000, 40, 50),
     new obstacle(1800, 4025, 800, 475),
-
-
 
     //Dropper shute
     new obstacle(1800, 3000, 100, 900),
