@@ -227,7 +227,9 @@ function gameLoop(timestamp) {
         drawBackground();
         drawGround();
 
-        player.update(obstacles, canvas.height - 95);
+        if (!inCombat) {
+            player.update(obstacles, canvas.height - 95);
+        }        
         player.draw();
 
         for (let obs of obstacles) {
@@ -237,7 +239,10 @@ function gameLoop(timestamp) {
         ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
     }
 
-    if (!inCombat) checkCombatTrigger();
+    if (!inCombat) CombatTrigger(enemyGoat);
+
+    updatePlayerStats();
+
     requestAnimationFrame(gameLoop);
 }
 
