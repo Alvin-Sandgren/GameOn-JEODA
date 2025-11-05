@@ -202,18 +202,11 @@ class obstacle {
 
 const player = new Character(5500, 1500, 100, 100, 10, 2, "meatball.png");
 
-class Goat {
-    constructor(x, y, w, h, imgSrc) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.img = new Image();
-        this.img.src = imgSrc;
-    }
-}
-
-const enemyGoat = new Goat(1200, 0, 80, 80, "goat.png");
+// Lista med alla getter
+const enemiesList = [
+    new goat(1400, 1000, 90, 90),
+    
+];
 
 
 function drawBackground() {
@@ -369,10 +362,18 @@ function gameLoop(timestamp) {
         drawGround();
 
         for (let obs of obstacles) obs.draw();
+        
+        // Rita och uppdatera enemies
+        for (let enemy of enemiesList) {
+            enemy.draw(ctx);
+            // Kontrollera om spelaren är nära en enemy och trigga combat
+            if (typeof CombatTrigger === "function") {
+                CombatTrigger(enemy);
+            }
+        }
+        
         player.update(obstacles, worldHeight - 95);
         player.draw();
-
-        ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
 
         ctx.restore();
     }

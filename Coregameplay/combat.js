@@ -43,6 +43,7 @@ function startCombat(enemy) {
     inCombat = true;
     currentEnemy = enemy;
     playerTurn = true;
+    if (typeof pauseMap === "function") pauseMap();
     openCombatUI();
     updateCombatUI();
     logMessage(`Du blev attackerad av en ond ${enemy.name}!`);
@@ -130,6 +131,7 @@ function endCombat(playerWon, fled = false) {
     currentEnemy = null;
     playerTurn = true;
     closeCombatUI();
+    if (typeof startMap === "function") startMap();
 }
 
 function openCombatUI() {
@@ -160,11 +162,20 @@ function updatePlayerStats() {
 
 
 function CombatTrigger(enemy) {
-    if (!inCombat &&
-        player.x < enemy.x + enemy.w &&
-        player.x + player.w > enemy.x &&
-        player.y < enemy.y + enemy.h &&
-        player.y + player.h > enemy.y) {
+    if (inCombat || enemy.health <= 0) return;
+    
+    const playerCenterX = player.x + player.w / 2;
+    const playerCenterY = player.y + player.h / 2;
+    const enemyCenterX = enemy.x + enemy.w / 2;
+    const enemyCenterY = enemy.y + enemy.h / 2;
+    
+    const distance = Math.sqrt(
+        Math.pow(playerCenterX - enemyCenterX, 2) + 
+        Math.pow(playerCenterY - enemyCenterY, 2)
+    );
+    
+    const triggerDistance = 150;
+    if (distance < triggerDistance) {
         startCombat(enemy);
     }
 }
