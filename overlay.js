@@ -2,7 +2,7 @@ let currentState = "menu"; // menu, overworld, gameover, combat
 const startBtn = document.getElementById('start-btn');
 
 function fadeInOverlay() {
-    const times = 5;           // antal gånger vi ritar rektangeln
+    const times = 5;           // fadeout counter
     let count = 0;
 
     function drawStep() {
@@ -72,8 +72,6 @@ function enterCombat() {
         console.log("Combat state activated!");
     }, fadeDuration);
 }
-
-
 
 // Starta spelet
 function startGame() {
