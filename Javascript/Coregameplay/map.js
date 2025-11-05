@@ -1,233 +1,50 @@
-let paused = true;          // styr om spelet ska köra
-let lastFrameTime = 0;      // måste deklareras före gameLoop
+// Javascript/Coregameplay/map.js
+import { Character, obstacle, Goat } from "./classer.js";
 
-const canvas = document.getElementById('karta');
-const ctx = canvas.getContext('2d');
+// DOM & canvas (exporteras så andra moduler kan använda dem)
+export const canvas = document.getElementById('karta');
+export const ctx = canvas.getContext('2d');
 
+// canvas-standardstorlek (kan ändras av fullscreen.js senare)
 canvas.width = 1910;
 canvas.height = 920;
 
-// Större värld
-const worldWidth = canvas.width * 6;
-const worldHeight = canvas.height * 5;
+// värld
+export const worldWidth = canvas.width * 6;
+export const worldHeight = canvas.height * 5;
 
-// Kamerans position
+// spelstatus
+export let paused = true;
+let lastFrameTime = 0;
+export function startMap() { paused = false; }
+export function pauseMap() { paused = true; }
+
+// kamera
 let cameraX = 0;
 let cameraY = 0;
 
-
-const keys = {};
+// input
+export const keys = {};
 document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
+// spelare (exporteras så overlay kan flytta den vid gameover)
+export const player = new Character(200, 4200, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
 
-class Character {
-    constructor(x, y, w, h, speed, maxJumps, imgSrc) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.speed = speed;
-        this.mana = 100;
-        this.maxMana = 100;
-        this.health = 100;
-        this.maxHealth = 100;
-        this.damage = 10;
-        this.maxJumps = maxJumps;
-        this.jumps = maxJumps;
-        this.velY = 0;
-        this.gravity = 2;
-        this.onGround = false;
-        this.img = new Image();
-        this.img.src = imgSrc;
+export const enemyGoat = new Goat(500, 4100, 80, 80, "goat.png");
 
-        // Dash
-        this.lastDirection = "right";
-        this.canDash = true;
-        this.isDashing = false;
-        this.dashTime = null;
-
-        this.jumpPressedLastFrame = false;
-    }
-
-    draw() {
-    if (this.img.complete) {
-        ctx.save(); // Spara nuvarande canvas-inställningar
-
-        if (this.lastDirection === "left") {
-            // Spegla bilden horisontellt
-            ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-            ctx.scale(-1, 1); // invertera horisontellt
-            ctx.drawImage(this.img, -this.w / 2, -this.h / 2, this.w, this.h);
-        } else {
-            ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
-        }
-
-        ctx.restore(); // Återställ canvas till normalt läge
-    } else {
-        this.img.onload = () => this.draw();
-    }
+// ritfunktioner
+export function drawBackground() {
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, worldWidth, worldHeight);
+}
+export function drawGround() {
+  ctx.fillStyle = "green";
+  ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
 }
 
-    update(obstacles, groundY) {
-
-        
-        // Beräkna hopp / dash / uppdaterar riktning
-        let dx = 0;
-        if (!this.isDashing) {
-            if (keys["a"] || keys["ArrowLeft"]) {
-                dx -= this.speed;
-                this.lastDirection = "left";
-            }
-            if (keys["d"] || keys["ArrowRight"]) {
-                dx += this.speed;
-                this.lastDirection = "right";
-            }
-
-            // Hoppa endast vid nytt knapptryck
-            if ((keys[" "]) && !this.jumpPressedLastFrame) {
-                if (this.jumps > 0) {
-                    this.velY = -35;
-                    this.jumps--;
-                    this.onGround = false;
-                }
-            }
-            // Starta dash
-            if (keys["q"] && this.canDash) {
-                keys["q"] = false; //förhindra dashspam
-                this.isDashing = true;
-                this.canDash = false; 
-                this.dashTime = 200; // dash varar i 200 millisekunder
-            }
-        } else {
-            const dashSpeed = this.speed * 4;
-            dx += (this.lastDirection === "left") ? -dashSpeed : dashSpeed;
-            this.dashTime -= 16;
-            if (this.dashTime <= 0) {
-                this.isDashing = false;
-                setTimeout(() => { this.canDash = true; }, 750);
-            }
-        }
-
-        // Uppdatera jumpPressedLastFrame för att kolla om hoppknappen är nytryckt
-        this.jumpPressedLastFrame = keys[" "];
-
-        // Hopp + kollisionskorrigering
-        let newX = this.x + dx;
-
-        if (dx !== 0) {
-            for (let obs of obstacles) {
-                // Kolla vertikal kollision
-                if (this.y + this.h > obs.y + 1 && this.y < obs.y + obs.h - 1) {
-                    // Kolla horisontell kollision
-                    const rightEdge = this.x + this.w;
-                    const newRightEdge = newX + this.w;
-
-                    if (dx > 0 && rightEdge <= obs.x && newRightEdge > obs.x) {
-                        // Kolliderar från vänster
-                        newX = obs.x - this.w;
-                    } else if (dx < 0 && this.x >= obs.x + obs.w && newX < obs.x + obs.w) {
-                        // Kolliderar från höger
-                        newX = obs.x + obs.w;
-                    }
-                }
-            }
-        }
-
-        this.x = newX;
-
-        // Gravitation (uppdatera vertikal hastighet) och vertikal kollisionshantering
-        // Gravitation är bara om inte onGround är true (alltså i luften)
-        if (!this.onGround) {
-            this.velY += this.gravity;
-        }
-
-        let newY = this.y + this.velY;
-        let standingOnSomething = false;
-
-        for (let obs of obstacles) {
-            // kolla horisontell overlap (spelaren efter horisontell korrigering)
-            if (this.x + this.w > obs.x + 1 && this.x < obs.x + obs.w - 1) {
-                const prevBottom = this.y + this.h;
-                const nextBottom = newY + this.h;
-                // Landar på toppen: tidigare under botten, nu passerar ner till/toppen
-                if (prevBottom <= obs.y && nextBottom >= obs.y) {
-                    newY = obs.y - this.h;
-                    this.velY = 0;
-                    standingOnSomething = true;
-                } else {
-                    // Slår huvudet i underkant
-                    const prevTop = this.y;
-                    const nextTop = newY;
-                    if (prevTop >= obs.y + obs.h && nextTop <= obs.y + obs.h) {
-                        newY = obs.y + obs.h;
-                        this.velY = 0;
-                    }
-                }
-            }
-        }
-
-        // Markkollision (marken är vid groundY)
-        if (newY + this.h >= groundY) {
-            newY = groundY - this.h;
-            this.velY = 0;
-            standingOnSomething = true;
-        }
-
-        this.y = newY;
-        this.onGround = standingOnSomething;
-
-        // Återställ hopp när man landar
-        if (this.onGround) this.jumps = this.maxJumps;
-    }
-}
-
-// Klass för hinder
-class obstacle {
-    constructor(x, y, w, h, color) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.color = color;
-    }
-    
-    //Rita hindret
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-    }
-    
-}
-
-const player = new Character(5500, 1500, 100, 100, 10, 2, "character bilder/meatball_fullklädd.png");
-
-class Goat {
-    constructor(x, y, w, h, imgSrc) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.img = new Image();
-        this.img.src = imgSrc;
-    }
-}
-
-const enemyGoat = new Goat(1200, 0, 80, 80, "goat.png");
-
-
-function drawBackground() {
-    ctx.fillStyle = "#000"; // svart himmel
-    ctx.fillRect(0, 0, worldWidth, worldHeight);
-}
-
-function drawGround() {
-    ctx.fillStyle = "green";
-    ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
-}
-
-
-const obstacles = [
+// obstacles (använd obstacle-klassen och kalla draw(ctx))
+export const obstacles = [
     // platforms spawn
     new obstacle(700, 4300, 300, 50),
     new obstacle(1200, 4200, 200, 50),
@@ -254,8 +71,6 @@ const obstacles = [
     new obstacle(6200, 2600, 275, 100, "gray"),
     new obstacle(6250, 2550, 177, 100, "gray"),
 
-
-
     // Vägen till nivå 5
     new obstacle(3000, 2000, 200, 50, "green"),
 
@@ -278,10 +93,6 @@ const obstacles = [
     new obstacle(2000, 3400, 75, 50),
     new obstacle(2200, 3200, 100, 50),
 
-
-    
-
-
     //Platforms efter droppern
     new obstacle(3000, 4400, 150, 100),
     new obstacle(2800, 4250, 150, 250),
@@ -293,7 +104,7 @@ const obstacles = [
 
     //Platforms som leder till nivå 4
     new obstacle(5000, 4300, 75, 25, "gray"),
-    new obstacle(5500, 4200, 75, 50),
+    new obstacle(5500, 4200, 75, 50, "gray"),
     new obstacle(5000, 4000, 75, 75, "gray"),
 
     //Till nivå 4 trappor tillbaka
@@ -321,59 +132,44 @@ const obstacles = [
     new obstacle(0, 0, 30, 10000, "green")
 ];
 
-
+// kamerauppdatering
 function updateCamera() {
-    // Håll kameran centrerad på spelaren
-    cameraX = player.x + player.w / 2 - canvas.width / 2;
-    cameraY = player.y + player.h / 2 - canvas.height / 2;
-
-    // Förhindra att kameran går utanför världen
-    cameraX = Math.max(0, Math.min(cameraX, worldWidth - canvas.width));
-    cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
+  cameraX = player.x + player.w / 2 - canvas.width / 2;
+  cameraY = player.y + player.h / 2 - canvas.height / 2;
+  cameraX = Math.max(0, Math.min(cameraX, worldWidth - canvas.width));
+  cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
 }
 
+// game loop (modulen startas automatiskt)
+const targetFPS = 60;
+const frameDuration = 1000 / targetFPS;
 
-
-function startMap() {
-    paused = false; // fortsätt uppdatera i gameLoop
+export function gameLoop(timestamp) {
+  requestAnimationFrame(gameLoop);
+  if (paused) return;
+  const elapsed = timestamp - lastFrameTime;
+  if (elapsed >= frameDuration) {
+    lastFrameTime = timestamp - (elapsed % frameDuration);
+    updateCamera();
+    ctx.save();
+    ctx.translate(-cameraX, -cameraY);
+    drawBackground();
+    drawGround();
+    for (let obs of obstacles) obs.draw(ctx);
+    player.update(obstacles, worldHeight - 95, keys);
+    player.draw(ctx);
+    ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
+    ctx.restore();
+  }
 }
 
-function pauseMap() {
-    paused = true; // hoppa över uppdateringar
-}
-
-// starta loopen EN gång när sidan laddas
+// starta loopen (requestAnimationFrame körs men pausad tills startMap())
 requestAnimationFrame(gameLoop);
 
-
-// Olika skärmars uppdateringsfrekvenser hanteras här, annars blir spelet för snabbt eller långsamt beroende på skärm
-const targetFPS = 60;
-const frameDuration = 1000 / targetFPS; // Target fps är 60
-
-function gameLoop(timestamp) {
-    requestAnimationFrame(gameLoop); // alltid boka nästa frame
-
-    if (paused) return; // hoppa bara över uppdateringar
-
-    const elapsed = timestamp - lastFrameTime;
-
-    if (elapsed >= frameDuration) {
-        lastFrameTime = timestamp - (elapsed % frameDuration);
-
-        updateCamera();
-
-        ctx.save();
-        ctx.translate(-cameraX, -cameraY);
-
-        drawBackground();
-        drawGround();
-
-        for (let obs of obstacles) obs.draw();
-        player.update(obstacles, worldHeight - 95);
-        player.draw();
-
-        ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
-
-        ctx.restore();
-    }
+// Direktbind startknapp i modulen (bättre än inline onclick)
+const startBtn = document.getElementById('start-btn');
+if (startBtn) {
+  startBtn.addEventListener('click', () => {
+    startMap();
+  });
 }
