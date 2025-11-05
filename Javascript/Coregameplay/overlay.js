@@ -1,8 +1,18 @@
-// Javascript/Coregameplay/overlay.js
-import { canvas, ctx, startMap, pauseMap, player } from "./map.js";
+import { canvas, ctx, startMap, pauseMap, player, setCombatTrigger } from "./map.js";
+
+import * as MapModule from "./map.js";
 
 let currentState = "menu";
 const startBtn = document.getElementById('start-btn');
+
+// registrera callback direkt via setCombatTrigger
+setCombatTrigger(() => {
+  if (currentState === "overworld") {
+    enterCombat();
+  }
+});
+
+
 
 const menuImg = new Image();
 menuImg.src = "./Bilder/meny.png";
@@ -65,7 +75,13 @@ window.addEventListener('keydown', e => {
   else if (e.key.toLowerCase() === "m") showMenu();
   else if (e.key.toLowerCase() === "å") gameOver();
   else if (e.key.toLowerCase() === "ä") enterCombat();
+  else if (e.key.toLowerCase() === "l") {
+    currentState = "overworld";
+    player.x += 200;   // 🔥 flytta spelaren 200 pixlar åt höger
+    startMap();        // 🔄 starta overworld igen
+  }
 });
+
 
 // init: visa menyn första gången
 menuImg.onload = () => showMenu();

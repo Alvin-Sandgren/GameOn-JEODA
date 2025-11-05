@@ -1,7 +1,7 @@
 // Javascript/Coregameplay/fullscreen.js
 import { canvas, ctx } from "./map.js";
 
-const btn = document.getElementById('fullscreen-btn');
+export const btn = document.getElementById('fullscreen-btn');
 const menuImage = new Image();
 menuImage.src = './Bilder/meny.png';
 

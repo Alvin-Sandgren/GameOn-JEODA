@@ -1,5 +1,7 @@
 import { Character, obstacle, Goat } from "./classer.js";
 
+export let onCombatTrigger = null;
+
 // DOM & canvas (exporteras så andra moduler kan använda dem)
 export const canvas = document.getElementById('karta');
 export const ctx = canvas.getContext('2d');
@@ -28,9 +30,15 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
-export const player = new Character(4500, 2500, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
+export const player = new Character(200, 4000, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
 
-export const enemyGoat = new Goat(5500, 2500, 80, 80, "goat.png");
+export const enemyGoats = [
+    new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png"),
+    new Goat(1500,2855,150,150, "./Goat_bilder/stenget.png"),
+    new Goat(7300,4300,200,200, "./Goat_bilder/stefanget.png"),
+    new Goat(600,975,450,450, "./Goat_bilder/antonget.png")
+
+]
 
 // ritfunktioner
 export function drawBackground() {
@@ -155,7 +163,24 @@ export function gameLoop(timestamp) {
     for (let obs of obstacles) obs.draw(ctx);
     player.update(obstacles, worldHeight - 95, keys);
     player.draw(ctx);
-    ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
+    for (let goat of enemyGoats) {
+    goat.draw(ctx);
+    }
+        // --- Kolla om spelaren nuddar en get ---
+    for (let goat of enemyGoats) {
+    if (
+        player.x < goat.x + goat.w &&
+        player.x + player.w > goat.x &&
+        player.y < goat.y + goat.h &&
+        player.y + player.h > goat.y
+    ) {
+        if (onCombatTrigger) {
+        onCombatTrigger(); // 🔥 anropa funktionen om den är kopplad
+        }
+        break;
+    }
+    }
+
     ctx.restore();
   }
 }
@@ -169,4 +194,8 @@ if (startBtn) {
   startBtn.addEventListener('click', () => {
     startMap();
   });
+}
+
+export function setCombatTrigger(callback) {
+  onCombatTrigger = callback;
 }
