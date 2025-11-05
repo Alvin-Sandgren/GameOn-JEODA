@@ -1,3 +1,6 @@
+let paused = true;          // styr om spelet ska köra
+let lastFrameTime = 0;      // måste deklareras före gameLoop
+
 const canvas = document.getElementById('karta');
 const ctx = canvas.getContext('2d');
 
@@ -199,11 +202,19 @@ class obstacle {
 
 const player = new Character(5500, 1500, 100, 100, 10, 2, "meatball.png");
 
-const enemyGoat = new goat();
-enemyGoat.w = 80;
-enemyGoat.h = 80;
-enemyGoat.x = 1200;
-enemyGoat.y = 0
+class Goat {
+    constructor(x, y, w, h, imgSrc) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.img = new Image();
+        this.img.src = imgSrc;
+    }
+}
+
+const enemyGoat = new Goat(1200, 0, 80, 80, "goat.png");
+
 
 function drawBackground() {
     ctx.fillStyle = "#000"; // svart himmel
@@ -322,12 +333,28 @@ function updateCamera() {
 }
 
 
+
+function startMap() {
+    paused = false; // fortsätt uppdatera i gameLoop
+}
+
+function pauseMap() {
+    paused = true; // hoppa över uppdateringar
+}
+
+// starta loopen EN gång när sidan laddas
+requestAnimationFrame(gameLoop);
+
+
 // Olika skärmars uppdateringsfrekvenser hanteras här, annars blir spelet för snabbt eller långsamt beroende på skärm
-let lastFrameTime = 0;
 const targetFPS = 60;
 const frameDuration = 1000 / targetFPS; // Target fps är 60
 
 function gameLoop(timestamp) {
+    requestAnimationFrame(gameLoop); // alltid boka nästa frame
+
+    if (paused) return; // hoppa bara över uppdateringar
+
     const elapsed = timestamp - lastFrameTime;
 
     if (elapsed >= frameDuration) {
@@ -336,7 +363,7 @@ function gameLoop(timestamp) {
         updateCamera();
 
         ctx.save();
-        ctx.translate(-cameraX, -cameraY); // Flytta allt med kameran
+        ctx.translate(-cameraX, -cameraY);
 
         drawBackground();
         drawGround();
@@ -349,8 +376,4 @@ function gameLoop(timestamp) {
 
         ctx.restore();
     }
-
-    requestAnimationFrame(gameLoop);
 }
-
-gameLoop();
