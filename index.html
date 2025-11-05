@@ -5,20 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mjödbelly Main</title>
   <link rel="stylesheet" href="UI.css">
+  <link rel="stylesheet" href="combatUI.css">
   
 </head>
 <body>
-  <!-- Canvas först -->
+ 
   <canvas id="karta"></canvas>
-
-  <!-- Startknapp -->
   <img id="start-btn" class="start-btn" src="startknapp.png" alt="Start Button">
-
-
-  <!-- Fullscreen-knapp -->
   <button id="fullscreen-btn">⛶ Fullscreen</button>
 
-  <!-- Scripts i ordning -->
+  <div id="combat-container" style="display:none;">
+    <div id="combat-stats">
+      <h3>Stats:</h3>
+      <p>Health: <span id="stat-health"></span></p>
+      <p>Mana: <span id="stat-mana"></span></p>
+      <p>Damage: <span id="stat-damage"></span></p>
+      <p>Speed: <span id="stat-speed"></span></p>
+    </div>
+    <div id="combat-status"></div>
+    <div id="combat-log"></div>
+    <div>
+      <p>Dina kort:</p>
+    </div>
+    <div id="combat-ui"></div>
+  </div>
+
+  <script src="Coregameplay/enemies.js" defer></script>
+  <script src="Coregameplay/combat.js" defer></script>
   <script src="map.js" defer></script>
   <script src="fullscreen.js" defer></script>
   <script src="overlay.js" defer></script>
