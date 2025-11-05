@@ -200,7 +200,7 @@ class obstacle {
     
 }
 
-const player = new Character(5500, 1500, 100, 100, 10, 2, "charcahter bilder/meatball.png");
+const player = new Character(5500, 1500, 100, 100, 10, 2, "character bilder/meatball_fullklädd.png");
 
 class Goat {
     constructor(x, y, w, h, imgSrc) {

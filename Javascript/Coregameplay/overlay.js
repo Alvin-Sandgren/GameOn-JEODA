@@ -19,7 +19,7 @@ function fadeInOverlay() {
 
 // Ladda meny-bilden
 const menuImg = new Image();
-menuImg.src = "meny.png";
+menuImg.src = "Bilder/meny.png";
 
 // Visa menyn
 function showMenu() {
