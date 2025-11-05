@@ -368,11 +368,22 @@ function gameLoop(timestamp) {
         drawBackground();
         drawGround();
 
+        if (!inCombat) {
+            player.update(obstacles, canvas.height - 95);
+        }        
         for (let obs of obstacles) obs.draw();
         player.update(obstacles, worldHeight - 95);
         player.draw();
 
         ctx.drawImage(enemyGoat.img, enemyGoat.x, enemyGoat.y, enemyGoat.w, enemyGoat.h);
+    }
+
+    if (!inCombat) CombatTrigger(enemyGoat);
+
+    updatePlayerStats();
+
+    requestAnimationFrame(gameLoop);
+}
 
         ctx.restore();
     }

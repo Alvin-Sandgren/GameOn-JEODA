@@ -8,12 +8,13 @@ class enemies {
         this.y = y;
         this.w = w;
         this.h = h;
+        this.maxHealth = health;
     }
 }
 // Basic bergsget enemy
 class goat extends enemies {
     constructor(x = 0, y = 0, w = 80, h = 80) {
-        super("Goat", 50, 10, 5, x, y, w, h);
+        super("Get", 50, 5, 5, x, y, w, h);
         this.img = new Image();
         this.img.src = "goat.png"; 
     }
