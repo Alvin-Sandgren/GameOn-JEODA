@@ -16,16 +16,3 @@ function resizeCanvas() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(menuImage, 0, 0, canvas.width, canvas.height);
 }
-
-btn.addEventListener('click', async () => {
-  if (!document.fullscreenElement) {
-    await canvas.requestFullscreen();
-    btn.textContent = '⏏ Exit Fullscreen';
-  } else {
-    await document.exitFullscreen();
-    btn.textContent = '⛶ Fullscreen';
-  }
-  resizeCanvas();
-});
-
-window.addEventListener('resize', resizeCanvas);
