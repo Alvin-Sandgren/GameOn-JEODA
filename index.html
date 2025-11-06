@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mjödbelly Main</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mjödbelly Main</title>
+  <link rel="stylesheet" href="UI.css">
+  
 </head>
 <body>
-    <canvas id="karta"></canvas> 
-    <div id="combat-ui"></div>
+  <!-- Canvas först -->
+  <canvas id="karta"></canvas>
+
+  <!-- Startknapp -->
+  <img id="start-btn" class="start-btn" src="Bilder/startknapp.png" alt="Start Button">
 
 
-    <script src="Coregameplay/enemies.js" defer></script>
-    <script src="Coregameplay/combat.js" defer></script>
-    <script src="map.js" defer></script>
-  <!---  <script src="overlay.js" defer></script> -->
-    <script type="module" src="import.js" defer></script>
+  <!-- Fullscreen-knapp -->
+  <button id="fullscreen-btn">⛶ Fullscreen</button>
 
-    <audio id="Background-music" src="Background-music.mp3" loop></audio>
-    <audio id="Combat-music" src="combat-music-123083.mp3" loop></audio>
+<!-- test.html -->
+
+<script type="module" src="Javascript/Coregameplay/map.js" defer></script>
+<script type="module" src="Javascript/Coregameplay/fullscreen.js" defer></script>
+<script type="module" src="Javascript/Coregameplay/overlay.js" defer></script>
+
 </body>
 </html>

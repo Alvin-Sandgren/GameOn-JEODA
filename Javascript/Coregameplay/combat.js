@@ -2,6 +2,7 @@ let inCombat = false;
 let currentEnemy = null;
 let playerTurn = true;
 
+export { startCombat, endCombat, playerAction };
 
 const PlayerActions = [
     {
@@ -132,14 +133,4 @@ function closeCombatUI() {
     container.innerHTML = "";
 }
 
-// startar strid om spelaren kolliderar med fienden (ska bytas till random encounter senare)
-function checkCombatTrigger() {
-    if (!inCombat &&
-        player.x < enemyGoat.x + enemyGoat.w &&
-        player.x + player.w > enemyGoat.x &&
-        player.y < enemyGoat.y + enemyGoat.h &&
-        player.y + player.h > enemyGoat.y) {
 
-        startCombat(enemyGoat);
-    }
-}

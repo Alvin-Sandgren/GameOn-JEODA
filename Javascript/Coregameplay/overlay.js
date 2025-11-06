@@ -1,5 +1,8 @@
 import { canvas, ctx, startMap, pauseMap, player, setCombatTrigger } from "./map.js";
 
+import { startCombat, endCombat, playerAction } from "./combat.js";
+
+
 import * as MapModule from "./map.js";
 
 let currentState = "menu";
@@ -12,13 +15,11 @@ setCombatTrigger(() => {
   }
 });
 
-
-
 const menuImg = new Image();
 menuImg.src = "./Bilder/meny.png";
 
 function fadeInOverlay() {
-    const times = 5;           // fadeout counter
+    const times = 6;           // fadeout counter
     let count = 0;
 
     function drawStep() {
@@ -31,6 +32,8 @@ function fadeInOverlay() {
     }
     drawStep();
 }
+
+
 
 function showMenu() {
   currentState = "menu";
@@ -49,18 +52,15 @@ function gameOver() {
 }
 
 function enterCombat() {
-  currentState = "combat";
-  startBtn.style.display = "none";
-  pauseMap();
-  // enkel visual för combat
-  fadeInOverlay();
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  setTimeout(()=> {
-    ctx.fillStyle = "red";
-    const rectW = 100, rectH = 100;
-    ctx.fillRect((canvas.width-rectW)/2,(canvas.height-rectH)/2,rectW,rectH);
-  }, 1000);
-}
+    currentState = "combat";
+    pauseMap();
+    fadeInOverlay();
+
+    setTimeout(() => {
+      startCombat(enemyGoats);
+
+    }, 1200); }
+    
 
 function startGame() {
   currentState = "overworld";
