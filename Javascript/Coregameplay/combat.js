@@ -1,5 +1,6 @@
 import { canvas, ctx, player } from "./map.js";  // <-- lägg till ctx och canv
 
+
 let inCombat = false;
 let playerTurn = true;
 
@@ -29,7 +30,6 @@ export function startCombat(goat) {
     playerTurn = true;
     drawCombat(goat); // får nu en giltig Goat
 }
-
 
 // --- Player Action ---
 export function playerAction(actionIndex, goat) {

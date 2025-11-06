@@ -30,7 +30,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
-export const player = new Character(1700, 2855, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
+export const player = new Character(200, 4300, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
 
 export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png", "GWget");
 export const enemygoatsten = new Goat(1500, 2855, 150, 150, "./Goat_bilder/stenget.png", "Stenget");

@@ -56,8 +56,6 @@ export function enterCombat(collidedGoat) {
     }, 1200);
 }
 
-
-
 // --- Start Game ---
 function startGame() {
     currentState = "overworld";
@@ -72,6 +70,7 @@ window.addEventListener('keydown', e => {
     if (currentState === "menu" && e.key === "Enter") startGame();
     else if (e.key.toLowerCase() === "m") showMenu();
     else if (e.key.toLowerCase() === "å") gameOver();
+    else if (e.key.toLowerCase() === "l") startGame();
 });
 
 canvas.addEventListener("click", (e) => {
