@@ -147,18 +147,21 @@ export class obstacle {
 }
 
 export class Goat {
-  constructor(x, y, w, h, imgSrc) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    this.img = new Image();
-    this.img.src = imgSrc;
-  }
+    constructor(x, y, w, h, imageSrc) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.health = 100;      // exempel
+        this.damage = 10;       // exempel
+        this.name = imageSrc.split("/").pop().split(".")[0]; // t.ex. "Stenget"
 
-  draw(ctx) {
-    if (this.img.complete) {
-      ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
+        // **Skapa HTMLImageElement**
+        this.image = new Image();
+        this.image.src = imageSrc;
     }
-  }
+
+    draw(ctx) {
+        ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
+    }
 }

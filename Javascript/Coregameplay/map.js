@@ -32,13 +32,14 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 // spelare (exporteras så overlay kan flytta den vid gameover)
 export const player = new Character(1700, 2855, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
 
-export const enemyGoats = [
-    new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png"),
-    new Goat(1500,2855,150,150, "./Goat_bilder/stenget.png"),
-    new Goat(7300,4300,200,200, "./Goat_bilder/stefanget.png"),
-    new Goat(600,975,450,450, "./Goat_bilder/antonget.png")
+export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png", "GWget");
+export const enemygoatsten = new Goat(1500, 2855, 150, 150, "./Goat_bilder/stenget.png", "Stenget");
+export const enemygoatstefan = new Goat(7300, 4300, 200, 200, "./Goat_bilder/stefanget.png", "Stefanget");
+export const enemygoatanton = new Goat(600, 975, 450, 450, "./Goat_bilder/antonget.png", "Antonget");
 
-]
+
+// fyll combatGoats efter att getter är deklarerade
+export let combatGoats = [enemygoatgw, enemygoatsten, enemygoatstefan, enemygoatanton];
 
 // ritfunktioner
 export function drawBackground() {
@@ -152,38 +153,52 @@ const frameDuration = 1000 / targetFPS;
 export function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
   if (paused) return;
+
   const elapsed = timestamp - lastFrameTime;
   if (elapsed >= frameDuration) {
     lastFrameTime = timestamp - (elapsed % frameDuration);
+
+    // --- kamera ---
     updateCamera();
+
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
+
+    // --- rita bakgrund ---
     drawBackground();
     drawGround();
+
+    // --- rita hinder ---
     for (let obs of obstacles) obs.draw(ctx);
+
+    // --- uppdatera och rita spelare ---
     player.update(obstacles, worldHeight - 95, keys);
     player.draw(ctx);
-    for (let goat of enemyGoats) {
-    goat.draw(ctx);
-    }
-        // --- Kolla om spelaren nuddar en get ---
-    for (let goat of enemyGoats) {
-    if (
+
+    // --- rita getter var för sig ---
+    enemygoatgw.draw(ctx);
+    enemygoatsten.draw(ctx);
+    enemygoatstefan.draw(ctx);
+    enemygoatanton.draw(ctx);
+
+    for (let goat of combatGoats) {
+      if (
         player.x < goat.x + goat.w &&
         player.x + player.w > goat.x &&
         player.y < goat.y + goat.h &&
         player.y + player.h > goat.y
-    ) {
-        if (onCombatTrigger) {
-        onCombatTrigger(); // 🔥 anropa funktionen om den är kopplad
-        }
+      ) {
+        if (onCombatTrigger) onCombatTrigger(goat); // skicka med geten här
+        console.log("Kollision med get:", goat.name);
         break;
+      }
     }
-    }
+
 
     ctx.restore();
   }
 }
+
 
 // starta loopen (requestAnimationFrame körs men pausad tills startMap())
 requestAnimationFrame(gameLoop);

@@ -1,22 +1,20 @@
+import { canvas, ctx, player } from "./map.js";  // <-- lägg till ctx och canv
+
 let inCombat = false;
-let currentEnemy = null;
 let playerTurn = true;
 
-export { startCombat, endCombat, playerAction };
-
-const PlayerActions = [
+export const PlayerActions = [
     {
         name: "Attack",
         damage: () => player.damage,
         cost: 5
     },
     {
-        // Nästa skada minskas med 50%
         name: "Dodge",
         cost: 10,
         apply: () => {
             player.isDodging = true;
-            console.log("Du förbereder en dodge! Nästa skada minskas med 50%");
+            console.log("Du förbereder en dodge!");
         }
     },
     {
@@ -26,40 +24,29 @@ const PlayerActions = [
     }
 ];
 
-// Starta strid mot fiende
-function startCombat(enemy) {
+export function startCombat(goat) {
     inCombat = true;
-    currentEnemy = enemy;
     playerTurn = true;
-    updateCombatUI();
-    openCombatUI();
+    drawCombat(goat); // får nu en giltig Goat
 }
 
-// Uppdatera combat UI 
-function updateCombatUI() {
-    console.log(`Spelare HP: ${player.health}/${player.maxHealth} | Mana: ${player.mana}/${player.maxMana}`);
-    console.log(`${currentEnemy.name} HP: ${currentEnemy.health}`);
-}
 
-// Hantera spelarens val
-function playerAction(actionIndex) {
-    if (!playerTurn) {
-        console.log("Det är inte din tur!");
-        return;
-    }
+// --- Player Action ---
+export function playerAction(actionIndex, goat) {
+    if (!playerTurn || !inCombat) return;
 
     const action = PlayerActions[actionIndex];
 
     if (player.mana < action.cost) {
-        console.log("Inte tillräckligt med mana!");
+        console.log("Inte tillräckligt mana!");
         return;
     }
 
     player.mana -= action.cost;
 
     if (action.damage) {
-        currentEnemy.health -= action.damage();
-        console.log(`Du gjorde ${action.damage()} skada på ${currentEnemy.name}`);
+        goat.health -= action.damage();
+        console.log(`Du gjorde ${action.damage()} skada på ${goat.name}`);
     } else if (action.heal) {
         player.health += action.heal();
         if (player.health > player.maxHealth) player.health = player.maxHealth;
@@ -68,69 +55,66 @@ function playerAction(actionIndex) {
         action.apply();
     }
 
-    if (currentEnemy.health <= 0) {
-        endCombat(true);
+    if (goat.health <= 0) {
+        endCombat(true, goat);
         return;
     }
 
     playerTurn = false;
-    enemyTurn();
+    setTimeout(() => enemyTurn(goat), 1000);
 }
 
-// Fiendens tur
-function enemyTurn() {
-    setTimeout(() => {
-        let damage = currentEnemy.damage;
+// --- Enemy Turn ---
+function enemyTurn(goat) {
+    let damage = goat.damage || 5;
 
-        if (player.isDodging) {
-            damage = Math.floor(damage * 0.5);
-            player.isDodging = false;
-        }
-
-        player.health -= damage;
-        console.log(`${currentEnemy.name} gjorde ${damage} skada!`);
-
-        if (player.health <= 0) {
-            endCombat(false);
-            return;
-        }
-
-        playerTurn = true;
-        updateCombatUI();
-    }, 1000);
-}
-
-// Avsluta strid
-function endCombat(playerWon) {
-    if (playerWon) {
-        console.log(`Du besegrade ${currentEnemy.name}!`);
-    } else {
-        console.log("Du blev besegrad!");
+    if (player.isDodging) {
+        damage = Math.floor(damage * 0.5);
+        player.isDodging = false;
     }
 
+    player.health -= damage;
+    console.log(`${goat.name} gjorde ${damage} skada!`);
+
+    if (player.health <= 0) {
+        endCombat(false, goat);
+        return;
+    }
+
+    playerTurn = true;
+    drawCombat(goat);
+}
+
+// --- End Combat ---
+function endCombat(playerWon, goat) {
+    if (playerWon) console.log(`Du besegrade ${goat.name}!`);
+    else console.log("Du blev besegrad!");
+
     inCombat = false;
-    currentEnemy = null;
-
-    closeCombatUI();
+    playerTurn = true;
 }
 
-// Öppna UI 
-function openCombatUI() {
-    const container = document.getElementById("combat-ui");
-    container.innerHTML = ""; // rensa gamla knappar
+export function drawCombat(goat) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    PlayerActions.forEach((action, i) => {
-        const btn = document.createElement("button");
-        btn.innerText = action.name;
-        btn.onclick = () => playerAction(i);
-        container.appendChild(btn);
-    });
+    // Bakgrund
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Spelare
+    if (player.img.complete) {
+        ctx.drawImage(player.img, 400, canvas.height / 2 - 75, 150, 150);
+    }
+
+    // Fiende (Goat)
+    if (goat.image.complete) {
+        ctx.drawImage(goat.image, canvas.width - 600, canvas.height / 2 - 75, 150, 150);
+    }
+
+    // Text
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    ctx.fillText(`Player HP: ${player.health}/${player.maxHealth}`, 200, 50);
+    ctx.fillText(`Player Mana: ${player.mana}/${player.maxMana}`, 200, 80);
+    ctx.fillText(`${goat.name} HP: ${goat.health}`, canvas.width - 250, 50);
 }
-
-// Stäng UI 
-function closeCombatUI() { 
-    const container = document.getElementById("combat-ui");
-    container.innerHTML = "";
-}
-
-
