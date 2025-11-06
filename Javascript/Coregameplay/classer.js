@@ -199,8 +199,6 @@ export class Obstacle {
   }
 }
 
-
-
 export class Goat {
     constructor(x, y, w, h, imageSrc) {
         this.x = x;

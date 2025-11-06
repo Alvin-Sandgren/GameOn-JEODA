@@ -1,6 +1,5 @@
 import { canvas, ctx, player } from "./map.js";  // <-- lägg till ctx och canv
 
-
 let inCombat = false;
 let playerTurn = true;
 

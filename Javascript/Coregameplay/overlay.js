@@ -9,11 +9,14 @@ const startBtn = document.getElementById('start-btn');
 const menuImg = new Image();
 menuImg.src = "./Bilder/meny.png";
 
-setCombatTrigger((collidedGoat) => {
-  if (currentState === "overworld") {
-    enterCombat(collidedGoat); // skicka med den kolliderade geten
-  }
+window.addEventListener("DOMContentLoaded", () => {
+  setCombatTrigger((collidedGoat) => {
+    if (currentState === "overworld") {
+      enterCombat(collidedGoat);
+    }
+  });
 });
+
 
 // --- Menu ---
 function fadeInOverlay(callback) {
@@ -38,7 +41,7 @@ function showMenu() {
     pauseMap();
 }
 
-function gameOver() {
+export function gameOver() {
     currentState = "gameover";
     startBtn.style.display = "block";
     player.x = 200;

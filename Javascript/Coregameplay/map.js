@@ -31,7 +31,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
 export const player = new Character(
-    3400, 4000, 100, 100, 10, 2,
+    4300, 2000, 100, 100, 10, 2,
     "./character_bilder/meatball_nack.png",      // Idle
     "./character_bilder/Meatball_Lleg.png",   // Left leg forward
     "./character_bilder/Meatball_nack_Rleg.png"   // Right leg forward
@@ -45,11 +45,26 @@ export const enemygoatanton = new Goat(600, 975, 450, 450, "./Goat_bilder/antong
 // fyll combatGoats efter att getter är deklarerade
 export let combatGoats = [enemygoatgw, enemygoatsten, enemygoatstefan, enemygoatanton];
 
-// ritfunktioner
+  // --- Bakgrundsbild ---
+  export const backgroundImage = new Image();
+  let backgroundLoaded = false;
+  backgroundImage.src = "./Bilder/bakgrund.png"; // ← byt till din faktiska filväg
+  backgroundImage.onload = () => {
+    backgroundLoaded = true;
+    console.log("Bakgrundsbild laddad!");
+      };
+
 export function drawBackground() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, worldWidth, worldHeight);
+  if (backgroundLoaded) {
+    // Ritar bilden över hela den synliga canvasen
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+  } else {
+    // Fallback om bilden inte hunnit laddas
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 }
+
 export function drawGround() {
   ctx.fillStyle = "green";
   ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
@@ -160,33 +175,30 @@ const frameDuration = 1000 / targetFPS;
 
 export function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
-  if (paused) return;
+  if (paused || !backgroundLoaded) return;
 
   const elapsed = timestamp - lastFrameTime;
   if (elapsed >= frameDuration) {
     lastFrameTime = timestamp - (elapsed % frameDuration);
 
-    // --- kamera ---
-    updateCamera();
+    // 🧹 Rensa canvasen
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // 🖼️ Rita bakgrund först — utan translate, så den står still
+    drawBackground();
+
+    // 🎥 Flytta kameran och rita resten
+    updateCamera();
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
 
-    // --- rita bakgrund ---
-    drawBackground();
     drawGround();
-
-    // --- rita hinder ---
     for (let obs of obstacles) obs.draw(ctx);
 
-    // --- kolla om spelaren rör sig ---
     const isMoving = keys["a"] || keys["d"] || keys["ArrowLeft"] || keys["ArrowRight"];
-
-    // --- uppdatera och rita spelare ---
     player.update(obstacles, worldHeight - 95, keys);
     player.draw(ctx, isMoving);
 
-    // --- rita getter ---
     enemygoatgw.draw(ctx);
     enemygoatsten.draw(ctx);
     enemygoatstefan.draw(ctx);
@@ -199,7 +211,7 @@ export function gameLoop(timestamp) {
         player.y < goat.y + goat.h &&
         player.y + player.h > goat.y
       ) {
-        if (onCombatTrigger) onCombatTrigger(goat); // skicka med geten här
+        if (onCombatTrigger) onCombatTrigger(goat);
         console.log("Kollision med get:", goat.name);
         break;
       }
@@ -208,6 +220,7 @@ export function gameLoop(timestamp) {
     ctx.restore();
   }
 }
+
 
 // starta loopen (requestAnimationFrame körs men pausad tills startMap())
 requestAnimationFrame(gameLoop);
