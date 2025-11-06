@@ -199,6 +199,36 @@ export class Obstacle {
   }
 }
 
+export class Lava extends Obstacle {
+  constructor(x, y, w, h, imageOrColor = null) {
+    super(x, y, w, h, imageOrColor || "red");
+  }
+
+  draw(ctx) {
+    if (this.image && this.imageLoaded) {
+      ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
+    } else {
+      const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.h);
+      gradient.addColorStop(0, "#ff6600");
+      gradient.addColorStop(0.5, "#ff3300");
+      gradient.addColorStop(1, "#cc0000");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(this.x, this.y, this.w, this.h);
+    }
+  }
+
+  // Endast kollisionstest (returnerar true/false)
+  checkCollision(character) {
+    return (
+      character.x < this.x + this.w &&
+      character.x + character.w > this.x &&
+      character.y < this.y + this.h &&
+      character.y + character.h > this.y
+    );
+  }
+}
+
+
 export class Goat {
     constructor(x, y, w, h, imageSrc) {
         this.x = x;

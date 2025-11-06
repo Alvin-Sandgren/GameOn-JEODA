@@ -31,7 +31,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
 export const player = new Character(
-    4300, 2000, 100, 100, 10, 2,
+    200, 4200, 100, 100, 10, 2,
     "./character_bilder/meatball_nack.png",      // Idle
     "./character_bilder/Meatball_Lleg.png",   // Left leg forward
     "./character_bilder/Meatball_nack_Rleg.png"   // Right leg forward
@@ -181,13 +181,10 @@ export function gameLoop(timestamp) {
   if (elapsed >= frameDuration) {
     lastFrameTime = timestamp - (elapsed % frameDuration);
 
-    // 🧹 Rensa canvasen
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 🖼️ Rita bakgrund först — utan translate, så den står still
     drawBackground();
 
-    // 🎥 Flytta kameran och rita resten
     updateCamera();
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
@@ -220,7 +217,6 @@ export function gameLoop(timestamp) {
     ctx.restore();
   }
 }
-
 
 // starta loopen (requestAnimationFrame körs men pausad tills startMap())
 requestAnimationFrame(gameLoop);
