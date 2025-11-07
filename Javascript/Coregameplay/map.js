@@ -1,4 +1,4 @@
-import { Character, Obstacle, Goat, Lava } from "./classer.js";
+import { Character, Obstacle, Goat, Lava, Skylt } from "./classer.js";
 
 // --- NYTT --- GameOver-trigger och flagga
 export let onCombatTrigger = null;
@@ -41,7 +41,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
 export const player = new Character(
-  200, 4200, 100, 100, 10, 2,
+  1500, 4000, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      // Idle
   "./character_bilder/Meatball_Lleg.png",      // Left leg forward
   "./character_bilder/Meatball_nack_Rleg.png"  // Right leg forward
@@ -116,6 +116,7 @@ export const obstacles = [
   new Obstacle(6100, 1901, 20, 798, "red"),
   new Obstacle(6500, 1800, 100, 1000, "gray"),
   new Obstacle(6200, 2600, 275, 100, "gray"),
+  new Obstacle(6320, 2500, 50, 50, "red"),
   new Obstacle(6250, 2550, 177, 100, "gray"),
 
   // Vägen till nivå 5
@@ -169,11 +170,28 @@ export const obstacles = [
 
   new Obstacle(8500, 4400, 150, 100, "gray"),
   new Obstacle(8600, 4350, 100, 100, "gray"),
+  new Obstacle(8625, 4300, 50, 50, "red"),
   new Obstacle(8650, 4400, 150, 100, "gray"),
 
   //Väggar på sidorna
   new Obstacle(worldWidth - 30, 0, 30, 10000, "green"),
   new Obstacle(0, 0, 30, 10000, "green")
+];
+
+ const skyltar = [
+    new Skylt(2115, 4000, 25, 25,"black"),
+    new Skylt(2120, 3975, 15, 50, "saddlebrown"),
+    new Skylt(2070, 3925, 120, 75),
+    new Skylt(2065, 3920, 5, 80, "black"),
+    new Skylt(2065, 3920, 125, 5),
+    new Skylt(2190, 3920, 5, 80),
+    new Skylt(2065, 4000, 130, 5, ),
+    new Skylt(2110, 3940, 10, 40),
+    new Skylt(2100, 3950, 30, 10),
+    new Skylt(2105, 3945, 20, 5),
+    new Skylt(2110, 3975, 65, 10),
+    new Skylt(2155, 3965, 10, 30),
+    new Skylt(2160, 3970, 10, 20,)
 ];
 
 // kamera
@@ -206,6 +224,10 @@ export function gameLoop(timestamp) {
     drawGround();
     drawKeybinds();
     for (let obs of obstacles) obs.draw(ctx);
+
+    for (let skylt of skyltar) {
+      skylt.draw(ctx);
+    }
 
     const isMoving = keys["a"] || keys["d"] || keys["ArrowLeft"] || keys["ArrowRight"];
     player.update(obstacles, worldHeight - 95, keys);
