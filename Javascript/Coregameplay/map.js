@@ -41,7 +41,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
 export const player = new Character(
-  3200, 4200, 100, 100, 10, 2,
+  200, 4200, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      // Idle
   "./character_bilder/Meatball_Lleg.png",      // Left leg forward
   "./character_bilder/Meatball_nack_Rleg.png"  // Right leg forward
@@ -76,6 +76,22 @@ export function drawBackground() {
 export function drawGround() {
   ctx.fillStyle = "green";
   ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
+}
+
+// skriver text för visa keybinds 
+function drawKeybinds() {
+  ctx.fillStyle = "gray";
+  ctx.fillRect(100, 3950, 850, 250);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 5;
+  ctx.strokeRect(100, 3950, 850, 250);
+  
+  ctx.fillStyle = "white";
+  ctx.font = "40px Arial";
+
+  ctx.fillText("Såhär spelar du:", 150, 4010);
+  ctx.fillText("Gå Vänster/Höger: A/D eller ← →", 150, 4080);
+  ctx.fillText("Hoppa: W eller Mellanslag", 150, 4150);
 }
 
 // obstacles
@@ -188,6 +204,7 @@ export function gameLoop(timestamp) {
     ctx.translate(-cameraX, -cameraY);
 
     drawGround();
+    drawKeybinds();
     for (let obs of obstacles) obs.draw(ctx);
 
     const isMoving = keys["a"] || keys["d"] || keys["ArrowLeft"] || keys["ArrowRight"];

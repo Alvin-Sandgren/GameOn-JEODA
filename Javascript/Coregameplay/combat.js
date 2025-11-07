@@ -1,8 +1,21 @@
-import { canvas, ctx, player } from "./map.js";  // <-- lägg till ctx och canv
+import { canvas, ctx, startMap, player } from "./map.js";
+import { startGame } from "./overlay.js";
 
 let inCombat = false;
 let playerTurn = true;
+let slays = 0;
+let currentGoat = null;
 
+// Log system
+const gameLogs = [];
+
+function addLog(message) {
+    gameLogs.push(message);
+    if (gameLogs.length > 6) gameLogs.shift();
+    drawCombat(currentGoat);
+}
+
+// --- Player Actions ---
 export const PlayerActions = [
     {
         name: "Attack",
@@ -14,7 +27,7 @@ export const PlayerActions = [
         cost: 10,
         apply: () => {
             player.isDodging = true;
-            console.log("Du förbereder en dodge!");
+            addLog("Du förbereder en dodge!");
         }
     },
     {
@@ -24,20 +37,24 @@ export const PlayerActions = [
     }
 ];
 
+// --- Start Combat ---
 export function startCombat(goat) {
+    if (!goat) return;
     inCombat = true;
     playerTurn = true;
-    drawCombat(goat); // får nu en giltig Goat
+    currentGoat = goat;
+    addLog(`En ${goat.name} dyker upp!`);
+    drawCombat(goat);
 }
 
 // --- Player Action ---
 export function playerAction(actionIndex, goat) {
-    if (!playerTurn || !inCombat) return;
+    if (!playerTurn || !inCombat || !goat) return;
 
     const action = PlayerActions[actionIndex];
 
     if (player.mana < action.cost) {
-        console.log("Inte tillräckligt mana!");
+        addLog("Inte tillräckligt mana!");
         return;
     }
 
@@ -45,11 +62,11 @@ export function playerAction(actionIndex, goat) {
 
     if (action.damage) {
         goat.health -= action.damage();
-        console.log(`Du gjorde ${action.damage()} skada på ${goat.name}`);
+        addLog(`Du gjorde ${action.damage()} skada på ${goat.name}`);
     } else if (action.heal) {
         player.health += action.heal();
         if (player.health > player.maxHealth) player.health = player.maxHealth;
-        console.log(`Du helade ${action.heal()} HP`);
+        addLog(`Du helade ${action.heal()} HP`);
     } else if (action.apply) {
         action.apply();
     }
@@ -65,6 +82,7 @@ export function playerAction(actionIndex, goat) {
 
 // --- Enemy Turn ---
 function enemyTurn(goat) {
+    if (!goat) return;
     let damage = goat.damage || 5;
 
     if (player.isDodging) {
@@ -73,7 +91,7 @@ function enemyTurn(goat) {
     }
 
     player.health -= damage;
-    console.log(`${goat.name} gjorde ${damage} skada!`);
+    addLog(`${goat.name} gjorde ${damage} skada!`);
 
     if (player.health <= 0) {
         endCombat(false, goat);
@@ -86,34 +104,85 @@ function enemyTurn(goat) {
 
 // --- End Combat ---
 function endCombat(playerWon, goat) {
-    if (playerWon) console.log(`Du besegrade ${goat.name}!`);
-    else console.log("Du blev besegrad!");
+    if (playerWon) {
+        addLog(`Du besegrade ${goat.name}!`);
+        slays += 1;
+        startMap();
+        startGame();
+    } else {
+        addLog("Du blev besegrad!");
+        startGame();
+        // Reset player stats
+        player.health = player.maxHealth;
+        player.mana = player.maxMana;
+        player.x = 370;
+        player.y = 4405;
+    }
 
     inCombat = false;
     playerTurn = true;
+    currentGoat = null;
 }
 
+// --- Draw Combat ---
 export function drawCombat(goat) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Bakgrund
+    // Background
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Spelare
-    if (player.img.complete) {
+    if (!goat) return;
+
+    // Player
+    if (player.img && player.img.complete) {
         ctx.drawImage(player.img, 400, canvas.height / 2 - 75, 150, 150);
     }
 
-    // Fiende (Goat)
-    if (goat.image.complete) {
-        ctx.drawImage(goat.image, canvas.width - 600, canvas.height / 2 - 75, 150, 150);
+    // Enemy (Goat)
+    if (goat.image && goat.image.complete) {
+        ctx.drawImage(goat.image, canvas.width - 570, canvas.height / 2 - 75, 150, 150);
     }
 
-    // Text
+    // Stats Text
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
-    ctx.fillText(`Player HP: ${player.health}/${player.maxHealth}`, 200, 50);
-    ctx.fillText(`Player Mana: ${player.mana}/${player.maxMana}`, 200, 80);
-    ctx.fillText(`${goat.name} HP: ${goat.health}`, canvas.width - 250, 50);
+    ctx.fillText(`Du har besegrat: ${slays}/4`, 680, canvas.height - 650);
+    ctx.fillText(`Strid mot: ${goat.name}`, 690, canvas.height - 700);
+    ctx.fillText(`Ditt HP: ${player.health}/${player.maxHealth}`, 400, 220);
+    ctx.fillText(`Din Mana: ${player.mana}/${player.maxMana}`, 400, 250);
+    ctx.fillText(`${goat.name} HP: ${goat.health}`, canvas.width - 570, 250);
+
+    // Player Actions UI
+    PlayerActions.forEach((action, index) => {
+        ctx.fillStyle = "gray";
+        ctx.fillRect(670, canvas.height - 250 + index * 50, 200, 40);
+        ctx.fillStyle = "white";
+        ctx.fillText(`${action.name} (Mana: ${action.cost})`, 695, canvas.height - 222 + index * 50);
+    });
+
+    // Game Logs
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    gameLogs.forEach((log, index) => {
+        ctx.fillText(log, 50, canvas.height - 380 + index * 25);
+    });
 }
+
+// --- Click Handling for Player Actions ---
+canvas.addEventListener("click", (event) => {
+    if (!inCombat || !playerTurn || !currentGoat) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    PlayerActions.forEach((action, index) => {
+        const actionX = 670;
+        const actionY = canvas.height - 250 + index * 50;
+
+        if (x >= actionX && x <= actionX + 200 && y >= actionY && y <= actionY + 40) {
+            playerAction(index, currentGoat);
+        }
+    });
+});
