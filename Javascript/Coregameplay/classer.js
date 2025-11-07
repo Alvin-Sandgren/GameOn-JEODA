@@ -219,15 +219,15 @@ export class Lava extends Obstacle {
 
   // Endast kollisionstest (returnerar true/false)
   checkCollision(character) {
-    return (
-      character.x < this.x + this.w &&
-      character.x + character.w > this.x &&
-      character.y < this.y + this.h &&
-      character.y + character.h > this.y
-    );
+  return (
+    character.x < this.x + this.w &&
+    character.x + character.w > this.x &&
+    character.y < this.y + this.h &&
+    character.y + character.h >= this.y // ändrat till >=
+  );
   }
+  
 }
-
 
 export class Goat {
     constructor(x, y, w, h, imageSrc) {

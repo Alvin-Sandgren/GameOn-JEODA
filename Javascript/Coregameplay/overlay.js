@@ -15,10 +15,12 @@ window.addEventListener("DOMContentLoaded", () => {
       enterCombat(collidedGoat);
     }
   });
+
+  MapModule.setGameOverTrigger(() => {
+    gameOver();
+  });
 });
 
-
-// --- Menu ---
 function fadeInOverlay(callback) {
     let count = 0;
     const times = 6;
@@ -33,20 +35,47 @@ function fadeInOverlay(callback) {
     step();
 }
 
-function showMenu() {
-    currentState = "menu";
-    startBtn.style.display = "block";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+export function showMenu() {
+  currentState = "menu";
+  startBtn.style.display = "block";
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (menuImg.complete) {
     ctx.drawImage(menuImg, 0, 0, canvas.width, canvas.height);
-    pauseMap();
+  } else {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  pauseMap();
 }
 
+
 export function gameOver() {
-    currentState = "gameover";
-    startBtn.style.display = "block";
-    player.x = 200;
-    player.y = 4200;
-    showMenu();
+  console.log("🔥 Game over triggered!");
+  pauseMap();
+
+  let opacity = 0;
+  const fadeInterval = setInterval(() => {
+    opacity += 0.05;
+    ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // När fade är klar → visa gameovertext
+    if (opacity >= 1) {
+      clearInterval(fadeInterval);
+      drawGameOverText();
+    }
+  }, 50);
+}
+
+function resetToMenu() {
+  player.x = 200;
+  player.y = 4200;
+  showMenu();
 }
 
 export function enterCombat(collidedGoat) {
@@ -99,3 +128,28 @@ canvas.addEventListener("click", (e) => {
 
 // --- Initial Menu ---
 menuImg.onload = () => showMenu();
+
+
+function drawGameOverText() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // reset camera transform
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // "You Died"-text
+  ctx.fillStyle = "red";
+  ctx.font = "bold 120px Georgia";
+  ctx.textAlign = "center";
+  ctx.fillText("YOU DIED", canvas.width / 2, canvas.height / 2 - 50);
+
+  // Subtext
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.fillText("Click anywhere to return to the menu", canvas.width / 2, canvas.height / 2 + 50);
+
+  // Väntar på klick
+  const handleClick = () => {
+    canvas.removeEventListener("click", handleClick);
+    resetToMenu();
+  };
+  canvas.addEventListener("click", handleClick);
+}
