@@ -39,13 +39,20 @@ export const keys = {};
 document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
-// spelare (exporteras så overlay kan flytta den vid gameover)
 export const player = new Character(
-  1500, 4000, 100, 100, 10, 2,
+  200, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      // Idle
-  "./character_bilder/Meatball_Lleg.png",      // Left leg forward
-  "./character_bilder/Meatball_nack_Rleg.png"  // Right leg forward
+  "./character_bilder/Meatball_Lleg.png",      // Left leg
+  "./character_bilder/Meatball_nack_Rleg.png", // Right leg
+  [                                             // Dash frames
+    "./character_bilder/Meatball_dash1.png",
+    "./character_bilder/Meatball_dash2.png",
+    "./character_bilder/Meatball_dash3.png",
+    "./character_bilder/Meatball_dash4.png"
+  ],
+  "./character_bilder/Meatball_Jump_nack.png"       // Jump image
 );
+
 
 // getter (fiender)
 export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png", "GWget");
@@ -66,7 +73,13 @@ backgroundImage.onload = () => {
 
 export function drawBackground() {
   if (backgroundLoaded) {
+    // Rita bakgrund på hela canvas
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+    // Rita permanent mörkning ovanpå
+    ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; // justera 0.05–0.15
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   } else {
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -97,62 +110,74 @@ function drawKeybinds() {
 // obstacles
 export const obstacles = [
   // platforms spawn
-  new Obstacle(700, 4300, 300, 50, "./Bilder/grass_plattform.png"),
-  new Obstacle(1200, 4200, 200, 50, "./Bilder/grass_plattform.png"),
-  new Obstacle(1600, 4000, 40, 50, "./Bilder/grass_plattform.png"),
-  new Obstacle(1800, 4025, 800, 575),
+  new Obstacle(700, 4300, 300, 50, "./Bilder/grass_platform.png"),
+  new Obstacle(1200, 4200, 200, 50, "./Bilder/grass_platform.png"),
+  new Obstacle(1600, 4000, 40, 50, "./Bilder/grass_platform.png"),
+  new Obstacle(1800, 4025, 800, 575, "Bilder/grassplatformstor.png"),
 
   //Dropper shute
   new Obstacle(1800, 3000, 100, 900),
 
   //Vänster sida plus tak på droppern och gången till dash/get nr 2
-  new Obstacle(1300, 3000, 500, 100, "./Bilder/grass_plattform.png"),
-  new Obstacle(400, 2500, 4000, 100, "gray"),
+  new Obstacle(1300, 3000, 500, 100, "./Bilder/grass_platform.png"),
+  new Obstacle(400, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(700, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(1000, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(1300, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(1600, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(1900, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(2200, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(2500, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(2800, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(3100, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(3400, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(3700, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(4000, 2500, 300, 100, "./Bilder/stone_platform.png"),
 
   //Cave entrance
   new Obstacle(4000, 0, 2600, 1900, "gray"),
-  new Obstacle(4300, 2500, 100, 200, "gray"),
-  new Obstacle(4300, 2700, 2300, 200, "gray"),
+  new Obstacle(4300, 2500, 100, 205, "gray"),
+  new Obstacle(4300, 2700, 2300, 430, "gray"),
   new Obstacle(6100, 1901, 20, 798, "red"),
-  new Obstacle(6500, 1800, 100, 1000, "gray"),
-  new Obstacle(6200, 2600, 275, 100, "gray"),
-  new Obstacle(6320, 2500, 50, 50, "red"),
-  new Obstacle(6250, 2550, 177, 100, "gray"),
+  new Obstacle(6500, 1800, 1000, 1430, "gray"),
+  new Obstacle(6200, 2600, 275, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(6300, 2500, 80, 52, "./Bilder/equip_troja.png"),
+  new Obstacle(6250, 2550, 177, 100, "./Bilder/stone_platform.png"),
 
   // Vägen till nivå 5
-  new Obstacle(3000, 2000, 200, 50, "./Bilder/grass_plattform.png"),
+  new Obstacle(3000, 2000, 200, 50, "./Bilder/grass_platform.png"),
 
-  //Nivå 5 plattformar
-  new Obstacle(3500, 1700, 500, 200, "green"),
+  //Nivå 5 platformar
+  new Obstacle(3400, 1700, 300, 100, "Bilder/grass_platform.png"),
   new Obstacle(0, 1400, 2600, 200, "green"),
 
   //Obstacles mot nivå 3
-  new Obstacle(950, 3000, 45, 30, "./Bilder/grass_plattform.png"),
-  new Obstacle(500, 3000, 39, 30,"./Bilder/grass_plattform.png"),
-  new Obstacle(300, 2750, 30, 30,"./Bilder/grass_plattform.png"),
+  new Obstacle(950, 3000, 45, 30, "./Bilder/grass_platform.png"),
+  new Obstacle(500, 3000, 39, 30,"./Bilder/grass_platform.png"),
+  new Obstacle(300, 2750, 30, 30,"./Bilder/grass_platform.png"),
 
   // Höger sida
   new Obstacle(2500, 2600, 100, 1275,),
-  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_plattform.png"),
-  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_plattform.png"),
-  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_plattform.png"),
-  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_plattform.png"),
+  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_platform.png"),
+  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_platform.png"),
+  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_platform.png"),
+  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_platform.png"),
 
   //Platforms efter droppern
-  new Obstacle(3000, 4400, 150, 100,"./Bilder/grass_plattform.png"),
-  new Obstacle(2800, 4250, 150, 250,"./Bilder/grass_plattform.png"),
+  new Obstacle(3000, 4400, 150, 100,"Bilder/grassplatformstor.png"),
+  new Obstacle(2800, 4250, 150, 250,"Bilder/grassplatformstor.png"),
 
   //Lavablock som hindrar progress när man inte har dash
   new Obstacle(3400, 4475, 50 , 25, "gray"),
   new Obstacle(3450, 4450, 50, 50, "gray"),
-  new Lava(3500, 4500, 600, 600, "red"),   // Lavan
+  new Lava(3500, 4500, 600, 600),   // Lavan
   new Obstacle(4100, 4450, 50, 50, "gray"),
   new Obstacle(4150, 4475, 50, 25, "gray"),
 
   //Platforms som leder till nivå 4
-  new Obstacle(5000, 4300, 75, 25, "gray"),
-  new Obstacle(5500, 4200, 75, 50, "gray"),
-  new Obstacle(5000, 4000, 75, 75, "gray"),
+  new Obstacle(5000, 4300, 75, 25, "./Bilder/stone_platform.png"),
+  new Obstacle(5500, 4200, 75, 50, "./Bilder/stone_platform.png"),
+  new Obstacle(5000, 4000, 75, 25, "./Bilder/stone_platform.png"),
 
   //Till nivå 4 trappor tillbaka
   new Obstacle(5700, 3800, 100, 1000, "gray"),
@@ -170,7 +195,7 @@ export const obstacles = [
 
   new Obstacle(8500, 4400, 150, 100, "gray"),
   new Obstacle(8600, 4350, 100, 100, "gray"),
-  new Obstacle(8625, 4300, 50, 50, "red"),
+  new Obstacle(8625, 4330, 64, 20, "./Bilder/equip_skor.png"),
   new Obstacle(8650, 4400, 150, 100, "gray"),
 
   //Väggar på sidorna

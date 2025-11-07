@@ -1,112 +1,175 @@
-// Klassen för spelkaraktären
 export class Character {
-constructor(x, y, w, h, speed, maxJumps, imgIdleSrc, imgLeftLegSrc, imgRightLegSrc) {
-    this.x = x; 
+  constructor(
+    x, y, w, h, speed, maxJumps,
+    imgIdleSrc, imgLeftLegSrc, imgRightLegSrc,
+    imgDashSrcs = [], imgJumpSrc = null
+  ) {
+    // Position & storlek
+    this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
     this.speed = speed;
+
+    // Stats
     this.mana = 100; this.maxMana = 100;
     this.health = 100; this.maxHealth = 100;
     this.damage = 10;
+
+    // Jumping
     this.maxJumps = maxJumps;
     this.jumps = maxJumps;
     this.velY = 0;
     this.gravity = 2;
     this.onGround = false;
 
-    // Animation frames
-    this.imgIdle = new Image();
-    this.imgIdle.src = imgIdleSrc;
+    // Walking frames
+    this.imgIdle = new Image(); this.imgIdle.src = imgIdleSrc;
+    this.imgLeftLeg = new Image(); this.imgLeftLeg.src = imgLeftLegSrc;
+    this.imgRightLeg = new Image(); this.imgRightLeg.src = imgRightLegSrc;
 
-    this.imgLeftLeg = new Image();
-    this.imgLeftLeg.src = imgLeftLegSrc;
+    this.currentFrame = 0;
+    this.frameCounter = 0;
+    this.frameSpeed = 10;
 
-    this.imgRightLeg = new Image();
-    this.imgRightLeg.src = imgRightLegSrc;
+    // Dash frames
+    this.imgDashFrames = imgDashSrcs.map(src => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+    this.dashFrameIndex = 0;
+    this.dashFrameCounter = 0;
+    this.dashFrameSpeed = 5;
+    this.dashTime = 0;
+    this.dashDuration = 200; // ms
 
-    this.currentFrame = 0;       // index för animation
-    this.frameCounter = 0;       // för att styra hastighet
-    this.frameSpeed = 10;        // antal uppdateringar per frame
+    // Jump image
+    this.imgJump = imgJumpSrc ? new Image() : null;
+    if (this.imgJump) this.imgJump.src = imgJumpSrc;
 
+    // State
     this.lastDirection = "right";
     this.canDash = true;
     this.isDashing = false;
-    this.dashTime = null;
     this.jumpPressedLastFrame = false;
-}
+  }
 
+  // Kontrollera att alla bilder i en array är färdigladdade
+  static _allImagesComplete(images) {
+    if (!images) return true;
+    if (Array.isArray(images)) return images.every(img => img && img.complete);
+    return images.complete;
+  }
 
-draw(ctx, isMoving) {
-    if (this.imgIdle.complete && this.imgLeftLeg.complete && this.imgRightLeg.complete) {
-        ctx.save();
-        ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-        if (this.lastDirection === "left") ctx.scale(-1, 1);
+  // Rita spelaren
+  draw(ctx, isMoving = false) {
+    let imgToDraw = null;
 
-        // Välj bild
-        let imgToDraw;
-        if (!isMoving) {
-            imgToDraw = this.imgIdle;
-        } else {
-            if (this.currentFrame === 0) imgToDraw = this.imgIdle;
-            else if (this.currentFrame === 1) imgToDraw = this.imgLeftLeg;
-            else imgToDraw = this.imgRightLeg;
-        }
-
-        ctx.drawImage(imgToDraw, -this.w / 2, -this.h / 2, this.w, this.h);
-        ctx.restore();
+    if (this.isDashing && this.imgDashFrames.length > 0) {
+      if (Character._allImagesComplete(this.imgDashFrames)) {
+        imgToDraw = this.imgDashFrames[this.dashFrameIndex];
+      } else {
+        imgToDraw = this.imgDashFrames.find(i => i && i.complete) || this.imgIdle;
+      }
+    } else if (!this.onGround && this.imgJump && this.imgJump.complete) {
+      imgToDraw = this.imgJump;
     } else {
-        // Om någon bild inte är laddad än
-        this.imgIdle.onload = () => this.draw(ctx, isMoving);
+      if (!isMoving && this.currentFrame === 0) {
+        imgToDraw = this.imgIdle;
+      } else {
+        if (this.imgIdle.complete && this.imgLeftLeg.complete && this.imgRightLeg.complete) {
+          if (this.currentFrame === 0) imgToDraw = this.imgIdle;
+          else if (this.currentFrame === 1) imgToDraw = this.imgLeftLeg;
+          else imgToDraw = this.imgRightLeg;
+        } else {
+          imgToDraw = this.imgIdle;
+        }
+      }
     }
-}
 
+    ctx.save();
+    ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+    if (this.lastDirection === "left") ctx.scale(-1, 1);
 
-  // Movement funktioner
+    if (imgToDraw && imgToDraw.complete) {
+      ctx.drawImage(imgToDraw, -this.w / 2, -this.h / 2, this.w, this.h);
+    } else {
+      ctx.fillStyle = "magenta";
+      ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+    }
+
+    ctx.restore();
+  }
+
+  // Uppdatera spelaren
   update(obstacles, groundY, keys) {
-
     let dx = 0;
     let isMoving = false;
 
+    // --- Input & dash ---
     if (!this.isDashing) {
-        if (keys["a"] || keys["ArrowLeft"]) { dx -= this.speed; this.lastDirection = "left"; isMoving = true; }
-        if (keys["d"] || keys["ArrowRight"]) { dx += this.speed; this.lastDirection = "right"; isMoving = true; }
+      if (keys["a"] || keys["ArrowLeft"]) { dx -= this.speed; this.lastDirection = "left"; isMoving = true; }
+      if (keys["d"] || keys["ArrowRight"]) { dx += this.speed; this.lastDirection = "right"; isMoving = true; }
 
-        if ((keys[" "] && !this.jumpPressedLastFrame) || (keys["w"] && !this.jumpPressedLastFrame) || (keys["ArrowUp"] && !this.jumpPressedLastFrame)) {
-            if (this.jumps > 0) { this.velY = -35; this.jumps--; this.onGround = false; }
-        }
+      if ((keys[" "] && !this.jumpPressedLastFrame) || (keys["w"] && !this.jumpPressedLastFrame) || (keys["ArrowUp"] && !this.jumpPressedLastFrame)) {
+        if (this.jumps > 0) { this.velY = -35; this.jumps--; this.onGround = false; }
+      }
 
-        if ((keys["Shift"] || keys["ShiftLeft"] || keys["ShiftRight"]) && this.canDash) {
-            keys["Shift"] = keys["ShiftLeft"] = keys["ShiftRight"] = false;
-            this.isDashing = true;
-            this.canDash = false;
-            this.dashTime = 200;
-        }
+      if ((keys["Shift"] || keys["ShiftLeft"] || keys["ShiftRight"]) && this.canDash) {
+        // Släpp dash-tangenten
+        keys["Shift"] = keys["ShiftLeft"] = keys["ShiftRight"] = false;
+
+        // 🟩 NYTT: Nollställ rörelseriktningar så man inte "fastnar" efter dash
+        keys["a"] = keys["ArrowLeft"] = false;
+        keys["d"] = keys["ArrowRight"] = false;
+
+        // Starta dash
+        this.isDashing = true;
+        this.canDash = false;
+        this.dashTime = this.dashDuration;
+        this.dashFrameIndex = 0;
+        this.dashFrameCounter = 0;
+      }
+
     } else {
-        const dashSpeed = this.speed * 4;
-        dx += (this.lastDirection === "left") ? -dashSpeed : dashSpeed;
-        this.dashTime -= 16;
-        if (this.dashTime <= 0) {
-            this.isDashing = false;
-            setTimeout(() => { this.canDash = true; }, 750);
+      const dashSpeed = this.speed * 3;
+      dx += (this.lastDirection === "left") ? -dashSpeed : dashSpeed;
+
+      this.dashTime -= 10;
+      if (this.imgDashFrames.length > 0) {
+        this.dashFrameCounter++;
+        if (this.dashFrameCounter >= this.dashFrameSpeed) {
+          this.dashFrameCounter = 0;
+          this.dashFrameIndex = (this.dashFrameIndex + 1) % this.imgDashFrames.length;
         }
+      }
+
+      if (this.dashTime <= 0) {
+        this.isDashing = false;
+        this.dashFrameIndex = 0;
+        this.dashFrameCounter = 0;
+        setTimeout(() => { this.canDash = true; }, 750);
+      }
     }
 
-    // Frame-animation
-    if (isMoving) {
+    // --- Walking animation ---
+    if (!this.isDashing) {
+      if (isMoving) {
         this.frameCounter++;
         if (this.frameCounter >= this.frameSpeed) {
-            this.frameCounter = 0;
-            this.currentFrame = (this.currentFrame + 1) % 3; // 3 frames: idle, left leg, right leg
+          this.frameCounter = 0;
+          this.currentFrame = (this.currentFrame + 1) % 3;
         }
-    } else {
-        this.currentFrame = 0; // idle
+      } else {
+        this.currentFrame = 0;
         this.frameCounter = 0;
+      }
     }
 
     this.jumpPressedLastFrame = keys[" "] || keys["w"] || keys["ArrowUp"];
 
-    // Horisontell kollisionshantering = förhindrar att spelaren går igenom hinder från vänster eller höger
+    // --- Horisontell kollisionshantering ---
     let newX = this.x + dx;
     if (dx !== 0) {
       for (let obs of obstacles) {
@@ -118,15 +181,13 @@ draw(ctx, isMoving) {
         }
       }
     }
-    //Sätter ny x position för gubben
     this.x = newX;
 
-    //tillför gravitation när man är i luften/inte på marken
+    // --- Gravitation & vertikal kollisionshantering ---
     if (!this.onGround) this.velY += this.gravity;
     let newY = this.y + this.velY;
     let standingOnSomething = false;
 
-    // Vertikal kollisionshantering = förhindrar att spelaren åker igenom objekten ovanifrån eller att man hoppar igenom de underifrån
     for (let obs of obstacles) {
       if (this.x + this.w > obs.x + 1 && this.x < obs.x + obs.w - 1) {
         const prevBottom = this.y + this.h;
@@ -142,24 +203,17 @@ draw(ctx, isMoving) {
       }
     }
 
-    // Kolla om spelaren når marken
     if (newY + this.h >= groundY) {
-        newY = groundY - this.h; // placera spelaren precis ovanpå marken
-        this.velY = 0;            // stoppar fallet
-        standingOnSomething = true; // visar att spelaren står på något
+      newY = groundY - this.h;
+      this.velY = 0;
+      standingOnSomething = true;
     }
 
-    // Uppdatera spelarens position
     this.y = newY;
-
-    // Visa onGround när spelaren står på något
     this.onGround = standingOnSomething;
-
-    // Återställ hopp när spelaren står på marken
-    if (this.onGround) 
-        this.jumps = this.maxJumps;
+    if (this.onGround) this.jumps = this.maxJumps;
   }
-}
+}   
 
 export class Obstacle {
   constructor(x, y, w, h, imageOrColor = null) {
