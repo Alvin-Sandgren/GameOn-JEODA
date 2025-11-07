@@ -107,7 +107,7 @@ export class Character {
     let dx = 0;
     let isMoving = false;
 
-    // --- Input & dash ---
+    //  Input & dash 
     if (!this.isDashing) {
       if (keys["a"] || keys["ArrowLeft"]) { dx -= this.speed; this.lastDirection = "left"; isMoving = true; }
       if (keys["d"] || keys["ArrowRight"]) { dx += this.speed; this.lastDirection = "right"; isMoving = true; }
@@ -120,7 +120,7 @@ export class Character {
         // Släpp dash-tangenten
         keys["Shift"] = keys["ShiftLeft"] = keys["ShiftRight"] = false;
 
-        // 🟩 NYTT: Nollställ rörelseriktningar så man inte "fastnar" efter dash
+        // Nollställ rörelseriktningar så man inte "fastnar" efter dash
         keys["a"] = keys["ArrowLeft"] = false;
         keys["d"] = keys["ArrowRight"] = false;
 
@@ -153,7 +153,7 @@ export class Character {
       }
     }
 
-    // --- Walking animation ---
+    // Walking animation 
     if (!this.isDashing) {
       if (isMoving) {
         this.frameCounter++;
@@ -169,7 +169,7 @@ export class Character {
 
     this.jumpPressedLastFrame = keys[" "] || keys["w"] || keys["ArrowUp"];
 
-    // --- Horisontell kollisionshantering ---
+    // Horisontell kollisionshantering 
     let newX = this.x + dx;
     if (dx !== 0) {
       for (let obs of obstacles) {
@@ -183,7 +183,7 @@ export class Character {
     }
     this.x = newX;
 
-    // --- Gravitation & vertikal kollisionshantering ---
+    // Gravitation & vertikal kollisionshantering
     if (!this.onGround) this.velY += this.gravity;
     let newY = this.y + this.velY;
     let standingOnSomething = false;
@@ -277,7 +277,7 @@ export class Lava extends Obstacle {
     character.x < this.x + this.w &&
     character.x + character.w > this.x &&
     character.y < this.y + this.h &&
-    character.y + character.h >= this.y // ändrat till >=
+    character.y + character.h >= this.y
   );
   }
 }
@@ -303,11 +303,10 @@ export class Goat {
         this.y = y;
         this.w = w;
         this.h = h;
-        this.health = 100;      // exempel
-        this.damage = 10;       // exempel
-        this.name = imageSrc.split("/").pop().split(".")[0]; // t.ex. "Stenget"
+        this.health = 100;      
+        this.damage = 10;       
+        this.name = imageSrc.split("/").pop().split(".")[0]; 
 
-        // **Skapa HTMLImageElement**
         this.image = new Image();
         this.image.src = imageSrc;
     }

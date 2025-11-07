@@ -1,13 +1,13 @@
 import { Character, Obstacle, Goat, Lava, Skylt } from "./classer.js";
 
-// --- NYTT --- GameOver-trigger och flagga
+// GameOver-trigger och flagga
 export let onCombatTrigger = null;
 export let onGameOver = null;
 let gameOverTriggered = false;
 export function setCombatTrigger(callback) { onCombatTrigger = callback; }
 export function setGameOverTrigger(callback) { onGameOver = callback; }
 
-// --- DOM & canvas ---
+// DOM & canvas
 export const canvas = document.getElementById('karta');
 export const ctx = canvas.getContext('2d');
 
@@ -25,7 +25,7 @@ let lastFrameTime = 0;
 
 export function startMap() {
   paused = false;
-  gameOverTriggered = false; // --- NYTT --- nolla vid start
+  gameOverTriggered = false; // Nolla vid start
 }
 
 export function pauseMap() { paused = true; }
@@ -227,7 +227,7 @@ function updateCamera() {
   cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
 }
 
-// --- Game Loop ---
+// Game Loop
 const targetFPS = 60;
 const frameDuration = 1000 / targetFPS;
 
@@ -264,7 +264,7 @@ export function gameLoop(timestamp) {
     enemygoatstefan.draw(ctx);
     enemygoatanton.draw(ctx);
 
-    // --- Kolla kollision med getter (combat) ---
+    // Kolla kollision med getter (combat)
     for (let goat of combatGoats) {
       if (
         player.x < goat.x + goat.w &&
@@ -277,7 +277,7 @@ export function gameLoop(timestamp) {
       }
     }
 
-    // --- Kolla kollision med Lava ---
+    //  Kolla kollision med Lava 
     const lava = obstacles.find(o => o instanceof Lava);
       if (lava && lava.checkCollision(player)) {
         if (!gameOverTriggered) {

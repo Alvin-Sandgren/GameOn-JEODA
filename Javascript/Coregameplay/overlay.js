@@ -9,7 +9,7 @@ const startBtn = document.getElementById('start-btn');
 const menuImg = new Image();
 menuImg.src = "./Bilder/meny.png";
 
-// --- Combat & Game Over Triggers ---
+//  Combat & Game Over Triggers 
 window.addEventListener("DOMContentLoaded", () => {
   setCombatTrigger((collidedGoat) => {
     if (currentState === "overworld") {
@@ -22,7 +22,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// --- Fade overlay for transitions ---
+// Fade overlay for transitions 
 function fadeInOverlay(callback) {
     let count = 0;
     const times = 6;
@@ -37,7 +37,7 @@ function fadeInOverlay(callback) {
     step();
 }
 
-// --- Menu ---
+//  Menu 
 export function showMenu() {
   currentState = "menu";
   startBtn.style.display = "block";
@@ -55,7 +55,7 @@ export function showMenu() {
   pauseMap();
 }
 
-// --- Game Over ---
+//  Game Over 
 export function gameOver() {
   console.log("🔥 Game over triggered!");
   currentState = "gameover";
@@ -80,7 +80,7 @@ function resetToMenu() {
   showMenu();
 }
 
-// --- Combat ---
+//  Combat 
 export function enterCombat(collidedGoat) {
     pauseMap();
     fadeInOverlay(() => {
@@ -90,14 +90,14 @@ export function enterCombat(collidedGoat) {
     });
 }
 
-// --- Start Game ---
+//  Start Game 
 export function startGame() {
     currentState = "overworld";
     startBtn.style.display = "none";
     startMap();
 }
 
-// --- Event Listeners ---
+//  Event Listeners 
 startBtn.addEventListener('click', startGame);
 
 window.addEventListener('keydown', e => {
@@ -128,7 +128,7 @@ canvas.addEventListener("click", (e) => {
     });
 });
 
-// --- Initial Menu ---
+//  Initial Menu 
 menuImg.onload = () => showMenu();
 
 function drawGameOverText() {
