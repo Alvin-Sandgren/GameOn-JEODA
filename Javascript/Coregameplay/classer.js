@@ -1,6 +1,6 @@
 // Klassen för spelkaraktären
 export class Character {
-  constructor(x, y, w, h, speed, maxJumps, imgSrc) {
+constructor(x, y, w, h, speed, maxJumps, imgIdleSrc, imgLeftLegSrc, imgRightLegSrc) {
     this.x = x; 
     this.y = y;
     this.w = w;
@@ -14,70 +14,97 @@ export class Character {
     this.velY = 0;
     this.gravity = 2;
     this.onGround = false;
-    this.img = new Image(); 
-    this.img.src = imgSrc;
+
+    // Animation frames
+    this.imgIdle = new Image();
+    this.imgIdle.src = imgIdleSrc;
+
+    this.imgLeftLeg = new Image();
+    this.imgLeftLeg.src = imgLeftLegSrc;
+
+    this.imgRightLeg = new Image();
+    this.imgRightLeg.src = imgRightLegSrc;
+
+    this.currentFrame = 0;       // index för animation
+    this.frameCounter = 0;       // för att styra hastighet
+    this.frameSpeed = 10;        // antal uppdateringar per frame
 
     this.lastDirection = "right";
     this.canDash = true;
     this.isDashing = false;
     this.dashTime = null;
     this.jumpPressedLastFrame = false;
-  }
+}
 
-  //Ritar gubben beroende på vilken riktning han står mot
-  //Bilden blir inverted när man byter riktning till vänster
-  draw(ctx) {
-    if (this.img.complete) {
-      ctx.save();
-      if (this.lastDirection === "left") {
+
+draw(ctx, isMoving) {
+    if (this.imgIdle.complete && this.imgLeftLeg.complete && this.imgRightLeg.complete) {
+        ctx.save();
         ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-        ctx.scale(-1, 1);
-        ctx.drawImage(this.img, -this.w / 2, -this.h / 2, this.w, this.h);
-      } else {
-        ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
-      }
-      ctx.restore();
+        if (this.lastDirection === "left") ctx.scale(-1, 1);
+
+        // Välj bild
+        let imgToDraw;
+        if (!isMoving) {
+            imgToDraw = this.imgIdle;
+        } else {
+            if (this.currentFrame === 0) imgToDraw = this.imgIdle;
+            else if (this.currentFrame === 1) imgToDraw = this.imgLeftLeg;
+            else imgToDraw = this.imgRightLeg;
+        }
+
+        ctx.drawImage(imgToDraw, -this.w / 2, -this.h / 2, this.w, this.h);
+        ctx.restore();
     } else {
-      this.img.onload = () => this.draw(ctx);
+        // Om någon bild inte är laddad än
+        this.imgIdle.onload = () => this.draw(ctx, isMoving);
     }
-  }
+}
+
 
   // Movement funktioner
   update(obstacles, groundY, keys) {
+
     let dx = 0;
-    //Rörelse höger vänster
+    let isMoving = false;
+
     if (!this.isDashing) {
-      if (keys["a"] || keys["ArrowLeft"]) { dx -= this.speed; this.lastDirection = "left"; }
-      if (keys["d"] || keys["ArrowRight"]) { dx += this.speed; this.lastDirection = "right"; }
+        if (keys["a"] || keys["ArrowLeft"]) { dx -= this.speed; this.lastDirection = "left"; isMoving = true; }
+        if (keys["d"] || keys["ArrowRight"]) { dx += this.speed; this.lastDirection = "right"; isMoving = true; }
 
-    // Funktion för hopp och vilka keys som gör det, definerar även hur högt hoppet är.
-      if (keys[" "] && !this.jumpPressedLastFrame || (keys["w"] && !this.jumpPressedLastFrame || (keys["ArrowUp"] && !this.jumpPressedLastFrame))) {
-        if (this.jumps > 0) { this.velY = -35; this.jumps--; this.onGround = false; }
-      }
+        if ((keys[" "] && !this.jumpPressedLastFrame) || (keys["w"] && !this.jumpPressedLastFrame) || (keys["ArrowUp"] && !this.jumpPressedLastFrame)) {
+            if (this.jumps > 0) { this.velY = -35; this.jumps--; this.onGround = false; }
+        }
 
-      if ((keys["Shift"] || keys["ShiftLeft"] || keys["ShiftRight"]) && this.canDash) {
-        // Nollställ de shiftknappar du använder så du inte dashar konstant
-        keys["Shift"] = false;
-        keys["ShiftLeft"] = false;
-        keys["ShiftRight"] = false;
-
-        this.isDashing = true;
-        this.canDash = false;
-        this.dashTime = 200;
-}   
-    //Uppdaterar spelarens position och löser cooldown så man inte kan abusea
+        if ((keys["Shift"] || keys["ShiftLeft"] || keys["ShiftRight"]) && this.canDash) {
+            keys["Shift"] = keys["ShiftLeft"] = keys["ShiftRight"] = false;
+            this.isDashing = true;
+            this.canDash = false;
+            this.dashTime = 200;
+        }
     } else {
-      const dashSpeed = this.speed * 4;
-      dx += (this.lastDirection === "left") ? -dashSpeed : dashSpeed;
-      this.dashTime -= 16;
-      if (this.dashTime <= 0) {
-        this.isDashing = false;
-        setTimeout(() => { this.canDash = true; }, 750);
-      }
+        const dashSpeed = this.speed * 4;
+        dx += (this.lastDirection === "left") ? -dashSpeed : dashSpeed;
+        this.dashTime -= 16;
+        if (this.dashTime <= 0) {
+            this.isDashing = false;
+            setTimeout(() => { this.canDash = true; }, 750);
+        }
     }
 
-    //Registrerar hopptryck från förra framen
-    this.jumpPressedLastFrame = keys[" "] || keys["w"] || keys["ArrowUp"] ;
+    // Frame-animation
+    if (isMoving) {
+        this.frameCounter++;
+        if (this.frameCounter >= this.frameSpeed) {
+            this.frameCounter = 0;
+            this.currentFrame = (this.currentFrame + 1) % 3; // 3 frames: idle, left leg, right leg
+        }
+    } else {
+        this.currentFrame = 0; // idle
+        this.frameCounter = 0;
+    }
+
+    this.jumpPressedLastFrame = keys[" "] || keys["w"] || keys["ArrowUp"];
 
     // Horisontell kollisionshantering = förhindrar att spelaren går igenom hinder från vänster eller höger
     let newX = this.x + dx;
@@ -134,16 +161,72 @@ export class Character {
   }
 }
 
-//Sätter defaultvärden för hinder
-export class obstacle {
-  constructor(x, y, w, h, color = "green") {
-    this.x = x; this.y = y; this.w = w; this.h = h; this.color = color;
+export class Obstacle {
+  constructor(x, y, w, h, imageOrColor = null) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+
+    this.imageLoaded = false;
+
+    if (imageOrColor && imageOrColor.endsWith(".png")) {
+      this.image = new Image();
+      this.image.src = imageOrColor;
+      this.color = null;
+
+      this.image.onload = () => {
+        this.imageLoaded = true;
+      };
+      this.image.onerror = () => {
+        // fallback till grön om bilden inte hittas
+        this.image = null;
+        this.color = "green";
+      };
+    } else {
+      this.image = null;
+      this.color = imageOrColor || "green"; // fallbackgrön om inget skickas
+    }
   }
 
   draw(ctx) {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.w, this.h);
+    if (this.image && this.imageLoaded) {
+      ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
+    } else {
+      ctx.fillStyle = this.color || "green";
+      ctx.fillRect(this.x, this.y, this.w, this.h);
+    }
   }
+}
+
+export class Lava extends Obstacle {
+  constructor(x, y, w, h, imageOrColor = null) {
+    super(x, y, w, h, imageOrColor || "red");
+  }
+
+  draw(ctx) {
+    if (this.image && this.imageLoaded) {
+      ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
+    } else {
+      const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.h);
+      gradient.addColorStop(0, "#ff6600");
+      gradient.addColorStop(0.5, "#ff3300");
+      gradient.addColorStop(1, "#cc0000");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(this.x, this.y, this.w, this.h);
+    }
+  }
+
+  // Endast kollisionstest (returnerar true/false)
+  checkCollision(character) {
+  return (
+    character.x < this.x + this.w &&
+    character.x + character.w > this.x &&
+    character.y < this.y + this.h &&
+    character.y + character.h >= this.y // ändrat till >=
+  );
+  }
+  
 }
 
 export class Goat {

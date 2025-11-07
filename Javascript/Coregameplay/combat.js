@@ -30,7 +30,6 @@ export function startCombat(goat) {
     drawCombat(goat); // får nu en giltig Goat
 }
 
-
 // --- Player Action ---
 export function playerAction(actionIndex, goat) {
     if (!playerTurn || !inCombat) return;

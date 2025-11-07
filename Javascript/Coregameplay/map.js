@@ -1,8 +1,13 @@
-import { Character, obstacle, Goat } from "./classer.js";
+import { Character, Obstacle, Goat, Lava } from "./classer.js";
 
+// --- NYTT --- GameOver-trigger och flagga
 export let onCombatTrigger = null;
+export let onGameOver = null;
+let gameOverTriggered = false;
+export function setCombatTrigger(callback) { onCombatTrigger = callback; }
+export function setGameOverTrigger(callback) { onGameOver = callback; }
 
-// DOM & canvas (exporteras så andra moduler kan använda dem)
+// --- DOM & canvas ---
 export const canvas = document.getElementById('karta');
 export const ctx = canvas.getContext('2d');
 
@@ -17,7 +22,12 @@ export const worldHeight = canvas.height * 5;
 // spelstatus
 export let paused = true;
 let lastFrameTime = 0;
-export function startMap() { paused = false; }
+
+export function startMap() {
+  paused = false;
+  gameOverTriggered = false; // --- NYTT --- nolla vid start
+}
+
 export function pauseMap() { paused = true; }
 
 // kamera
@@ -30,115 +40,127 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 // spelare (exporteras så overlay kan flytta den vid gameover)
-export const player = new Character(1700, 2855, 100, 100, 10, 2, "./character_bilder/meatball_fullkladd.png");
+export const player = new Character(
+  3200, 4200, 100, 100, 10, 2,
+  "./character_bilder/meatball_nack.png",      // Idle
+  "./character_bilder/Meatball_Lleg.png",      // Left leg forward
+  "./character_bilder/Meatball_nack_Rleg.png"  // Right leg forward
+);
 
+// getter (fiender)
 export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png", "GWget");
 export const enemygoatsten = new Goat(1500, 2855, 150, 150, "./Goat_bilder/stenget.png", "Stenget");
 export const enemygoatstefan = new Goat(7300, 4300, 200, 200, "./Goat_bilder/stefanget.png", "Stefanget");
 export const enemygoatanton = new Goat(600, 975, 450, 450, "./Goat_bilder/antonget.png", "Antonget");
 
-
-// fyll combatGoats efter att getter är deklarerade
 export let combatGoats = [enemygoatgw, enemygoatsten, enemygoatstefan, enemygoatanton];
 
-// ritfunktioner
+// --- Bakgrundsbild ---
+export const backgroundImage = new Image();
+let backgroundLoaded = false;
+backgroundImage.src = "./Bilder/bakgrund.png";
+backgroundImage.onload = () => {
+  backgroundLoaded = true;
+  console.log("Bakgrundsbild laddad!");
+};
+
 export function drawBackground() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, worldWidth, worldHeight);
+  if (backgroundLoaded) {
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 }
+
 export function drawGround() {
   ctx.fillStyle = "green";
   ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
 }
 
-// obstacles (använd obstacle-klassen och kalla draw(ctx))
+// obstacles
 export const obstacles = [
-    // platforms spawn
-    new obstacle(700, 4300, 300, 50),
-    new obstacle(1200, 4200, 200, 50),
-    new obstacle(1600, 4000, 40, 50),
-    new obstacle(1800, 4025, 800, 475),
+  // platforms spawn
+  new Obstacle(700, 4300, 300, 50, "./Bilder/grass_plattform.png"),
+  new Obstacle(1200, 4200, 200, 50, "./Bilder/grass_plattform.png"),
+  new Obstacle(1600, 4000, 40, 50, "./Bilder/grass_plattform.png"),
+  new Obstacle(1800, 4025, 800, 575),
 
-    //Dropper shute
-    new obstacle(1800, 3000, 100, 900),
+  //Dropper shute
+  new Obstacle(1800, 3000, 100, 900),
 
-    //Vänster sida plus tak på droppern och gången till dash/get nr 2
-    new obstacle(1300, 3000, 500, 100, "green"),
-    
-    new obstacle(400, 2500, 4000, 100, "gray"),
+  //Vänster sida plus tak på droppern och gången till dash/get nr 2
+  new Obstacle(1300, 3000, 500, 100, "./Bilder/grass_plattform.png"),
+  new Obstacle(400, 2500, 4000, 100, "gray"),
 
-    //Cave entrance 1.Tak 2.Väggar 3. Temporär barrier
-    new obstacle(4000, 0, 2600, 1900, "gray"),
-    new obstacle(4300, 2500, 100, 200, "gray"),
-    new obstacle(4300, 2700, 2300, 200, "gray"),
-    new obstacle(6100, 1901, 20, 798, "red"),
-    new obstacle(6500, 1800, 100, 1000, "gray"),
+  //Cave entrance
+  new Obstacle(4000, 0, 2600, 1900, "gray"),
+  new Obstacle(4300, 2500, 100, 200, "gray"),
+  new Obstacle(4300, 2700, 2300, 200, "gray"),
+  new Obstacle(6100, 1901, 20, 798, "red"),
+  new Obstacle(6500, 1800, 100, 1000, "gray"),
+  new Obstacle(6200, 2600, 275, 100, "gray"),
+  new Obstacle(6250, 2550, 177, 100, "gray"),
 
-    new obstacle(6200, 2600, 275, 100, "gray"),
-    new obstacle(6250, 2550, 177, 100, "gray"),
+  // Vägen till nivå 5
+  new Obstacle(3000, 2000, 200, 50, "./Bilder/grass_plattform.png"),
 
-    // Vägen till nivå 5
-    new obstacle(3000, 2000, 200, 50, "green"),
+  //Nivå 5 plattformar
+  new Obstacle(3500, 1700, 500, 200, "green"),
+  new Obstacle(0, 1400, 2600, 200, "green"),
 
-    //Nivå 5 plattformar
-    new obstacle(3500, 1700, 500, 200, "green"),
-    new obstacle(0, 1400, 2600, 200, "green"),
+  //Obstacles mot nivå 3
+  new Obstacle(950, 3000, 45, 30, "./Bilder/grass_plattform.png"),
+  new Obstacle(500, 3000, 39, 30,"./Bilder/grass_plattform.png"),
+  new Obstacle(300, 2750, 30, 30,"./Bilder/grass_plattform.png"),
 
+  // Höger sida
+  new Obstacle(2500, 2600, 100, 1275,),
+  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_plattform.png"),
+  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_plattform.png"),
+  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_plattform.png"),
+  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_plattform.png"),
 
-    //Obstacles mot nivå 3
-    new obstacle(950, 3000, 45, 30, "green"),
+  //Platforms efter droppern
+  new Obstacle(3000, 4400, 150, 100,"./Bilder/grass_plattform.png"),
+  new Obstacle(2800, 4250, 150, 250,"./Bilder/grass_plattform.png"),
 
-    new obstacle(500, 3000, 39, 30),
-    new obstacle(300, 2750, 30, 30),
+  //Lavablock som hindrar progress när man inte har dash
+  new Obstacle(3400, 4475, 50 , 25, "gray"),
+  new Obstacle(3450, 4450, 50, 50, "gray"),
+  new Lava(3500, 4500, 600, 600, "red"),   // Lavan
+  new Obstacle(4100, 4450, 50, 50, "gray"),
+  new Obstacle(4150, 4475, 50, 25, "gray"),
 
-    // Höger sida
-    new obstacle(2500, 2600, 100, 1275,),
+  //Platforms som leder till nivå 4
+  new Obstacle(5000, 4300, 75, 25, "gray"),
+  new Obstacle(5500, 4200, 75, 50, "gray"),
+  new Obstacle(5000, 4000, 75, 75, "gray"),
 
-    new obstacle(2000, 3600, 100, 50),
-    new obstacle(2200, 3800, 50, 50),
-    new obstacle(2000, 3400, 75, 50),
-    new obstacle(2200, 3200, 100, 50),
+  //Till nivå 4 trappor tillbaka
+  new Obstacle(5700, 3800, 100, 1000, "gray"),
+  new Obstacle(5800, 4000, 150, 700, "gray"),
+  new Obstacle(5950, 4200, 150, 700, "gray"),
+  new Obstacle(6100, 4400, 150, 700, "gray"),
 
-    //Platforms efter droppern
-    new obstacle(3000, 4400, 150, 100),
-    new obstacle(2800, 4250, 150, 250),
+  //Nivå 4 boss arena
+  new Obstacle(7955, 3850, 100, 50, "gray"),
+  new Obstacle(7990, 3900, 30, 600, "orange"),
+  new Obstacle(8000, 3900, 10, 600, "yellow"),
+  new Obstacle(8015, 3900, 5, 600, "red"),
+  new Obstacle(7990, 3900, 5, 600, "red"),
+  new Obstacle(7955, 4495, 100, 50, "gray"),
 
+  new Obstacle(8500, 4400, 150, 100, "gray"),
+  new Obstacle(8600, 4350, 100, 100, "gray"),
+  new Obstacle(8650, 4400, 150, 100, "gray"),
 
-    //Lavablock när man inte har dash
-    new obstacle(3450, 4490, 50, 10, "gray"),
-    new obstacle(3500, 4500, 600, 600, "red"),
-
-    //Platforms som leder till nivå 4
-    new obstacle(5000, 4300, 75, 25, "gray"),
-    new obstacle(5500, 4200, 75, 50, "gray"),
-    new obstacle(5000, 4000, 75, 75, "gray"),
-
-    //Till nivå 4 trappor tillbaka
-    new obstacle(5700, 3800, 100, 1000, "gray"),
-    new obstacle(5800, 4000, 150, 700, "gray"),
-    new obstacle(5950, 4200, 150, 700, "gray"),
-    new obstacle(6100, 4400, 150, 700, "gray"),
-
-    //Nivå 4 boss arena plus double jump
-
-    new obstacle(7955, 3850, 100, 50, "gray"),
-    new obstacle(7990, 3900, 30, 600, "orange"),
-    new obstacle(8000, 3900, 10, 600, "yellow"),
-    new obstacle(8015, 3900, 5, 600, "red"),
-    new obstacle(7990, 3900, 5, 600, "red"),
-    new obstacle(7955, 4495, 100, 50, "gray"),
-
-
-    new obstacle(8500, 4400, 150, 100, "gray"),
-    new obstacle(8600, 4350, 100, 100, "gray"),
-    new obstacle(8650, 4400, 150, 100, "gray"),
-
-    //Väggar på sidorna
-    new obstacle(worldWidth - 30, 0, 30, 10000, "green"),
-    new obstacle(0, 0, 30, 10000, "green")
+  //Väggar på sidorna
+  new Obstacle(worldWidth - 30, 0, 30, 10000, "green"),
+  new Obstacle(0, 0, 30, 10000, "green")
 ];
 
-// kamerauppdatering
+// kamera
 function updateCamera() {
   cameraX = player.x + player.w / 2 - canvas.width / 2;
   cameraY = player.y + player.h / 2 - canvas.height / 2;
@@ -146,41 +168,39 @@ function updateCamera() {
   cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
 }
 
-// game loop (modulen startas automatiskt)
+// --- Game Loop ---
 const targetFPS = 60;
 const frameDuration = 1000 / targetFPS;
 
 export function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
-  if (paused) return;
+  if (paused || !backgroundLoaded) return;
 
   const elapsed = timestamp - lastFrameTime;
   if (elapsed >= frameDuration) {
     lastFrameTime = timestamp - (elapsed % frameDuration);
 
-    // --- kamera ---
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
     updateCamera();
 
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
 
-    // --- rita bakgrund ---
-    drawBackground();
     drawGround();
-
-    // --- rita hinder ---
     for (let obs of obstacles) obs.draw(ctx);
 
-    // --- uppdatera och rita spelare ---
+    const isMoving = keys["a"] || keys["d"] || keys["ArrowLeft"] || keys["ArrowRight"];
     player.update(obstacles, worldHeight - 95, keys);
-    player.draw(ctx);
+    player.draw(ctx, isMoving);
 
-    // --- rita getter var för sig ---
+    // Rita getter
     enemygoatgw.draw(ctx);
     enemygoatsten.draw(ctx);
     enemygoatstefan.draw(ctx);
     enemygoatanton.draw(ctx);
 
+    // --- Kolla kollision med getter (combat) ---
     for (let goat of combatGoats) {
       if (
         player.x < goat.x + goat.w &&
@@ -188,29 +208,30 @@ export function gameLoop(timestamp) {
         player.y < goat.y + goat.h &&
         player.y + player.h > goat.y
       ) {
-        if (onCombatTrigger) onCombatTrigger(goat); // skicka med geten här
-        console.log("Kollision med get:", goat.name);
+        if (onCombatTrigger) onCombatTrigger(goat);
         break;
       }
     }
 
+    // --- Kolla kollision med Lava ---
+    const lava = obstacles.find(o => o instanceof Lava);
+      if (lava && lava.checkCollision(player)) {
+        if (!gameOverTriggered) {
+          gameOverTriggered = true;
+          pauseMap();
+          if (onGameOver) onGameOver();
+      }
+    }
 
     ctx.restore();
-  }
+}
 }
 
-
-// starta loopen (requestAnimationFrame körs men pausad tills startMap())
+// starta loopen
 requestAnimationFrame(gameLoop);
 
-// Direktbind startknapp i modulen (bättre än inline onclick)
+// startknapp
 const startBtn = document.getElementById('start-btn');
 if (startBtn) {
-  startBtn.addEventListener('click', () => {
-    startMap();
-  });
-}
-
-export function setCombatTrigger(callback) {
-  onCombatTrigger = callback;
+  startBtn.addEventListener('click', () => startMap());
 }
