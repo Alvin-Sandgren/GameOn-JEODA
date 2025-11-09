@@ -276,7 +276,7 @@ export function gameLoop(timestamp) {
     player.x + player.w > shirt.x &&
     player.y < shirt.y + shirt.h &&
     player.y + player.h > shirt.y) {
-    hasShirt = true; // <-- här
+    hasShirt = true;
     player.canDash = true;
     shirt.w = 0; shirt.h = 0; shirt.image = null;
     localStorage.setItem("hasDash", "true");
@@ -291,7 +291,7 @@ if (player.x < boots.x + boots.w &&
     player.x + player.w > boots.x &&
     player.y < boots.y + boots.h &&
     player.y + player.h > boots.y) {
-    hasBoots = true; // <-- här
+    hasBoots = true;
     player.maxJumps = Math.max(player.maxJumps, 2);
     boots.w = 0; boots.h = 0; boots.image = null;
     localStorage.setItem("hasDoubleJump", "true");
