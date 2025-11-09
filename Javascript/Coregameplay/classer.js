@@ -4,140 +4,111 @@ export class Character {
     imgIdleSrc, imgLeftLegSrc, imgRightLegSrc,
     imgDashSrcs = [], imgJumpSrc = null
   ) {
-    // Position & storlek
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
+    // Position och storlek
+    this.x = x; this.y = y; this.w = w; this.h = h;
     this.speed = speed;
+    this.hasShirt = false; this.hasBoots = false;
 
-    // Stats
-    this.mana = 100; this.maxMana = 100;
-    this.health = 100; this.maxHealth = 100;
+    // Spelarens stats
+    this.mana = this.maxMana = 100;
+    this.health = this.maxHealth = 100;
     this.damage = 10;
 
-    // Jumping
-    this.maxJumps = maxJumps;
+    // Hopprelaterade variabler
+    this.maxJumps = maxJumps; 
     this.jumps = maxJumps;
-    this.velY = 0;
-    this.gravity = 2;
+    this.velY = 0; 
+    this.gravity = 2; 
     this.onGround = false;
 
-    // Walking frames
-    this.imgIdle = new Image(); this.imgIdle.src = imgIdleSrc;
-    this.imgLeftLeg = new Image(); this.imgLeftLeg.src = imgLeftLegSrc;
-    this.imgRightLeg = new Image(); this.imgRightLeg.src = imgRightLegSrc;
+    // Animationer
+    this.imgIdle = this._load(imgIdleSrc);
+    this.imgLeftLeg = this._load(imgLeftLegSrc);
+    this.imgRightLeg = this._load(imgRightLegSrc);
+    this.imgDashFrames = imgDashSrcs.map(src => this._load(src));
+    this.imgJump = imgJumpSrc ? this._load(imgJumpSrc) : null;
 
-    this.currentFrame = 0;
-    this.frameCounter = 0;
-    this.frameSpeed = 10;
-
-    // Dash frames
-    this.imgDashFrames = imgDashSrcs.map(src => {
-      const img = new Image();
-      img.src = src;
-      return img;
-    });
-    this.dashFrameIndex = 0;
-    this.dashFrameCounter = 0;
-    this.dashFrameSpeed = 5;
-    this.dashTime = 0;
-    this.dashDuration = 200; // ms
-
-    // Jump image
-    this.imgJump = imgJumpSrc ? new Image() : null;
-    if (this.imgJump) this.imgJump.src = imgJumpSrc;
+    // Frame-hantering för animationer
+    this.currentFrame = 0; this.frameCounter = 0; this.frameSpeed = 10;
+    this.dashFrameIndex = 0; this.dashFrameCounter = 0; this.dashFrameSpeed = 5;
+    this.dashTime = 0; this.dashDuration = 200;
 
     // State
-    this.lastDirection = "right";
-    this.canDash = true;
-    this.isDashing = false;
-    this.jumpPressedLastFrame = false;
+    this.lastDirection = "right"; // Vilket håll spelaren senast gick
+    this.canDash = true; this.isDashing = false;
+    this.jumpPressedLastFrame = false; // För att undvika dubbelhopp
   }
 
-  // Kontrollera att alla bilder i en array är färdigladdade
-  static _allImagesComplete(images) {
+  // Skapar och returnerar en ny Image
+  _load(src) {
+    const img = new Image();
+    img.src = src;
+    return img;
+  }
+
+  // Kollar om alla bilder i en array är färdigladdade
+  allImagesComplete(images) {
     if (!images) return true;
-    if (Array.isArray(images)) return images.every(img => img && img.complete);
-    return images.complete;
+    return Array.isArray(images) ? images.every(i => i?.complete) : images.complete;
   }
 
-  // Rita spelaren
+  // Rita spelaren på canvas
   draw(ctx, isMoving = false) {
-    let imgToDraw = null;
+    let img = this.imgIdle;
 
-    if (this.isDashing && this.imgDashFrames.length > 0) {
-      if (Character._allImagesComplete(this.imgDashFrames)) {
-        imgToDraw = this.imgDashFrames[this.dashFrameIndex];
-      } else {
-        imgToDraw = this.imgDashFrames.find(i => i && i.complete) || this.imgIdle;
-      }
-    } else if (!this.onGround && this.imgJump && this.imgJump.complete) {
-      imgToDraw = this.imgJump;
-    } else {
-      if (!isMoving && this.currentFrame === 0) {
-        imgToDraw = this.imgIdle;
-      } else {
-        if (this.imgIdle.complete && this.imgLeftLeg.complete && this.imgRightLeg.complete) {
-          if (this.currentFrame === 0) imgToDraw = this.imgIdle;
-          else if (this.currentFrame === 1) imgToDraw = this.imgLeftLeg;
-          else imgToDraw = this.imgRightLeg;
-        } else {
-          imgToDraw = this.imgIdle;
-        }
-      }
+    // Välj rätt bild beroende på dash, hopp eller gång
+    if (this.isDashing && this.imgDashFrames.length && this.allImagesComplete(this.imgDashFrames)) {
+      img = this.imgDashFrames[this.dashFrameIndex];
+    } else if (!this.onGround && this.imgJump?.complete) {
+      img = this.imgJump;
+    } else if (isMoving && this.imgIdle.complete && this.imgLeftLeg.complete && this.imgRightLeg.complete) {
+      img = [this.imgIdle, this.imgLeftLeg, this.imgRightLeg][this.currentFrame];
     }
 
+    // Rita bilden på rätt plats och spegla om spelaren går vänster
     ctx.save();
     ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
     if (this.lastDirection === "left") ctx.scale(-1, 1);
 
-    if (imgToDraw && imgToDraw.complete) {
-      ctx.drawImage(imgToDraw, -this.w / 2, -this.h / 2, this.w, this.h);
-    } else {
-      ctx.fillStyle = "magenta";
-      ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
-    }
+    if (img?.complete) ctx.drawImage(img, -this.w / 2, -this.h / 2, this.w, this.h);
+    else { ctx.fillStyle = "magenta"; ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h); }
 
     ctx.restore();
   }
 
-  // Uppdatera spelaren
+  // Uppdatera spelarens position, animation och fysik
   update(obstacles, groundY, keys) {
     let dx = 0;
     let isMoving = false;
 
-    //  Input & dash 
+    //  Rörelse 
     if (!this.isDashing) {
       if (keys["a"] || keys["ArrowLeft"]) { dx -= this.speed; this.lastDirection = "left"; isMoving = true; }
       if (keys["d"] || keys["ArrowRight"]) { dx += this.speed; this.lastDirection = "right"; isMoving = true; }
 
-      if ((keys[" "] && !this.jumpPressedLastFrame) || (keys["w"] && !this.jumpPressedLastFrame) || (keys["ArrowUp"] && !this.jumpPressedLastFrame)) {
-        if (this.jumps > 0) { this.velY = -35; this.jumps--; this.onGround = false; }
+      // Hopphantering
+      if ((keys[" "] || keys["w"] || keys["ArrowUp"]) && !this.jumpPressedLastFrame && this.jumps > 0) {
+        if (this.jumps === this.maxJumps || this.hasBoots) {
+          this.velY = -35; this.jumps--; this.onGround = false;
+        }
       }
 
-      if ((keys["Shift"] || keys["ShiftLeft"] || keys["ShiftRight"]) && this.canDash) {
-        // Släpp dash-tangenten
+      // Dash
+      if ((keys["Shift"] || keys["ShiftLeft"] || keys["ShiftRight"]) && this.canDash && this.hasShirt) {
         keys["Shift"] = keys["ShiftLeft"] = keys["ShiftRight"] = false;
-
-        // Nollställ rörelseriktningar så man inte "fastnar" efter dash
-        keys["a"] = keys["ArrowLeft"] = false;
-        keys["d"] = keys["ArrowRight"] = false;
-
-        // Starta dash
-        this.isDashing = true;
-        this.canDash = false;
-        this.dashTime = this.dashDuration;
-        this.dashFrameIndex = 0;
-        this.dashFrameCounter = 0;
+        keys["a"] = keys["ArrowLeft"] = keys["d"] = keys["ArrowRight"] = false;
+        this.isDashing = true; this.canDash = false; this.dashTime = this.dashDuration;
+        this.dashFrameIndex = 0; this.dashFrameCounter = 0;
       }
+    }
 
-    } else {
-      const dashSpeed = this.speed * 3;
-      dx += (this.lastDirection === "left") ? -dashSpeed : dashSpeed;
+    //  Dashrörelse 
+    if (this.isDashing) {
+      dx += (this.lastDirection === "left" ? -1 : 1) * this.speed * 3;
+      this.dashTime -= 12;
 
-      this.dashTime -= 10;
-      if (this.imgDashFrames.length > 0) {
+      // Dashanimation
+      if (this.imgDashFrames.length) {
         this.dashFrameCounter++;
         if (this.dashFrameCounter >= this.dashFrameSpeed) {
           this.dashFrameCounter = 0;
@@ -145,15 +116,50 @@ export class Character {
         }
       }
 
+      // Avsluta dash
       if (this.dashTime <= 0) {
-        this.isDashing = false;
-        this.dashFrameIndex = 0;
-        this.dashFrameCounter = 0;
+        this.isDashing = false; this.dashFrameIndex = 0; this.dashFrameCounter = 0;
         setTimeout(() => { this.canDash = true; }, 750);
       }
     }
 
-    // Walking animation 
+    this.jumpPressedLastFrame = keys[" "] || keys["w"] || keys["ArrowUp"];
+
+    //  Horisontell kollisionshantering 
+    let newX = this.x + dx;
+    if (dx !== 0) {
+      for (let obs of obstacles) {
+        if (this.y + this.h > obs.y + 1 && this.y < obs.y + obs.h - 1) {
+          const rightEdge = this.x + this.w, newRightEdge = newX + this.w;
+          if (dx > 0 && rightEdge <= obs.x && newRightEdge > obs.x) newX = obs.x - this.w;
+          if (dx < 0 && this.x >= obs.x + obs.w && newX < obs.x + obs.w) newX = obs.x + obs.w;
+        }
+      }
+    }
+    this.x = newX;
+
+    //  Gravitation & vertikal kollisionshantering 
+    if (!this.onGround) this.velY += this.gravity;
+    let newY = this.y + this.velY;
+    let standingOnSomething = false;
+
+    for (let obs of obstacles) {
+      if (this.x + this.w > obs.x + 1 && this.x < obs.x + obs.w - 1) {
+        const prevBottom = this.y + this.h, nextBottom = newY + this.h;
+        if (prevBottom <= obs.y && nextBottom >= obs.y) { newY = obs.y - this.h; this.velY = 0; standingOnSomething = true; }
+        const prevTop = this.y, nextTop = newY;
+        if (prevTop >= obs.y + obs.h && nextTop <= obs.y + obs.h) newY = obs.y + obs.h, this.velY = 0;
+      }
+    }
+
+    // Stå på marken
+    if (newY + this.h >= groundY) { newY = groundY - this.h; this.velY = 0; standingOnSomething = true; }
+
+    this.y = newY; 
+    this.onGround = standingOnSomething;
+    if (this.onGround) this.jumps = this.maxJumps;
+
+    // Animation
     if (!this.isDashing) {
       if (isMoving) {
         this.frameCounter++;
@@ -161,59 +167,11 @@ export class Character {
           this.frameCounter = 0;
           this.currentFrame = (this.currentFrame + 1) % 3;
         }
-      } else {
-        this.currentFrame = 0;
-        this.frameCounter = 0;
-      }
+      } else this.frameCounter = this.currentFrame = 0;
     }
-
-    this.jumpPressedLastFrame = keys[" "] || keys["w"] || keys["ArrowUp"];
-
-    // Horisontell kollisionshantering 
-    let newX = this.x + dx;
-    if (dx !== 0) {
-      for (let obs of obstacles) {
-        if (this.y + this.h > obs.y + 1 && this.y < obs.y + obs.h - 1) {
-          const rightEdge = this.x + this.w;
-          const newRightEdge = newX + this.w;
-          if (dx > 0 && rightEdge <= obs.x && newRightEdge > obs.x) newX = obs.x - this.w;
-          else if (dx < 0 && this.x >= obs.x + obs.w && newX < obs.x + obs.w) newX = obs.x + obs.w;
-        }
-      }
-    }
-    this.x = newX;
-
-    // Gravitation & vertikal kollisionshantering
-    if (!this.onGround) this.velY += this.gravity;
-    let newY = this.y + this.velY;
-    let standingOnSomething = false;
-
-    for (let obs of obstacles) {
-      if (this.x + this.w > obs.x + 1 && this.x < obs.x + obs.w - 1) {
-        const prevBottom = this.y + this.h;
-        const nextBottom = newY + this.h;
-        if (prevBottom <= obs.y && nextBottom >= obs.y) {
-          newY = obs.y - this.h; this.velY = 0; standingOnSomething = true;
-        } else {
-          const prevTop = this.y, nextTop = newY;
-          if (prevTop >= obs.y + obs.h && nextTop <= obs.y + obs.h) {
-            newY = obs.y + obs.h; this.velY = 0;
-          }
-        }
-      }
-    }
-
-    if (newY + this.h >= groundY) {
-      newY = groundY - this.h;
-      this.velY = 0;
-      standingOnSomething = true;
-    }
-
-    this.y = newY;
-    this.onGround = standingOnSomething;
-    if (this.onGround) this.jumps = this.maxJumps;
   }
-}   
+}
+
 
 export class Obstacle {
   constructor(x, y, w, h, imageOrColor = null) {

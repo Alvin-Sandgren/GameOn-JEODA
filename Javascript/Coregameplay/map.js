@@ -1,6 +1,9 @@
 import { Character, Obstacle, Goat, Lava, Skylt } from "./classer.js";
 
 // GameOver-trigger och flagga
+let hasShirt = false;
+let hasBoots = false;
+
 export let onCombatTrigger = null;
 export let onGameOver = null;
 let gameOverTriggered = false;
@@ -40,7 +43,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
-  200, 4400, 100, 100, 10, 2,
+  6050, 1901, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      // Idle
   "./character_bilder/Meatball_Lleg.png",      // Left leg
   "./character_bilder/Meatball_nack_Rleg.png", // Right leg
@@ -138,7 +141,7 @@ export const obstacles = [
   new Obstacle(4000, 0, 2600, 1900, "gray"),
   new Obstacle(4300, 2500, 100, 205, "gray"),
   new Obstacle(4300, 2700, 2300, 430, "gray"),
-  new Obstacle(6100, 1901, 20, 798, "red"),
+  //new Obstacle(6100, 1901, 20, 798, "red"),
   new Obstacle(6500, 1800, 1000, 1430, "gray"),
   new Obstacle(6200, 2600, 275, 100, "./Bilder/stone_platform.png"),
   //Här imellan hamnar trjöjan
@@ -187,10 +190,10 @@ export const obstacles = [
 
   //Nivå 4 boss arena
   new Obstacle(7955, 3850, 100, 50, "gray"),
-  new Obstacle(7990, 3900, 30, 600, "orange"),
-  new Obstacle(8000, 3900, 10, 600, "yellow"),
-  new Obstacle(8015, 3900, 5, 600, "red"),
-  new Obstacle(7990, 3900, 5, 600, "red"),
+  //new Obstacle(7990, 3900, 30, 600, "orange"),
+  //new Obstacle(8000, 3900, 10, 600, "yellow"),
+  //new Obstacle(8015, 3900, 5, 600, "red"),
+  //new Obstacle(7990, 3900, 5, 600, "red"),
   new Obstacle(7955, 4495, 100, 50, "gray"),
 
   new Obstacle(8500, 4400, 150, 100, "gray"),
@@ -264,7 +267,40 @@ export function gameLoop(timestamp) {
 
     const isMoving = keys["a"] || keys["d"] || keys["ArrowLeft"] || keys["ArrowRight"];
     player.update(obstacles, worldHeight - 95, keys);
+
+    if (player.x < shirt.x + shirt.w &&
+    player.x + player.w > shirt.x &&
+    player.y < shirt.y + shirt.h &&
+    player.y + player.h > shirt.y) {
+    hasShirt = true; // <-- här
+    player.canDash = true;
+    shirt.w = 0; shirt.h = 0; shirt.image = null;
+    localStorage.setItem("hasDash", "true");
+    player.imgIdle.src = "./character_bilder/Meatball_HT.png";
+    player.imgLeftLeg.src = "./character_bilder/Meatball_HT_LLeg.png";
+    player.imgRightLeg.src = "./character_bilder/Meatball_HT_RLeg.png";
+    player.imgJump.src = "./character_bilder/Meatball_HT_Jump.png";
+    player.hasShirt = true;  
+}
+
+if (player.x < boots.x + boots.w &&
+    player.x + player.w > boots.x &&
+    player.y < boots.y + boots.h &&
+    player.y + player.h > boots.y) {
+    hasBoots = true; // <-- här
+    player.maxJumps = Math.max(player.maxJumps, 2);
+    boots.w = 0; boots.h = 0; boots.image = null;
+    localStorage.setItem("hasDoubleJump", "true");
+    player.imgIdle.src = "./character_bilder/Meatball_HTS.png";
+    player.imgLeftLeg.src = "./character_bilder/Meatball_HTS_LLeg.png";
+    player.imgRightLeg.src = "./character_bilder/Meatball_HTS_RLeg.png";
+    player.imgJump.src = "./character_bilder/Meatball_HTS_Jump.png";
+    player.hasShirt = true;  
+    player.hasBoots = true;  
+}
+
     player.draw(ctx, isMoving);
+    
 
     // Rita getter
     enemygoatgw.draw(ctx);
