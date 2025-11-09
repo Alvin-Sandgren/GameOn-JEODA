@@ -141,7 +141,7 @@ export const obstacles = [
   new Obstacle(6100, 1901, 20, 798, "red"),
   new Obstacle(6500, 1800, 1000, 1430, "gray"),
   new Obstacle(6200, 2600, 275, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(6300, 2500, 80, 52, "./Bilder/equip_troja.png"),
+  //Här imellan hamnar trjöjan
   new Obstacle(6250, 2550, 177, 100, "./Bilder/stone_platform.png"),
 
   // Vägen till nivå 5
@@ -195,13 +195,19 @@ export const obstacles = [
 
   new Obstacle(8500, 4400, 150, 100, "gray"),
   new Obstacle(8600, 4350, 100, 100, "gray"),
-  new Obstacle(8625, 4330, 64, 20, "./Bilder/equip_skor.png"),
+  //Här imellan hamnar skorna
   new Obstacle(8650, 4400, 150, 100, "gray"),
 
   //Väggar på sidorna
   new Obstacle(worldWidth - 30, 0, 30, 10000, "green"),
   new Obstacle(0, 0, 30, 10000, "green")
 ];
+
+
+let shirt = new Obstacle(6300, 2500, 80, 52, "./Bilder/equip_troja.png");
+shirt.type = "shirt";
+let boots = new Obstacle(8625, 4330, 64, 20, "./Bilder/equip_skor.png");
+boots.type = "boots";
 
  const skyltar = [
     new Skylt(2115, 4000, 25, 25,"black"),
@@ -218,6 +224,8 @@ export const obstacles = [
     new Skylt(2155, 3965, 10, 30),
     new Skylt(2160, 3970, 10, 20,)
 ];
+
+
 
 // kamera
 function updateCamera() {
