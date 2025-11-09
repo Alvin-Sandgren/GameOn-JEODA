@@ -43,7 +43,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
-  6050, 1901, 100, 100, 10, 2,
+  200, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      // Idle
   "./character_bilder/Meatball_Lleg.png",      // Left leg
   "./character_bilder/Meatball_nack_Rleg.png", // Right leg
@@ -267,6 +267,10 @@ export function gameLoop(timestamp) {
 
     const isMoving = keys["a"] || keys["d"] || keys["ArrowLeft"] || keys["ArrowRight"];
     player.update(obstacles, worldHeight - 95, keys);
+    player.draw(ctx, isMoving);
+
+    shirt.draw(ctx);
+    boots.draw(ctx);
 
     if (player.x < shirt.x + shirt.w &&
     player.x + player.w > shirt.x &&
@@ -298,8 +302,6 @@ if (player.x < boots.x + boots.w &&
     player.hasShirt = true;  
     player.hasBoots = true;  
 }
-
-    player.draw(ctx, isMoving);
     
 
     // Rita getter
