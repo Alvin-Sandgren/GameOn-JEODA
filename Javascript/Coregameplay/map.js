@@ -1,5 +1,10 @@
 import { Character, Obstacle, Goat, Lava, Skylt } from "./classer.js";
 
+// --- ämne ---: Dialog & overlay-variabler och flags
+let dialogActive = false;
+let dialogText = "";
+let dialogOnClose = null; // valfri callback när dialog stängs (kan vara null)
+
 // GameOver-trigger och flagga
 let hasShirt = false;
 let hasBoots = false;
@@ -43,7 +48,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
-  8000, 4400, 100, 100, 10, 2,
+  200, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/Meatball_Lleg.png",      
   "./character_bilder/Meatball_nack_Rleg.png", 
@@ -56,8 +61,10 @@ export const player = new Character(
   "./character_bilder/Meatball_Jump_nack.png"      
 );
 
+// --- ämne ---: se till att spelaren har en flagga för första-gången-händelser
+player.seenLava = player.seenLava || false;
 
-// getter (fiender)
+ // getter (fiender)
 export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png", "GWget");
 export const enemygoatsten = new Goat(1500, 2855, 150, 150, "./Goat_bilder/stenget.png", "Stenget");
 export const enemygoatstefan = new Goat(7300, 4300, 200, 200, "./Goat_bilder/stefanget.png", "Stefanget");
@@ -129,7 +136,7 @@ export const obstacles = [
   new Obstacle(700, 4300, 300, 50, "./Bilder/grass_platform.png"),
   new Obstacle(1200, 4200, 200, 50, "./Bilder/grass_platform.png"),
   new Obstacle(1600, 4100, 70, 50, "./Bilder/grass_platform.png"),
-  new Obstacle(1800, 4025, 800, 575, "Bilder/grassplatformstor.png"),
+  new Obstacle(1800, 4025, 800, 575, "Bilder/grass_platform_stor.png"),
 
   //Dropper shute
   new Obstacle(1800, 3000, 100, 900),
@@ -180,8 +187,8 @@ export const obstacles = [
   new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_platform.png"),
 
   //Platforms efter droppern
-  new Obstacle(3000, 4400, 150, 100,"Bilder/grassplatformstor.png"),
-  new Obstacle(2800, 4250, 150, 250,"Bilder/grassplatformstor.png"),
+  new Obstacle(3000, 4400, 150, 100,"Bilder/grass_platform_stor.png"),
+  new Obstacle(2800, 4250, 150, 250,"Bilder/grass_platform_stor.png"),
 
   //Lavablock som hindrar progress när man inte har dash
   new Obstacle(3400, 4475, 50 , 25, "./Bilder/stone_platform.png"),
@@ -253,6 +260,26 @@ function updateCamera() {
   cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
 }
 
+// --- ämne ---: Funktion för att visa dialog (pausar spelet)
+function showDialog(text, onClose = null) {
+  paused = true;
+  dialogActive = true;
+  dialogText = text;
+  dialogOnClose = typeof onClose === 'function' ? onClose : null;
+}
+
+// --- ämne ---: Klick-hanterare för att stänga dialog (vänsterklick)
+canvas.addEventListener('mousedown', (e) => {
+  if (dialogActive && e.button === 0) { // 0 = vänster musknapp
+    dialogActive = false;
+    paused = false;
+    if (dialogOnClose) {
+      try { dialogOnClose(); } catch (err) { console.error(err); }
+      dialogOnClose = null;
+    }
+  }
+});
+
 // Game Loop
 const targetFPS = 60;
 const frameDuration = 1000 / targetFPS;
@@ -301,7 +328,10 @@ export function gameLoop(timestamp) {
     player.imgJump.src = "./character_bilder/Meatball_HT_Jump.png";
     player.hasShirt = true;  
     player.message = "Du fick en tröja! Du kan nu dash:a (Shift)!";
-    shirt.x = -1000; 
+    shirt.x = -1000;
+
+    // --- ämne ---: visa dialog när tröjan plockas upp
+    showDialog("Du hittade en tröja!\nDu kan nu dash:a (Shift)!");
     
 }
 
@@ -321,8 +351,10 @@ if (player.x < boots.x + boots.w &&
     player.hasBoots = true;
     player.message
     boots.x = -1000;  
+
+    // --- ämne ---: visa dialog när skorna plockas upp
+    showDialog("Du hittade skor!\nDu kan nu dubbelhoppa!");
 }
-    
 
     // Rita getter
     enemygoatgw.draw(ctx);
@@ -353,7 +385,57 @@ if (player.x < boots.x + boots.w &&
       }
     }
 
+
+    // --- ämne ---: upptäck lava (första gången spelaren ser den från höger vid droppern) ---
+    if (!player.seenLava) {
+      const triggerZoneX1 = 3000;
+      const triggerZoneX2 = 4200;
+      const triggerZoneYMin = 4000; // lavan ligger vid 4500, så denna höjd är marknivå
+      const triggerZoneYMax = 4700;
+      const playerFeetY = player.y + player.h;
+
+      if (
+        player.x > triggerZoneX1 &&
+        player.x < triggerZoneX2 &&
+        playerFeetY >= triggerZoneYMin &&
+        playerFeetY <= triggerZoneYMax
+      ) {
+        player.seenLava = true;
+        showDialog("Den där marken ser farlig ut, nästan som det vore lava...\nBäst att inte röra vid den! \n (Jag behöver nog kunna dasha för att ta mig över *wink-wink*)");
+      }
+    }
+
     ctx.restore();
+
+    // --- ämne ---: Rita dialogruta i skärmlägen (efter ctx.restore så det är i canvas-koordinater)
+    if (dialogActive) {
+      // bakgrundsruta
+      ctx.fillStyle = "rgba(0, 0, 0, )";
+      const boxW = 800;
+      const boxH = 260;
+      const boxX = canvas.width / 2 - boxW / 2;
+      const boxY = canvas.height / 2 - boxH / 2;
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+
+      // kantlinje
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 5;
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+      // text
+      ctx.fillStyle = "white";
+      ctx.font = "26px Arial";
+      ctx.textBaseline = "top";
+      const lines = dialogText.split("\n");
+      lines.forEach((line, i) => {
+        ctx.fillText(line, boxX + 24, boxY + 24 + i * 36);
+      });
+
+      // fortsätttext
+      ctx.font = "18px Arial";
+      ctx.fillText("Klicka vänster musknapp för att fortsätta...", boxX + boxW - 320, boxY + boxH - 40);
+    }
+
 }
 }
 
