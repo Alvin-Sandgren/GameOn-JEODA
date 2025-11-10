@@ -44,16 +44,16 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
   8000, 4400, 100, 100, 10, 2,
-  "./character_bilder/meatball_nack.png",      // Idle
-  "./character_bilder/Meatball_Lleg.png",      // Left leg
-  "./character_bilder/Meatball_nack_Rleg.png", // Right leg
-  [                                             // Dash frames
+  "./character_bilder/meatball_nack.png",      
+  "./character_bilder/Meatball_Lleg.png",      
+  "./character_bilder/Meatball_nack_Rleg.png", 
+  [                                             
     "./character_bilder/Meatball_dash1.png",
     "./character_bilder/Meatball_dash2.png",
     "./character_bilder/Meatball_dash3.png",
     "./character_bilder/Meatball_dash4.png"
   ],
-  "./character_bilder/Meatball_Jump_nack.png"       // Jump image
+  "./character_bilder/Meatball_Jump_nack.png"      
 );
 
 
@@ -224,9 +224,9 @@ export const obstacles = [
 ];
 
 
-let shirt = new Obstacle(6300, 2500, 80, 52, "./Bilder/equip_troja.png");
+let shirt = new Obstacle(6300, 2500, 80, 52, "./Bilder/equip_shirt.png");
 shirt.type = "shirt";
-let boots = new Obstacle(8625, 4330, 64, 20, "./Bilder/equip_skor.png");
+let boots = new Obstacle(8625, 4330, 64, 20, "./Bilder/equip_shoes.png");
 boots.type = "boots";
 
  const skyltar = [
@@ -244,8 +244,6 @@ boots.type = "boots";
     new Skylt(2155, 3965, 10, 30),
     new Skylt(2160, 3970, 10, 20,)
 ];
-
-
 
 // kamera
 function updateCamera() {
@@ -320,7 +318,9 @@ if (player.x < boots.x + boots.w &&
     player.imgRightLeg.src = "./character_bilder/Meatball_HTS_RLeg.png";
     player.imgJump.src = "./character_bilder/Meatball_HTS_Jump.png";
     player.hasShirt = true;  
-    player.hasBoots = true;  
+    player.hasBoots = true;
+    player.message
+    boots.x = -1000;  
 }
     
 
