@@ -1,6 +1,6 @@
 import { Character, Obstacle, Goat, Lava, Skylt } from "./classer.js";
 
-// --- ämne ---: Dialog & overlay-variabler och flags
+//  Dialog & overlay-variabler och flags
 let dialogActive = false;
 let dialogText = "";
 let dialogOnClose = null; // valfri callback när dialog stängs (kan vara null)
@@ -48,7 +48,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
-  200, 4400, 100, 100, 10, 2,
+  200, 4450, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/Meatball_Lleg.png",      
   "./character_bilder/Meatball_nack_Rleg.png", 
@@ -61,7 +61,7 @@ export const player = new Character(
   "./character_bilder/Meatball_Jump_nack.png"      
 );
 
-// --- ämne ---: se till att spelaren har en flagga för första-gången-händelser
+//  se till att spelaren har en flagga för första-gången-händelser
 player.seenLava = player.seenLava || false;
 
  // getter (fiender)
@@ -111,23 +111,6 @@ export function drawGround() {
     ctx.fillStyle = "#654321"; // brunaktig reservfärg
     ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
   }
-}
-
-
-// skriver text för visa keybinds 
-function drawKeybinds() {
-  ctx.fillStyle = "gray";
-  ctx.fillRect(100, 3950, 850, 250);
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 5;
-  ctx.strokeRect(100, 3950, 850, 250);
-  
-  ctx.fillStyle = "white";
-  ctx.font = "40px Arial";
-
-  ctx.fillText("Såhär spelar du:", 150, 4010);
-  ctx.fillText("Gå Vänster/Höger: A/D eller ← →", 150, 4080);
-  ctx.fillText("Hoppa: W eller Mellanslag", 150, 4150);
 }
 
 // obstacles
@@ -226,8 +209,8 @@ export const obstacles = [
   new Obstacle(8650, 4400, 150, 100, "./Bilder/stone_platform.png"),
 
   //Väggar på sidorna
-  new Obstacle(worldWidth - 30, 0, 30, 10000, "green"),
-  new Obstacle(0, 0, 30, 10000, "green")
+  new Obstacle(worldWidth - 30, 0, 100, 10000, "./Bilder/wall_right.png"),
+  new Obstacle(-70, 0, 100, 10000, "./Bilder/wall_left.png")
 ];
 
 
@@ -260,7 +243,7 @@ function updateCamera() {
   cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
 }
 
-// --- ämne ---: Funktion för att visa dialog (pausar spelet)
+//  Funktion för att visa dialog (pausar spelet)
 function showDialog(text, onClose = null) {
   paused = true;
   dialogActive = true;
@@ -268,7 +251,7 @@ function showDialog(text, onClose = null) {
   dialogOnClose = typeof onClose === 'function' ? onClose : null;
 }
 
-// --- ämne ---: Klick-hanterare för att stänga dialog (vänsterklick)
+//  Klick-hanterare för att stänga dialog (vänsterklick)
 canvas.addEventListener('mousedown', (e) => {
   if (dialogActive && e.button === 0) { // 0 = vänster musknapp
     dialogActive = false;
@@ -300,7 +283,6 @@ export function gameLoop(timestamp) {
     ctx.translate(-cameraX, -cameraY);
 
     drawGround();
-    drawKeybinds();
     for (let obs of obstacles) obs.draw(ctx);
 
     for (let skylt of skyltar) {
@@ -330,7 +312,7 @@ export function gameLoop(timestamp) {
     player.message = "Du fick en tröja! Du kan nu dash:a (Shift)!";
     shirt.x = -1000;
 
-    // --- ämne ---: visa dialog när tröjan plockas upp
+    //  visa dialog när tröjan plockas upp
     showDialog("Du hittade en tröja!\nDu kan nu dash:a (Shift)!");
     
 }
@@ -352,7 +334,7 @@ if (player.x < boots.x + boots.w &&
     player.message
     boots.x = -1000;  
 
-    // --- ämne ---: visa dialog när skorna plockas upp
+    //  visa dialog när skorna plockas upp
     showDialog("Du hittade skor!\nDu kan nu dubbelhoppa!");
 }
 
@@ -386,9 +368,9 @@ if (player.x < boots.x + boots.w &&
     }
 
 
-    // --- ämne ---: upptäck lava (första gången spelaren ser den från höger vid droppern) ---
+    //  upptäck lava (första gången spelaren ser den från höger vid droppern) ---
     if (!player.seenLava) {
-      const triggerZoneX1 = 3000;
+      const triggerZoneX1 = 3100;
       const triggerZoneX2 = 4200;
       const triggerZoneYMin = 4000; // lavan ligger vid 4500, så denna höjd är marknivå
       const triggerZoneYMax = 4700;
@@ -404,13 +386,27 @@ if (player.x < boots.x + boots.w &&
         showDialog("Den där marken ser farlig ut, nästan som det vore lava...\nBäst att inte röra vid den! \n (Jag behöver nog kunna dasha för att ta mig över *wink-wink*)");
       }
     }
+    // Trigger för controls-dialog (precis som lava-triggern)
+    if (!player.seenControls) {
+        const triggerX1 = 200;
+        const triggerX2 = 400;
+        const playerFeetY = player.y + player.h; // används om du vill kolla Y, annars bara X räcker
+
+        if (player.x >= triggerX1 && player.x <= triggerX2) {
+            player.seenControls = true;
+            showDialog(
+                "Såhär spelar du:\n\nGå Vänster/Höger: A/D eller ← →\nHoppa: W eller Mellanslag\nDash: Shift"
+            );
+        }
+    }
+
 
     ctx.restore();
 
-    // --- ämne ---: Rita dialogruta i skärmlägen (efter ctx.restore så det är i canvas-koordinater)
+    //  Rita dialogruta i skärmlägen (efter ctx.restore så det är i canvas-koordinater)
     if (dialogActive) {
       // bakgrundsruta
-      ctx.fillStyle = "rgba(0, 0, 0, )";
+      ctx.fillStyle = "rgba(0, 0, 0, 1)";
       const boxW = 800;
       const boxH = 260;
       const boxX = canvas.width / 2 - boxW / 2;

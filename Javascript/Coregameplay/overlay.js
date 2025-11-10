@@ -57,7 +57,6 @@ export function showMenu() {
 
 //  Game Over 
 export function gameOver() {
-  console.log("🔥 Game over triggered!");
   currentState = "gameover";
   pauseMap();
 
