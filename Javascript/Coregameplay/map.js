@@ -14,7 +14,7 @@ export function setGameOverTrigger(callback) { onGameOver = callback; }
 export const canvas = document.getElementById('karta');
 export const ctx = canvas.getContext('2d');
 
-// canvas-standardstorlek (kan ändras av fullscreen.js senare)
+// canvas-standardstorlek 
 canvas.width = 1910;
 canvas.height = 920;
 
@@ -28,7 +28,7 @@ let lastFrameTime = 0;
 
 export function startMap() {
   paused = false;
-  gameOverTriggered = false; // Nolla vid start
+  gameOverTriggered = false; 
 }
 
 export function pauseMap() { paused = true; }
@@ -43,7 +43,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
-  200, 4400, 100, 100, 10, 2,
+  8000, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      // Idle
   "./character_bilder/Meatball_Lleg.png",      // Left leg
   "./character_bilder/Meatball_nack_Rleg.png", // Right leg
@@ -71,7 +71,6 @@ let backgroundLoaded = false;
 backgroundImage.src = "./Bilder/bakgrund.png";
 backgroundImage.onload = () => {
   backgroundLoaded = true;
-  console.log("Bakgrundsbild laddad!");
 };
 
 export function drawBackground() {
@@ -89,10 +88,24 @@ export function drawBackground() {
   }
 }
 
+export const groundImage = new Image();
+let groundLoaded = false;
+groundImage.src = "./Bilder/ground.png";
+groundImage.onload = () => {
+  groundLoaded = true;
+};
+
 export function drawGround() {
-  ctx.fillStyle = "green";
-  ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
+  if (groundLoaded) {
+    // Rita markbild längst ner på världen
+    ctx.drawImage(groundImage, 0, worldHeight - 100, worldWidth, 100);
+  } else {
+    // Fallback (om bilden inte hunnit ladda)
+    ctx.fillStyle = "#654321"; // brunaktig reservfärg
+    ctx.fillRect(0, worldHeight - 100, worldWidth, 100);
+  }
 }
+
 
 // skriver text för visa keybinds 
 function drawKeybinds() {
@@ -115,14 +128,14 @@ export const obstacles = [
   // platforms spawn
   new Obstacle(700, 4300, 300, 50, "./Bilder/grass_platform.png"),
   new Obstacle(1200, 4200, 200, 50, "./Bilder/grass_platform.png"),
-  new Obstacle(1600, 4000, 40, 50, "./Bilder/grass_platform.png"),
+  new Obstacle(1600, 4100, 70, 50, "./Bilder/grass_platform.png"),
   new Obstacle(1800, 4025, 800, 575, "Bilder/grassplatformstor.png"),
 
   //Dropper shute
   new Obstacle(1800, 3000, 100, 900),
 
   //Vänster sida plus tak på droppern och gången till dash/get nr 2
-  new Obstacle(1300, 3000, 500, 100, "./Bilder/grass_platform.png"),
+  new Obstacle(1300, 3000, 500, 100, "./Bilder/stone_platform.png"),
   new Obstacle(400, 2500, 300, 100, "./Bilder/stone_platform.png"),
   new Obstacle(700, 2500, 300, 100, "./Bilder/stone_platform.png"),
   new Obstacle(1000, 2500, 300, 100, "./Bilder/stone_platform.png"),
@@ -155,9 +168,9 @@ export const obstacles = [
   new Obstacle(0, 1400, 2600, 200, "green"),
 
   //Obstacles mot nivå 3
-  new Obstacle(950, 3000, 45, 30, "./Bilder/grass_platform.png"),
-  new Obstacle(500, 3000, 39, 30,"./Bilder/grass_platform.png"),
-  new Obstacle(300, 2750, 30, 30,"./Bilder/grass_platform.png"),
+  new Obstacle(950, 3000, 45, 30, "./Bilder/stone_platform.png"),
+  new Obstacle(500, 3000, 39, 30,"./Bilder/stone_platform.png"),
+  new Obstacle(300, 2750, 30, 30,"./Bilder/stone_platform.png"),
 
   // Höger sida
   new Obstacle(2500, 2600, 100, 1275,),
@@ -171,22 +184,26 @@ export const obstacles = [
   new Obstacle(2800, 4250, 150, 250,"Bilder/grassplatformstor.png"),
 
   //Lavablock som hindrar progress när man inte har dash
-  new Obstacle(3400, 4475, 50 , 25, "gray"),
-  new Obstacle(3450, 4450, 50, 50, "gray"),
+  new Obstacle(3400, 4475, 50 , 25, "./Bilder/stone_platform.png"),
+  new Obstacle(3450, 4450, 50, 50, "./Bilder/stone_platform.png"),
   new Lava(3500, 4500, 600, 600),   // Lavan
-  new Obstacle(4100, 4450, 50, 50, "gray"),
-  new Obstacle(4150, 4475, 50, 25, "gray"),
+  new Obstacle(4100, 4450, 50, 50, "./Bilder/stone_platform.png"),
+  new Obstacle(4150, 4475, 50, 25, "./Bilder/stone_platform.png"),
 
   //Platforms som leder till nivå 4
-  new Obstacle(5000, 4300, 75, 25, "./Bilder/stone_platform.png"),
-  new Obstacle(5500, 4200, 75, 50, "./Bilder/stone_platform.png"),
-  new Obstacle(5000, 4000, 75, 25, "./Bilder/stone_platform.png"),
+  new Obstacle(5050, 4300, 75, 25, "./Bilder/stone_platform.png"),
+  new Obstacle(5600, 4200, 100, 50, "./Bilder/stone_platform.png"),
+  new Obstacle(5050, 4000, 75, 25, "./Bilder/stone_platform.png"),
 
   //Till nivå 4 trappor tillbaka
-  new Obstacle(5700, 3800, 100, 1000, "gray"),
-  new Obstacle(5800, 4000, 150, 700, "gray"),
-  new Obstacle(5950, 4200, 150, 700, "gray"),
-  new Obstacle(6100, 4400, 150, 700, "gray"),
+  new Obstacle(5700, 3900, 100, 1000, "gray"),
+  new Obstacle(5800, 4000, 100, 700, "gray"),
+  new Obstacle(5900, 4100, 100, 700, "gray"),
+  new Obstacle(6000, 4200, 100, 500, "gray"),
+  new Obstacle(6100, 4300, 100, 300, "gray"),
+  new Obstacle(6200, 4400, 100, 200, "gray"),
+
+
 
   //Nivå 4 boss arena
   new Obstacle(7955, 3850, 100, 50, "gray"),
@@ -196,10 +213,10 @@ export const obstacles = [
   //new Obstacle(7990, 3900, 5, 600, "red"),
   new Obstacle(7955, 4495, 100, 50, "gray"),
 
-  new Obstacle(8500, 4400, 150, 100, "gray"),
-  new Obstacle(8600, 4350, 100, 100, "gray"),
+  new Obstacle(8500, 4400, 150, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(8600, 4350, 100, 100, "./Bilder/stone_platform.png"),
   //Här imellan hamnar skorna
-  new Obstacle(8650, 4400, 150, 100, "gray"),
+  new Obstacle(8650, 4400, 150, 100, "./Bilder/stone_platform.png"),
 
   //Väggar på sidorna
   new Obstacle(worldWidth - 30, 0, 30, 10000, "green"),
@@ -285,6 +302,9 @@ export function gameLoop(timestamp) {
     player.imgRightLeg.src = "./character_bilder/Meatball_HT_RLeg.png";
     player.imgJump.src = "./character_bilder/Meatball_HT_Jump.png";
     player.hasShirt = true;  
+    player.message = "Du fick en tröja! Du kan nu dash:a (Shift)!";
+    shirt.x = -1000; 
+    
 }
 
 if (player.x < boots.x + boots.w &&
