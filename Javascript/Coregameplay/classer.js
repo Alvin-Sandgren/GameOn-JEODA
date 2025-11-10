@@ -39,10 +39,10 @@ export class Character {
     // State
     this.lastDirection = "right"; // Vilket håll spelaren senast gick
     this.canDash = true; this.isDashing = false;
-    this.jumpPressedLastFrame = false; // För att undvika dubbelhopp
+    this.jumpPressedLastFrame = false; // För att undvika dubbelhopp när man håller ned hopp
   }
 
-  // Skapar och returnerar en ny Image
+  // Skapar och returnerar en ny Imagge
   _load(src) {
     const img = new Image();
     img.src = src;

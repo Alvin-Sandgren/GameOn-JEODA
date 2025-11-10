@@ -6,7 +6,7 @@ export const soundmanager = new Soundmanager();
 //  Dialog & overlay-variabler och flags
 let dialogActive = false;
 let dialogText = "";
-let dialogOnClose = null; // valfri callback när dialog stängs (kan vara null)
+let dialogOnClose = null;
 
 // GameOver-trigger och flagga
 let hasShirt = false;
@@ -75,7 +75,7 @@ export const enemygoatanton = new Goat(600, 975, 450, 450, "./Goat_bilder/antong
 
 export let combatGoats = [enemygoatgw, enemygoatsten, enemygoatstefan, enemygoatanton];
 
-// --- Bakgrundsbild ---
+//  Bakgrundsbild 
 export const backgroundImage = new Image();
 let backgroundLoaded = false;
 backgroundImage.src = "./Bilder/bakgrund.png";
@@ -341,11 +341,12 @@ if (player.x < boots.x + boots.w &&
     showDialog("Du hittade skor!\nDu kan nu dubbelhoppa!");
 }
 
-    // Rita getter
-    enemygoatgw.draw(ctx);
-    enemygoatsten.draw(ctx);
-    enemygoatstefan.draw(ctx);
-    enemygoatanton.draw(ctx);
+// Rita getter dynamiskt
+    for (let goat of combatGoats) {
+        if (goat.health > 0) {
+            goat.draw(ctx);
+        }
+    }
 
     // Kolla kollision med getter (combat)
     for (let goat of combatGoats) {
@@ -372,11 +373,11 @@ if (player.x < boots.x + boots.w &&
     }
 
 
-    //  upptäck lava (första gången spelaren ser den från höger vid droppern) ---
+    //  upptäck lava (första gången spelaren ser den från höger vid droppern) 
     if (!player.seenLava) {
       const triggerZoneX1 = 3100;
       const triggerZoneX2 = 4200;
-      const triggerZoneYMin = 4000; // lavan ligger vid 4500, så denna höjd är marknivå
+      const triggerZoneYMin = 4000;
       const triggerZoneYMax = 4700;
       const playerFeetY = player.y + player.h;
 
@@ -390,16 +391,15 @@ if (player.x < boots.x + boots.w &&
         showDialog("Den där marken ser farlig ut, nästan som det vore lava...\nBäst att inte röra vid den! \n (Jag behöver nog kunna dasha för att ta mig över *wink-wink*)");
       }
     }
-    // Trigger för controls-dialog (precis som lava-triggern)
+    // Trigger för controls-dialog
     if (!player.seenControls) {
         const triggerX1 = 200;
         const triggerX2 = 400;
-        const playerFeetY = player.y + player.h; // används om du vill kolla Y, annars bara X räcker
 
         if (player.x >= triggerX1 && player.x <= triggerX2) {
             player.seenControls = true;
             showDialog(
-                "Såhär spelar du:\n\nGå Vänster/Höger: A/D eller ← →\nHoppa: W eller Mellanslag\nDash: Shift"
+                "Såhär spelar du:\n\nGå Vänster/Höger: A/D eller ← →\nHoppa: W eller Mellanslag\n Spamtryck L + håll inne en rörelseknapp: för att ta sig ur combat"
             );
         }
     }
@@ -407,7 +407,7 @@ if (player.x < boots.x + boots.w &&
 
     ctx.restore();
 
-    //  Rita dialogruta i skärmlägen (efter ctx.restore så det är i canvas-koordinater)
+    //  Rita dialogruta i skärmlägen 
     if (dialogActive) {
       // bakgrundsruta
       ctx.fillStyle = "rgba(0, 0, 0, 1)";
@@ -431,9 +431,8 @@ if (player.x < boots.x + boots.w &&
         ctx.fillText(line, boxX + 24, boxY + 24 + i * 36);
       });
 
-      // fortsätttext
       ctx.font = "18px Arial";
-      ctx.fillText("Klicka vänster musknapp för att fortsätta...", boxX + boxW - 320, boxY + boxH - 40);
+      ctx.fillText("Klicka vänster musknapp för att fortsätta...", boxX + boxW - 350, boxY + boxH - 40);
     }
 
 }

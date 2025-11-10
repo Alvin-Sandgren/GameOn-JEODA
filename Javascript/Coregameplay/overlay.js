@@ -1,5 +1,5 @@
 import { canvas, ctx, startMap, pauseMap, player, setCombatTrigger, combatGoats } from "./map.js";
-import { startCombat, PlayerActions, playerAction } from "./combat.js";
+import { startCombat, PlayerActions, playerAction, drawCombat } from "./combat.js";
 import { Soundmanager } from "./ljud.js";
 import * as MapModule from "./map.js";
 
@@ -61,6 +61,7 @@ export function showMenu() {
 
 //  Game Over 
 export function gameOver() {
+  console.log("🔥 Game over triggered!");
   currentState = "gameover";
   pauseMap();
 
@@ -91,6 +92,11 @@ export function enterCombat(collidedGoat) {
         currentState = "combat";
         startCombat(collidedGoat);
         currentCombatGoat = collidedGoat;
+
+        // Om drawCombat finns exporterat så rita upp combaten direkt
+        if (typeof drawCombat === "function") {
+          drawCombat(collidedGoat);
+        }
     });
 }
 
