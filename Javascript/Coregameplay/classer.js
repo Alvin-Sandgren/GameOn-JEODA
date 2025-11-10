@@ -1,3 +1,6 @@
+import { Soundmanager } from "./ljud.js";
+export const soundmanager = new Soundmanager();
+
 export class Character {
   constructor(
     x, y, w, h, speed, maxJumps,
@@ -90,6 +93,7 @@ export class Character {
       if ((keys[" "] || keys["w"] || keys["ArrowUp"]) && !this.jumpPressedLastFrame && this.jumps > 0) {
         if (this.jumps === this.maxJumps || this.hasBoots) {
           this.velY = -35; this.jumps--; this.onGround = false;
+          soundmanager.playJump();
         }
       }
 
@@ -99,6 +103,7 @@ export class Character {
         keys["a"] = keys["ArrowLeft"] = keys["d"] = keys["ArrowRight"] = false;
         this.isDashing = true; this.canDash = false; this.dashTime = this.dashDuration;
         this.dashFrameIndex = 0; this.dashFrameCounter = 0;
+        soundmanager.playDash();
       }
     }
 
@@ -119,7 +124,7 @@ export class Character {
       // Avsluta dash
       if (this.dashTime <= 0) {
         this.isDashing = false; this.dashFrameIndex = 0; this.dashFrameCounter = 0;
-        setTimeout(() => { this.canDash = true; }, 750);
+        setTimeout(() => { this.canDash = true; }, 1250);
       }
     }
 

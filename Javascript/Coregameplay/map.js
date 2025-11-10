@@ -1,4 +1,7 @@
 import { Character, Obstacle, Goat, Lava, Skylt } from "./classer.js";
+import { Soundmanager } from "./ljud.js";
+
+export const soundmanager = new Soundmanager();
 
 //  Dialog & overlay-variabler och flags
 let dialogActive = false;
@@ -50,15 +53,15 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 export const player = new Character(
   200, 4450, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
-  "./character_bilder/Meatball_Lleg.png",      
-  "./character_bilder/Meatball_nack_Rleg.png", 
+  "./character_bilder/meatball_lleg.png",      
+  "./character_bilder/meatball_nack_rleg.png", 
   [                                             
-    "./character_bilder/Meatball_dash1.png",
-    "./character_bilder/Meatball_dash2.png",
-    "./character_bilder/Meatball_dash3.png",
-    "./character_bilder/Meatball_dash4.png"
+    "./character_bilder/meatball_dash1.png",
+    "./character_bilder/meatball_dash2.png",
+    "./character_bilder/meatball_dash3.png",
+    "./character_bilder/meatball_dash4.png"
   ],
-  "./character_bilder/Meatball_Jump_nack.png"      
+  "./character_bilder/meatball_jump_nack.png"      
 );
 
 //  se till att spelaren har en flagga för första-gången-händelser
@@ -122,7 +125,7 @@ export const obstacles = [
   new Obstacle(1800, 4025, 800, 575, "Bilder/grass_platform_stor.png"),
 
   //Dropper shute
-  new Obstacle(1800, 3000, 100, 900),
+  new Obstacle(1800, 3000, 100, 900, "Bilder/left_dropper_pillar.png"),
 
   //Vänster sida plus tak på droppern och gången till dash/get nr 2
   new Obstacle(1300, 3000, 500, 100, "./Bilder/stone_platform.png"),
@@ -163,7 +166,7 @@ export const obstacles = [
   new Obstacle(300, 2750, 30, 30,"./Bilder/stone_platform.png"),
 
   // Höger sida
-  new Obstacle(2500, 2600, 100, 1275,),
+  new Obstacle(2500, 2600, 100, 1275, "./Bilder/right_dropper_pillar.png"),
   new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_platform.png"),
   new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_platform.png"),
   new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_platform.png"),
@@ -304,10 +307,10 @@ export function gameLoop(timestamp) {
     player.canDash = true;
     shirt.w = 0; shirt.h = 0; shirt.image = null;
     localStorage.setItem("hasDash", "true");
-    player.imgIdle.src = "./character_bilder/Meatball_HT.png";
-    player.imgLeftLeg.src = "./character_bilder/Meatball_HT_LLeg.png";
-    player.imgRightLeg.src = "./character_bilder/Meatball_HT_RLeg.png";
-    player.imgJump.src = "./character_bilder/Meatball_HT_Jump.png";
+    player.imgIdle.src = "./character_bilder/meatball_ht.png";
+    player.imgLeftLeg.src = "./character_bilder/meatball_ht_lleg.png";
+    player.imgRightLeg.src = "./character_bilder/meatball_ht_rleg.png";
+    player.imgJump.src = "./character_bilder/meatball_ht_jump.png";
     player.hasShirt = true;  
     player.message = "Du fick en tröja! Du kan nu dash:a (Shift)!";
     shirt.x = -1000;
@@ -325,10 +328,10 @@ if (player.x < boots.x + boots.w &&
     player.maxJumps = Math.max(player.maxJumps, 2);
     boots.w = 0; boots.h = 0; boots.image = null;
     localStorage.setItem("hasDoubleJump", "true");
-    player.imgIdle.src = "./character_bilder/Meatball_HTS.png";
-    player.imgLeftLeg.src = "./character_bilder/Meatball_HTS_LLeg.png";
-    player.imgRightLeg.src = "./character_bilder/Meatball_HTS_RLeg.png";
-    player.imgJump.src = "./character_bilder/Meatball_HTS_Jump.png";
+    player.imgIdle.src = "./character_bilder/meatball_hts.png";
+    player.imgLeftLeg.src = "./character_bilder/meatball_hts_lleg.png";
+    player.imgRightLeg.src = "./character_bilder/meatball_hts_rleg.png";
+    player.imgJump.src = "./character_bilder/meatball_hts_jump.png";
     player.hasShirt = true;  
     player.hasBoots = true;
     player.message
@@ -362,6 +365,7 @@ if (player.x < boots.x + boots.w &&
       if (lava && lava.checkCollision(player)) {
         if (!gameOverTriggered) {
           gameOverTriggered = true;
+          soundmanager.playGameover();
           pauseMap();
           if (onGameOver) onGameOver();
       }

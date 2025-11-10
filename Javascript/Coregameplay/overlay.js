@@ -1,9 +1,12 @@
 import { canvas, ctx, startMap, pauseMap, player, setCombatTrigger, combatGoats } from "./map.js";
 import { startCombat, PlayerActions, playerAction } from "./combat.js";
+import { Soundmanager } from "./ljud.js";
 import * as MapModule from "./map.js";
 
 let currentState = "menu";
 let currentCombatGoat = null;
+
+export const soundmanager = new Soundmanager();
 
 const startBtn = document.getElementById('start-btn');
 const menuImg = new Image();
@@ -40,6 +43,7 @@ function fadeInOverlay(callback) {
 //  Menu 
 export function showMenu() {
   currentState = "menu";
+  soundmanager.playMenu();
   startBtn.style.display = "block";
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -82,6 +86,7 @@ function resetToMenu() {
 //  Combat 
 export function enterCombat(collidedGoat) {
     pauseMap();
+    soundmanager.playCombat();
     fadeInOverlay(() => {
         currentState = "combat";
         startCombat(collidedGoat);
@@ -92,6 +97,7 @@ export function enterCombat(collidedGoat) {
 //  Start Game 
 export function startGame() {
     currentState = "overworld";
+    soundmanager.playOverworld();
     startBtn.style.display = "none";
     startMap();
 }
