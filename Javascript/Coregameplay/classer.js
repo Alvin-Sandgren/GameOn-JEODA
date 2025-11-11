@@ -246,19 +246,25 @@ export class Lava extends Obstacle {
 }
 
 export class Skylt {
-    constructor(x, y, w, h, color) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.color = color;
-    }
+  constructor(x, y, w, h, color) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.color = color;
+    this.image = null;
+  }
 
-    draw(ctx) {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.w, this.h);
+  draw(ctx) {
+    if (this.image && this.image.complete) {
+      ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
+    } else {
+      ctx.fillStyle = this.color;
+      ctx.fillRect(this.x, this.y, this.w, this.h);
+    }
   }
 }
+
 
 export class Goat {
     constructor(x, y, w, h, imageSrc) {
@@ -277,4 +283,21 @@ export class Goat {
     draw(ctx) {
         ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
     }
+}
+
+export class Decoration {
+  constructor(x, y, w, h, src) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.image = new Image();
+    this.image.src = src;
+  }
+
+  draw(ctx) {
+    if (this.image.complete) {
+      ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Character, Obstacle, Goat, Lava, Skylt } from "./classer.js";
+import { Character, Obstacle, Goat, Lava, Skylt, Decoration } from "./classer.js";
 import { Soundmanager } from "./ljud.js";
 
 export const soundmanager = new Soundmanager();
@@ -56,7 +56,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  200, 4400, 100, 100, 10, 2,
+  200, 4500, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -90,6 +90,11 @@ backgroundImage.onload = () => {
   backgroundLoaded = true;
 };
 
+export const caveSign = new Skylt(4400, 1805, 2200, 900);
+caveSign.image = new Image();
+caveSign.image.src = "Bilder/cave_background.png";
+
+
 export function drawBackground() {
   if (backgroundLoaded) {
     // Rita bakgrundsbild
@@ -100,6 +105,7 @@ export function drawBackground() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
+
 
 export const groundImage = new Image();
 let groundLoaded = false;
@@ -130,6 +136,13 @@ export const obstacles = [
   //Dropper shute
   new Obstacle(1800, 3000, 100, 900, "Bilder/left_dropper_pillar.png"),
 
+  // Höger sida
+  new Obstacle(2500, 2600, 100, 1275, "./Bilder/right_dropper_pillar.png"),
+  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_platform_small.png"),
+  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_platform_small.png"),
+  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_platform_small.png"),
+  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_platform_small.png"),
+
   //Vänster sida plus tak på droppern och gången till dash/get nr 2
   new Obstacle(1300, 3000, 500, 100, "./Bilder/stone_platform.png"),
   new Obstacle(400, 2500, 300, 100, "./Bilder/stone_platform.png"),
@@ -147,11 +160,11 @@ export const obstacles = [
   new Obstacle(4000, 2500, 300, 100, "./Bilder/stone_platform.png"),
 
   //Cave entrance
-  new Obstacle(4000, 0, 2600, 1900, "gray"),
-  new Obstacle(4300, 2500, 100, 205, "gray"),
-  new Obstacle(4300, 2700, 2300, 430, "gray"),
+  new Obstacle(4000, 0, 2600, 1900, "dimgray"),
+  new Obstacle(4300, 2500, 100, 205, "dimgray"),
+  new Obstacle(4300, 2700, 2300, 430, "dimgray"),
   //new Obstacle(6100, 1901, 20, 798, "red"),
-  new Obstacle(6500, 1800, 1000, 1430, "gray"),
+  new Obstacle(6500, 1800, 1000, 1430, "dimgray"),
   new Obstacle(6250, 2550, 177, 100, "./Bilder/stone_platform.png"),
   new Obstacle(6200, 2600, 275, 100, "./Bilder/stone_platform.png"),
 
@@ -168,16 +181,9 @@ export const obstacles = [
   new Obstacle(500, 3000, 39, 30,"./Bilder/stone_platform.png"),
   new Obstacle(300, 2750, 30, 30,"./Bilder/stone_platform.png"),
 
-  // Höger sida
-  new Obstacle(2500, 2600, 100, 1275, "./Bilder/right_dropper_pillar.png"),
-  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_platform_small.png"),
-  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_platform_small.png"),
-  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_platform_small.png"),
-  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_platform_small.png"),
-
   //Platforms efter droppern
-  new Obstacle(3000, 4400, 150, 100,"Bilder/grass_platform_stor.png"),
-  new Obstacle(2800, 4250, 150, 250,"Bilder/grass_platform_stor.png"),
+  new Obstacle(3000, 4400, 150, 200,"Bilder/grass_platform_stor.png"),
+  new Obstacle(2800, 4250, 150, 350,"Bilder/grass_platform_stor.png"),
 
   //Lavablock som hindrar progress när man inte har dash
   new Obstacle(3400, 4475, 50 , 25, "./Bilder/stone_platform.png"),
@@ -202,12 +208,9 @@ export const obstacles = [
 
 
   //Nivå 4 boss arena
-  new Obstacle(7955, 3850, 100, 50, "gray"),
-  //new Obstacle(7990, 3900, 30, 600, "orange"),
-  //new Obstacle(8000, 3900, 10, 600, "yellow"),
-  //new Obstacle(8015, 3900, 5, 600, "red"),
-  //new Obstacle(7990, 3900, 5, 600, "red"),
-  new Obstacle(7955, 4495, 100, 50, "gray"),
+  new Obstacle(7955, 3400, 100, 500, "./Bilder/stone_platform.png"),
+  new Obstacle(7993, 3900, 24, 600, "#ff6600"),
+  new Obstacle(7955, 4495, 100, 50, "./Bilder/stone_platform.png"),
 
   new Obstacle(8600, 4350, 100, 100, "./Bilder/stone_platform.png"),
   new Obstacle(8500, 4400, 300, 100, "./Bilder/stone_platform.png"),
@@ -236,7 +239,11 @@ boots.type = "boots";
     new Skylt(2105, 3945, 20, 5),
     new Skylt(2110, 3975, 65, 10),
     new Skylt(2155, 3965, 10, 30),
-    new Skylt(2160, 3970, 10, 20,)
+    new Skylt(2160, 3970, 10, 20,),
+];
+
+const decorations = [
+  new Decoration(100, 4400 - 150, 600, 256, "./Bilder/house.png")
 ];
 
 // kamera
@@ -289,11 +296,21 @@ export function gameLoop(timestamp) {
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
 
+    // Rita caveSign i världens koordinater
+    caveSign.draw(ctx);
+
+    caveSign.image.onload = () => console.log("caveSign image loaded:", caveSign.image.complete);
+    caveSign.image.onerror = () => console.warn("Failed to load caveSign image:", caveSign.image.src);
+
     drawGround();
     for (let obs of obstacles) obs.draw(ctx);
 
     for (let skylt of skyltar) {
       skylt.draw(ctx);
+    }
+
+    for (let decor of decorations) {
+      decor.draw(ctx);
     }
 
     const isMoving = keys["a"] || keys["d"] || keys["ArrowLeft"] || keys["ArrowRight"];
@@ -362,7 +379,6 @@ if (!player.seenCaveHint) {
     );
   }
 }
-
 
 // Rita getter ur listan om de inte är döda
     for (let goat of combatGoats) {
@@ -434,7 +450,6 @@ if (!player.seenCaveHint) {
     if (inEndZone && hasAllTokens && !creditsActive) {
       startCredits();
     }
-
     ctx.restore();
 
     //  Rita dialogruta i skärmlägen
@@ -463,7 +478,6 @@ if (!player.seenCaveHint) {
       ctx.font = "18px Arial";
       ctx.fillText("Click left mouse button to continue...", boxX + boxW - 350, boxY + boxH - 40);
     }
-
 }
 }
 
