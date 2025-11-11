@@ -56,7 +56,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  200, 4500, 100, 100, 10, 2,
+  200, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -163,6 +163,8 @@ export const obstacles = [
   new Obstacle(3700, 2500, 300, 100, "./platforms/stone_platform.png"),
   new Obstacle(4000, 2500, 300, 100, "./platforms/stone_platform.png"),
 
+  //Be Damien göra en bättre bild så jag kan göra en bättre plattform här 1300-4000 så 3000=bredd i x-led och 100=höjd i y-led
+
   //Cave entrance
   new Obstacle(4000, 0, 2600, 1900, "dimgray"),
   new Obstacle(4300, 2500, 100, 205, "dimgray"),
@@ -204,8 +206,7 @@ export const obstacles = [
   new Obstacle(6000, 4200, 100, 500, "gray"),
   new Obstacle(6100, 4300, 100, 300, "gray"),
   new Obstacle(6200, 4400, 100, 200, "gray"),
-
-
+  //Be Damien göra bättre bilder på trappor så kan jag göra bättre trappa
 
   //Nivå 4 boss arena
   new Obstacle(7955, 3400, 100, 500, "./platforms/stone_platform.png"),
@@ -227,19 +228,20 @@ let boots = new Obstacle(8625, 4330, 64, 20, "./equipment/equip_shoes.png");
 boots.type = "boots";
 
  const skyltar = [
-    new Skylt(2115, 4000, 25, 25,"black"),
-    new Skylt(2120, 3975, 15, 50, "saddlebrown"),
-    new Skylt(2070, 3925, 120, 75),
-    new Skylt(2065, 3920, 5, 80, "black"),
-    new Skylt(2065, 3920, 125, 5),
-    new Skylt(2190, 3920, 5, 80),
-    new Skylt(2065, 4000, 130, 5, ),
-    new Skylt(2110, 3940, 10, 40),
-    new Skylt(2100, 3950, 30, 10),
-    new Skylt(2105, 3945, 20, 5),
-    new Skylt(2110, 3975, 65, 10),
-    new Skylt(2155, 3965, 10, 30),
-    new Skylt(2160, 3970, 10, 20,),
+    // Svart stolpe och outline
+    new Skylt(2120, 3975, 25, 50, "black"),     
+    new Skylt(2065, 3920, 130, 85, "black"),   
+
+    // Själva skylten ovanpå
+    new Skylt(2070, 3925, 120, 75, "saddlebrown"),
+    new Skylt(2125, 3975, 15, 50, "saddlebrown"),
+
+    // Pilar och detaljer ovanpå
+    new Skylt(2100, 3955, 65, 10, "black"),
+    new Skylt(2145, 3945, 10, 30, "black"),
+    new Skylt(2150, 3950, 10, 20, "black"),
+    
+
 ];
 
 const decorations = [
@@ -302,12 +304,12 @@ export function gameLoop(timestamp) {
     caveSign.image.onload = () => console.log("caveSign image loaded:", caveSign.image.complete);
     caveSign.image.onerror = () => console.warn("Failed to load caveSign image:", caveSign.image.src);
 
-    drawGround();
-    for (let obs of obstacles) obs.draw(ctx);
-
     for (let skylt of skyltar) {
       skylt.draw(ctx);
     }
+
+    drawGround();
+    for (let obs of obstacles) obs.draw(ctx);
 
     for (let decor of decorations) {
       decor.draw(ctx);
@@ -413,7 +415,7 @@ if (!player.seenCaveHint) {
 
 
     //  upptäck lava (första gången spelaren ser den från höger vid droppern) 
-    if (!player.seenLava) {
+    if (!player.seenLava && !hasShirt) {
       const triggerZoneX1 = 3100;
       const triggerZoneX2 = 4200;
       const triggerZoneYMin = 4000;

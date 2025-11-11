@@ -40,7 +40,7 @@ function fadeInOverlay(callback) {
     step();
 }
 
-//  Menu 
+//  Meny
 export function showMenu() {
   currentState = "menu";
   soundmanager.playMenu();
@@ -59,9 +59,8 @@ export function showMenu() {
   pauseMap();
 }
 
-//  Game Over 
+//  Game Over gamestate
 export function gameOver() {
-  console.log("🔥 Game over triggered!");
   currentState = "gameover";
   pauseMap();
 
@@ -78,13 +77,14 @@ export function gameOver() {
   }, 50);
 }
 
+// Reset spelar position till meny efter game over
 function resetToMenu() {
   player.x = 200;
   player.y = 4200;
   showMenu();
 }
 
-//  Combat 
+//  Combat state
 export function enterCombat(collidedGoat) {
     pauseMap();
     soundmanager.playCombat();
@@ -114,6 +114,7 @@ startBtn.addEventListener('click', startGame);
 window.addEventListener('keydown', e => {
     if (currentState === "menu" && e.key === "Enter") startGame();
     else if (e.key.toLowerCase() === "m") showMenu();
+    //test keys
     else if (e.key.toLowerCase() === "å") gameOver();
     else if (e.key.toLowerCase() === "l") startGame();
 });
@@ -139,26 +140,29 @@ canvas.addEventListener("click", (e) => {
     });
 });
 
-//  Initial Menu 
+//sätt första gamestaten till menyn
 menuImg.onload = () => showMenu();
 
-function drawGameOverText() {
+// Rita "You Died" text vid game over
+export function drawGameOverText() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
   ctx.fillStyle = "red";
   ctx.font = "bold 120px Georgia";
-  ctx.textAlign = "center";
   ctx.fillText("YOU DIED", canvas.width / 2, canvas.height / 2 - 50);
 
   ctx.fillStyle = "white";
   ctx.font = "30px Arial";
   ctx.fillText("Click anywhere to return to the menu", canvas.width / 2, canvas.height / 2 + 50);
 
-  const handleClick = () => {
-    canvas.removeEventListener("click", handleClick);
-    resetToMenu();
-  };
-  canvas.addEventListener("click", handleClick);
+  ctx.restore();
+
+  canvas.addEventListener("click", () => resetToMenu(), { once: true });
 }
