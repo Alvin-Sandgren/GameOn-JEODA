@@ -54,6 +54,7 @@ export const keys = {};
 document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
+// Skapa spelaren
 export const player = new Character(
   200, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
@@ -91,15 +92,11 @@ backgroundImage.onload = () => {
 
 export function drawBackground() {
   if (backgroundLoaded) {
-    // Rita bakgrund på hela canvas
+    // Rita bakgrundsbild
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-    // Rita permanent mörkning ovanpå
+    // Rita permanent mörkning ovanpå bakgrunden
     ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; // justera 0.05–0.15
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  } else {
-    ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
@@ -276,8 +273,11 @@ const frameDuration = 1000 / targetFPS;
 
 export function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
+
+  // Pausa uppdatering om spelet är pausat eller bakgrunden inte är laddad
   if (paused || !backgroundLoaded) return;
 
+  // Tidsberäkning för att hålla konstant FPS
   const elapsed = timestamp - lastFrameTime;
   if (elapsed >= frameDuration) {
     lastFrameTime = timestamp - (elapsed % frameDuration);
@@ -303,6 +303,7 @@ export function gameLoop(timestamp) {
     shirt.draw(ctx);
     boots.draw(ctx);
 
+  //  Kolla kollision med tröjan och visa dialog samt uppdatera spelarens förmåga att dash'a plus animationerna av walking
     if (player.x < shirt.x + shirt.w &&
     player.x + player.w > shirt.x &&
     player.y < shirt.y + shirt.h &&
@@ -316,43 +317,39 @@ export function gameLoop(timestamp) {
     player.imgRightLeg.src = "./character_bilder/meatball_ht_rleg.png";
     player.imgJump.src = "./character_bilder/meatball_ht_jump.png";
     player.hasShirt = true;  
-    player.message = "Du fick en tröja! Du kan nu dash:a (Shift)!";
     shirt.x = -1000;
-
-    //  visa dialog när tröjan plockas upp
     showDialog("You found a shirt!\nYou can now dash! (by using Shift)");
-    
 }
 
-if (player.x < boots.x + boots.w &&
-    player.x + player.w > boots.x &&
-    player.y < boots.y + boots.h &&
-    player.y + player.h > boots.y) {
-    hasBoots = true;
-    player.maxJumps = Math.max(player.maxJumps, 2);
-    boots.w = 0; boots.h = 0; boots.image = null;
-    localStorage.setItem("hasDoubleJump", "true");
-    player.imgIdle.src = "./character_bilder/meatball_hts.png";
-    player.imgLeftLeg.src = "./character_bilder/meatball_hts_lleg.png";
-    player.imgRightLeg.src = "./character_bilder/meatball_hts_rleg.png";
-    player.imgJump.src = "./character_bilder/meatball_hts_jump.png";
-    player.hasShirt = true;  
-    player.hasBoots = true;
-    player.message
-    boots.x = -1000;  
+  // -||- som med tröjan fast skorna låser upp dubbelhopp
+  if (player.x < boots.x + boots.w &&
+      player.x + player.w > boots.x &&
+      player.y < boots.y + boots.h &&
+      player.y + player.h > boots.y) {
+      hasBoots = true;
+      player.maxJumps = Math.max(player.maxJumps, 2);
+      boots.w = 0; boots.h = 0; boots.image = null;
+      localStorage.setItem("hasDoubleJump", "true");
+      player.imgIdle.src = "./character_bilder/meatball_hts.png";
+      player.imgLeftLeg.src = "./character_bilder/meatball_hts_lleg.png";
+      player.imgRightLeg.src = "./character_bilder/meatball_hts_rleg.png";
+      player.imgJump.src = "./character_bilder/meatball_hts_jump.png";
+      player.hasShirt = true;  
+      player.hasBoots = true;
+      boots.x = -1000;  
 
-    //  visa dialog när skorna plockas upp
-    showDialog("You found shoes!\nYou can now double jump!");
+      showDialog("You found shoes!\nYou can now double jump!");
 }
 
 //  upptäck höga plattformen innan caven (hint om dubbelhopp)
 if (!player.seenCaveHint) {
-  const triggerZoneX1 = 2800; // börja känna av lite innan caven
-  const triggerZoneX2 = 3000; // strax innan man kommer upp
+  const triggerZoneX1 = 2800; 
+  const triggerZoneX2 = 3000; 
   const triggerZoneYMin = 2400;
   const triggerZoneYMax = 2800;
   const playerFeetY = player.y + player.h;
 
+  //Kollar om spelaren gått in i triggerzonen och visar dialogen enbart en gång
   if (
     player.x > triggerZoneX1 &&
     player.x < triggerZoneX2 &&
@@ -367,14 +364,14 @@ if (!player.seenCaveHint) {
 }
 
 
-// Rita getter dynamiskt
+// Rita getter ur listan om de inte är döda
     for (let goat of combatGoats) {
         if (goat.health > 0) {
             goat.draw(ctx);
         }
     }
 
-    // Kolla kollision med getter (combat)
+    // Kolla kollision med getter (combattrigger)
     for (let goat of combatGoats) {
       if (
         player.x < goat.x + goat.w &&
@@ -387,7 +384,7 @@ if (!player.seenCaveHint) {
       }
     }
 
-    //  Kolla kollision med Lava 
+    //  Kolla kollision med Lava spelar ljudet av gubben som dör och pausar spelet samt sätter en i gameOver state
     const lava = obstacles.find(o => o instanceof Lava);
       if (lava && lava.checkCollision(player)) {
         if (!gameOverTriggered) {
@@ -407,6 +404,7 @@ if (!player.seenCaveHint) {
       const triggerZoneYMax = 4700;
       const playerFeetY = player.y + player.h;
 
+      // Kollar om spelaren gått in i triggerzonen och visar dialogen för lava enbart en gång
       if (
         player.x > triggerZoneX1 &&
         player.x < triggerZoneX2 &&
@@ -417,7 +415,7 @@ if (!player.seenCaveHint) {
         showDialog("That ground looks dangerous, almost like it's lava...\nBetter not touch it! \n (I probably need to be able to dash to get over it *wink-wink*)");
       }
     }
-    // Trigger för controls-dialog
+    // Trigger för controls-dialog visas när man spawnar in i spelet första gången
     if (!player.seenControls) {
         const triggerX1 = 200;
         const triggerX2 = 400;
@@ -430,19 +428,16 @@ if (!player.seenCaveHint) {
         }
     }
 
-    // --- Placeholder: Trigger vid slutet av banan (testläge) ---
+    // Placeholder: Trigger vid slutet av banan (testläge) som visar credits
     const inEndZone = player.x > 9500 && player.x < 11000 && player.y > 3800 && player.y < 4600;
 
     if (inEndZone && hasAllTokens && !creditsActive) {
       startCredits();
     }
 
-
-
-
     ctx.restore();
 
-    //  Rita dialogruta i skärmlägen 
+    //  Rita dialogruta i skärmlägen
     if (dialogActive) {
       // bakgrundsruta
       ctx.fillStyle = "rgba(0, 0, 0, 1)";
@@ -452,15 +447,14 @@ if (!player.seenCaveHint) {
       const boxY = canvas.height / 2 - boxH / 2;
       ctx.fillRect(boxX, boxY, boxW, boxH);
 
-      // kantlinje
       ctx.strokeStyle = "white";
       ctx.lineWidth = 5;
       ctx.strokeRect(boxX, boxY, boxW, boxH);
 
-      // text
       ctx.fillStyle = "white";
       ctx.font = "26px Arial";
       ctx.textBaseline = "top";
+      //Gör så att dialogen kan ha flera rader
       const lines = dialogText.split("\n");
       lines.forEach((line, i) => {
         ctx.fillText(line, boxX + 24, boxY + 24 + i * 36);
@@ -485,6 +479,7 @@ if (startBtn) {
 // === Credits-system (minimal) ===
 let creditsActive = false, creditsY = canvas.height, fadeAlpha = 1, holdTimer = 0;
 
+// Ladda in bilder för credits och deras positioner
 const creditEntities = [
   { src: "./Goat_bilder/antonget.png", x: 50, y: 50 },
   { src: "./Goat_bilder/gwget.png", x: 1700, y: 50 },
@@ -492,8 +487,11 @@ const creditEntities = [
   { src: "./Goat_bilder/stefanget.png", x: 1700, y: 700 },
   { src: "./character_bilder/meatball_horn.png", x: 500, y: 400 }
 ];
+
+//Loopar igenom creditEntities och laddar bilderna
 creditEntities.forEach(e => { e.img = new Image(); e.img.src = e.src; });
 
+// Textinnehåll för credits
 const creditsText = [
   "Thank you for playing!", "", "A game by:",
   " - Alvin Sandgren (Logic & Gameplay)",
@@ -511,6 +509,7 @@ const creditsText = [
   "The End..."
 ];
 
+// Rita credits på canvasen
 function drawCredits() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (backgroundLoaded) ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -526,6 +525,8 @@ function drawCredits() {
   ctx.font = "32px Arial";
   ctx.textAlign = "center";
 
+  // Rita varje rad av credits-texten och låter dem scrolla uppåt
+  //Förutom de två sista raderna som får fadea ut och hålla stilla i mitten
   for (let i = 0; i < creditsText.length; i++) {
     const line = creditsText[i];
     const y = creditsY + i * 50;
@@ -541,14 +542,16 @@ function drawCredits() {
     }
   }
 
+  //hur snabbt credits ska scrolla
   creditsY -= 1.8;
-
+  // Hantera fade-out för de sista raderna
   if (holdTimer >= 7) fadeAlpha = Math.max(0, fadeAlpha - 0.01);
 
   if (fadeAlpha > 0) requestAnimationFrame(drawCredits);
   else { creditsActive = false; window.location.reload(); }
 }
 
+// Starta credits-sekvensen
 function startCredits() {
   if (creditsActive) return;
   creditsActive = true;
