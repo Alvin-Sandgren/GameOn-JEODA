@@ -12,6 +12,8 @@ let dialogOnClose = null;
 let hasShirt = false;
 let hasBoots = false;
 
+
+
 export let onCombatTrigger = null;
 export let onGameOver = null;
 let gameOverTriggered = false;
@@ -51,7 +53,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
-  200, 4450, 100, 100, 10, 2,
+  1900, 1000, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -66,6 +68,8 @@ export const player = new Character(
 
 //  se till att spelaren har en flagga för första-gången-händelser
 player.seenLava = player.seenLava || false;
+player.seenCaveHint = player.seenCaveHint || false;
+
 
  // getter (fiender)
 export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png", "GWget");
@@ -121,8 +125,8 @@ export const obstacles = [
   // platforms spawn
   new Obstacle(700, 4300, 300, 50, "./Bilder/grass_platform.png"),
   new Obstacle(1200, 4200, 200, 50, "./Bilder/grass_platform.png"),
-  new Obstacle(1600, 4100, 70, 50, "./Bilder/grass_platform.png"),
-  new Obstacle(1800, 4025, 800, 575, "Bilder/grass_platform_stor.png"),
+  new Obstacle(1600, 4100, 70, 50, "./Bilder/grass_platform_small.png"),
+  new Obstacle(1800, 4025, 800, 575, "./Bilder/grass_platform_stor.png"),
 
   //Dropper shute
   new Obstacle(1800, 3000, 100, 900, "Bilder/left_dropper_pillar.png"),
@@ -157,8 +161,9 @@ export const obstacles = [
   new Obstacle(3000, 2000, 200, 50, "./Bilder/grass_platform.png"),
 
   //Nivå 5 platformar
-  new Obstacle(3400, 1700, 300, 100, "Bilder/grass_platform.png"),
-  new Obstacle(0, 1400, 2600, 200, "green"),
+  new Obstacle(3400, 1700, 300, 100, "./Bilder/grass_platform.png"),
+  // ska bli Anton mark platform
+ // new Obstacle(0, 1400, 2600, 200, "./Bilder/ground.png"),
 
   //Obstacles mot nivå 3
   new Obstacle(950, 3000, 45, 30, "./Bilder/stone_platform.png"),
@@ -167,10 +172,10 @@ export const obstacles = [
 
   // Höger sida
   new Obstacle(2500, 2600, 100, 1275, "./Bilder/right_dropper_pillar.png"),
-  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_platform.png"),
-  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_platform.png"),
-  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_platform.png"),
-  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_platform.png"),
+  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_platform_small.png"),
+  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_platform_small.png"),
+  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_platform_small.png"),
+  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_platform_small.png"),
 
   //Platforms efter droppern
   new Obstacle(3000, 4400, 150, 100,"Bilder/grass_platform_stor.png"),
@@ -340,6 +345,28 @@ if (player.x < boots.x + boots.w &&
     //  visa dialog när skorna plockas upp
     showDialog("Du hittade skor!\nDu kan nu dubbelhoppa!");
 }
+
+//  upptäck höga plattformen innan caven (hint om dubbelhopp)
+if (!player.seenCaveHint) {
+  const triggerZoneX1 = 2800; // börja känna av lite innan caven
+  const triggerZoneX2 = 3000; // strax innan man kommer upp
+  const triggerZoneYMin = 2400;
+  const triggerZoneYMax = 2800;
+  const playerFeetY = player.y + player.h;
+
+  if (
+    player.x > triggerZoneX1 &&
+    player.x < triggerZoneX2 &&
+    playerFeetY >= triggerZoneYMin &&
+    playerFeetY <= triggerZoneYMax
+  ) {
+    player.seenCaveHint = true;
+    showDialog(
+      "Hmm... den där plattformen ser lite för hög ut.\nKanske om jag kunde hoppa en gång till i luften...\n Behöver nog bättre skor för det här!"
+    );
+  }
+}
+
 
 // Rita getter dynamiskt
     for (let goat of combatGoats) {
