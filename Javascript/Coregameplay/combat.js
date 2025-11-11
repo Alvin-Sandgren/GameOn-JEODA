@@ -2,7 +2,7 @@ import { canvas, ctx, startMap, player, combatGoats } from "./map.js";
 import { startGame, gameOver } from "./overlay.js";
 
 const combatImg = new Image();
-combatImg.src = "./Bilder/combat.png";
+combatImg.src = "./kartbiilder/combat.png";
 
 let inCombat = false;
 let playerTurn = true;

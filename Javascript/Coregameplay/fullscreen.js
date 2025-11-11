@@ -3,7 +3,7 @@ import { canvas, ctx } from "./map.js";
 
 export const btn = document.getElementById('fullscreen-btn');
 const menuImage = new Image();
-menuImage.src = './Bilder/meny.png';
+menuImage.src = './kartbilder/meny.png';
 
 menuImage.onload = () => resizeCanvas();
 

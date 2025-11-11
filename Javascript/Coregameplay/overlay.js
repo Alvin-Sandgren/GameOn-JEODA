@@ -1,4 +1,4 @@
-import { canvas, ctx, startMap, pauseMap, player, setCombatTrigger, combatGoats } from "./map.js";
+import { canvas, ctx, startMap, pauseMap, player, setCombatTrigger} from "./map.js";
 import { startCombat, PlayerActions, playerAction, drawCombat } from "./combat.js";
 import { Soundmanager } from "./ljud.js";
 import * as MapModule from "./map.js";
@@ -10,7 +10,7 @@ export const soundmanager = new Soundmanager();
 
 const startBtn = document.getElementById('start-btn');
 const menuImg = new Image();
-menuImg.src = "./Bilder/meny.png";
+menuImg.src = "./kartbilder/meny.png";
 
 //  Combat & Game Over Triggers 
 window.addEventListener("DOMContentLoaded", () => {

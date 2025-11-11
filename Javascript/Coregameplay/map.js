@@ -75,24 +75,24 @@ player.seenCaveHint = player.seenCaveHint || false;
 
 
  // getter (fiender)
-export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./Goat_bilder/gwget.png", "GWget");
-export const enemygoatsten = new Goat(1500, 2855, 150, 150, "./Goat_bilder/stenget.png", "Stenget");
-export const enemygoatstefan = new Goat(7300, 4300, 200, 200, "./Goat_bilder/stefanget.png", "Stefanget");
-export const enemygoatanton = new Goat(600, 975, 450, 450, "./Goat_bilder/antonget.png", "Antonget");
+export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./goat_bilder/gwget.png", "GWget");
+export const enemygoatsten = new Goat(1500, 2855, 150, 150, "./goat_bilder/stenget.png", "Stenget");
+export const enemygoatstefan = new Goat(7300, 4300, 200, 200, "./goat_bilder/stefanget.png", "Stefanget");
+export const enemygoatanton = new Goat(600, 975, 450, 450, "./goat_bilder/antonget.png", "Antonget");
 
 export let combatGoats = [enemygoatgw, enemygoatsten, enemygoatstefan, enemygoatanton];
 
 //  Bakgrundsbild 
 export const backgroundImage = new Image();
 let backgroundLoaded = false;
-backgroundImage.src = "./Bilder/bakgrund.png";
+backgroundImage.src = "./kartbilder/bakgrund.png";
 backgroundImage.onload = () => {
   backgroundLoaded = true;
 };
 
 export const caveSign = new Skylt(4400, 1805, 2200, 900);
 caveSign.image = new Image();
-caveSign.image.src = "Bilder/cave_background.png";
+caveSign.image.src = "./kartbilder/cave_background.png";
 
 
 export function drawBackground() {
@@ -109,7 +109,7 @@ export function drawBackground() {
 
 export const groundImage = new Image();
 let groundLoaded = false;
-groundImage.src = "./Bilder/ground.png";
+groundImage.src = "./kartbilder/ground.png";
 groundImage.onload = () => {
   groundLoaded = true;
 };
@@ -128,36 +128,40 @@ export function drawGround() {
 // obstacles
 export const obstacles = [
   // platforms spawn
-  new Obstacle(700, 4300, 300, 50, "./Bilder/grass_platform.png"),
-  new Obstacle(1200, 4200, 200, 50, "./Bilder/grass_platform.png"),
-  new Obstacle(1600, 4100, 70, 50, "./Bilder/grass_platform_small.png"),
-  new Obstacle(1800, 4025, 800, 575, "./Bilder/grass_platform_stor.png"),
+  new Obstacle(700, 4300, 300, 50, "./platforms/grass_platform.png"),
+  new Obstacle(1200, 4200, 200, 50, "./platforms/grass_platform.png"),
+  new Obstacle(1600, 4100, 70, 50, "./platforms/grass_platform_small.png"),
+  new Obstacle(1800, 4025, 800, 575, "./platforms/grass_platform_stor.png"),
 
   //Dropper shute
-  new Obstacle(1800, 3000, 100, 900, "Bilder/left_dropper_pillar.png"),
+  new Obstacle(1800, 3000, 100, 900, "platforms/left_dropper_pillar.png"),
 
   // Höger sida
-  new Obstacle(2500, 2600, 100, 1275, "./Bilder/right_dropper_pillar.png"),
-  new Obstacle(2000, 3600, 100, 50,"./Bilder/grass_platform_small.png"),
-  new Obstacle(2200, 3800, 50, 50,"./Bilder/grass_platform_small.png"),
-  new Obstacle(2000, 3400, 75, 50,"./Bilder/grass_platform_small.png"),
-  new Obstacle(2200, 3200, 100, 50,"./Bilder/grass_platform_small.png"),
+  new Obstacle(2500, 2600, 100, 1275, "./platforms/right_dropper_pillar.png"),
+  new Obstacle(2000, 3600, 100, 50,"./platforms/grass_platform_small.png"),
+  new Obstacle(2200, 3800, 50, 50,"./platforms/grass_platform_small.png"),
+  new Obstacle(2000, 3400, 75, 50,"./platforms/grass_platform_small.png"),
+  new Obstacle(2200, 3200, 100, 50,"./platforms/grass_platform_small.png"),
+
+  //platforms efter droppern som leder till lava
+  new Obstacle(3000, 4400, 150, 200,"./platforms/grass_platform_l_t_lava.png"),
+  new Obstacle(2800, 4250, 150, 350,"./platforms/grass_platform_s_t_lava.png"),
 
   //Vänster sida plus tak på droppern och gången till dash/get nr 2
-  new Obstacle(1300, 3000, 500, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(400, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(700, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(1000, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(1300, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(1600, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(1900, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(2200, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(2500, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(2800, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(3100, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(3400, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(3700, 2500, 300, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(4000, 2500, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(1300, 3000, 500, 100, "./platforms/stone_platform.png"),
+  new Obstacle(400, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(700, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(1000, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(1300, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(1600, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(1900, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(2200, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(2500, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(2800, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(3100, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(3400, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(3700, 2500, 300, 100, "./platforms/stone_platform.png"),
+  new Obstacle(4000, 2500, 300, 100, "./platforms/stone_platform.png"),
 
   //Cave entrance
   new Obstacle(4000, 0, 2600, 1900, "dimgray"),
@@ -165,37 +169,33 @@ export const obstacles = [
   new Obstacle(4300, 2700, 2300, 430, "dimgray"),
   //new Obstacle(6100, 1901, 20, 798, "red"),
   new Obstacle(6500, 1800, 1000, 1430, "dimgray"),
-  new Obstacle(6250, 2550, 177, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(6200, 2600, 275, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(6250, 2550, 177, 100, "./platforms/stone_platform.png"),
+  new Obstacle(6200, 2600, 275, 100, "./platforms/stone_platform.png"),
 
 
   // Vägen till nivå 5
-  new Obstacle(3000, 2000, 200, 50, "./Bilder/grass_platform.png"),
+  new Obstacle(3000, 2000, 200, 50, "./platforms/grass_platform.png"),
 
   //Nivå 5 platformar
-  new Obstacle(3400, 1700, 300, 100, "./Bilder/grass_platform.png"),
-  new Obstacle(0, 1400, 2600, 200, "./Bilder/grass_platform_medium.png"),
+  new Obstacle(3400, 1700, 300, 100, "./platforms/grass_platform.png"),
+  new Obstacle(0, 1400, 2600, 200, "./platforms/grass_platform_medium.png"),
 
   //Obstacles mot nivå 3
-  new Obstacle(950, 3000, 45, 30, "./Bilder/stone_platform.png"),
-  new Obstacle(500, 3000, 39, 30,"./Bilder/stone_platform.png"),
-  new Obstacle(300, 2750, 30, 30,"./Bilder/stone_platform.png"),
-
-  //Platforms efter droppern
-  new Obstacle(3000, 4400, 150, 200,"Bilder/grass_platform_stor.png"),
-  new Obstacle(2800, 4250, 150, 350,"Bilder/grass_platform_stor.png"),
+  new Obstacle(950, 3000, 45, 30, "./platforms/stone_platform.png"),
+  new Obstacle(500, 3000, 39, 30,"./platforms/stone_platform.png"),
+  new Obstacle(300, 2750, 30, 30,"./platforms/stone_platform.png"),
 
   //Lavablock som hindrar progress när man inte har dash
-  new Obstacle(3400, 4475, 50 , 25, "./Bilder/stone_platform.png"),
-  new Obstacle(3450, 4450, 50, 50, "./Bilder/stone_platform.png"),
+  new Obstacle(3400, 4475, 50 , 25, "./platforms/stone_platform.png"),
+  new Obstacle(3450, 4450, 50, 50, "./platforms/stone_platform.png"),
   new Lava(3500, 4500, 600, 600),   // Lavan
-  new Obstacle(4100, 4450, 50, 50, "./Bilder/stone_platform.png"),
-  new Obstacle(4150, 4475, 50, 25, "./Bilder/stone_platform.png"),
+  new Obstacle(4100, 4450, 50, 50, "./platforms/stone_platform.png"),
+  new Obstacle(4150, 4475, 50, 25, "./platforms/stone_platform.png"),
 
-  //Platforms som leder till nivå 4
-  new Obstacle(5050, 4300, 75, 25, "./Bilder/stone_platform.png"),
-  new Obstacle(5600, 4200, 100, 50, "./Bilder/stone_platform.png"),
-  new Obstacle(5050, 4000, 75, 25, "./Bilder/stone_platform.png"),
+  //platforms som leder till nivå 4
+  new Obstacle(5050, 4300, 75, 25, "./platforms/stone_platform.png"),
+  new Obstacle(5600, 4200, 100, 50, "./platforms/stone_platform.png"),
+  new Obstacle(5050, 4000, 75, 25, "./platforms/stone_platform.png"),
 
   //Till nivå 4 trappor tillbaka
   new Obstacle(5700, 3900, 100, 1000, "gray"),
@@ -208,22 +208,22 @@ export const obstacles = [
 
 
   //Nivå 4 boss arena
-  new Obstacle(7955, 3400, 100, 500, "./Bilder/stone_platform.png"),
+  new Obstacle(7955, 3400, 100, 500, "./platforms/stone_platform.png"),
   new Obstacle(7993, 3900, 24, 600, "#ff6600"),
-  new Obstacle(7955, 4495, 100, 50, "./Bilder/stone_platform.png"),
+  new Obstacle(7955, 4495, 100, 50, "./platforms/stone_platform.png"),
 
-  new Obstacle(8600, 4350, 100, 100, "./Bilder/stone_platform.png"),
-  new Obstacle(8500, 4400, 300, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(8600, 4350, 100, 100, "./platforms/stone_platform.png"),
+  new Obstacle(8500, 4400, 300, 100, "./platforms/stone_platform.png"),
 
   //Väggar på sidorna
-  new Obstacle(worldWidth - 30, 0, 100, 10000, "./Bilder/wall_right.png"),
-  new Obstacle(-70, 0, 100, 10000, "./Bilder/wall_left.png")
+  new Obstacle(worldWidth - 30, 0, 100, 10000, "./platforms/wall_right.png"),
+  new Obstacle(-70, 0, 100, 10000, "./platforms/wall_left.png")
 ];
 
 
-let shirt = new Obstacle(6300, 2500, 80, 52, "./Bilder/equip_shirt.png");
+let shirt = new Obstacle(6300, 2500, 80, 52, "./equipment/equip_shirt.png");
 shirt.type = "shirt";
-let boots = new Obstacle(8625, 4330, 64, 20, "./Bilder/equip_shoes.png");
+let boots = new Obstacle(8625, 4330, 64, 20, "./equipment/equip_shoes.png");
 boots.type = "boots";
 
  const skyltar = [
@@ -243,7 +243,7 @@ boots.type = "boots";
 ];
 
 const decorations = [
-  new Decoration(100, 4400 - 150, 600, 256, "./Bilder/house.png")
+  new Decoration(100, 4400 - 150, 600, 256, "./kartbilder/house.png")
 ];
 
 // kamera
@@ -495,10 +495,10 @@ let creditsActive = false, creditsY = canvas.height, fadeAlpha = 1, holdTimer = 
 
 // Ladda in bilder för credits och deras positioner
 const creditEntities = [
-  { src: "./Goat_bilder/antonget.png", x: 50, y: 50 },
-  { src: "./Goat_bilder/gwget.png", x: 1700, y: 50 },
-  { src: "./Goat_bilder/stenget.png", x: 50, y: 700 },
-  { src: "./Goat_bilder/stefanget.png", x: 1700, y: 700 },
+  { src: "./goat_bilder/antonget.png", x: 50, y: 50 },
+  { src: "./goat_bilder/gwget.png", x: 1700, y: 50 },
+  { src: "./goat_bilder/stenget.png", x: 50, y: 700 },
+  { src: "./goat_bilder/stefanget.png", x: 1700, y: 700 },
   { src: "./character_bilder/meatball_horn.png", x: 500, y: 400 }
 ];
 
