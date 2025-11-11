@@ -12,6 +12,8 @@ let dialogOnClose = null;
 let hasShirt = false;
 let hasBoots = false;
 
+// Check för trigger av ending
+const hasAllTokens = true;
 
 
 export let onCombatTrigger = null;
@@ -53,7 +55,7 @@ document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => keys[e.key] = false);
 
 export const player = new Character(
-  1900, 1000, 100, 100, 10, 2,
+  200, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -153,17 +155,16 @@ export const obstacles = [
   new Obstacle(4300, 2700, 2300, 430, "gray"),
   //new Obstacle(6100, 1901, 20, 798, "red"),
   new Obstacle(6500, 1800, 1000, 1430, "gray"),
-  new Obstacle(6200, 2600, 275, 100, "./Bilder/stone_platform.png"),
-  //Här imellan hamnar trjöjan
   new Obstacle(6250, 2550, 177, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(6200, 2600, 275, 100, "./Bilder/stone_platform.png"),
+
 
   // Vägen till nivå 5
   new Obstacle(3000, 2000, 200, 50, "./Bilder/grass_platform.png"),
 
   //Nivå 5 platformar
   new Obstacle(3400, 1700, 300, 100, "./Bilder/grass_platform.png"),
-  // ska bli Anton mark platform
- // new Obstacle(0, 1400, 2600, 200, "./Bilder/ground.png"),
+  new Obstacle(0, 1400, 2600, 200, "./Bilder/grass_platform_medium.png"),
 
   //Obstacles mot nivå 3
   new Obstacle(950, 3000, 45, 30, "./Bilder/stone_platform.png"),
@@ -211,10 +212,8 @@ export const obstacles = [
   //new Obstacle(7990, 3900, 5, 600, "red"),
   new Obstacle(7955, 4495, 100, 50, "gray"),
 
-  new Obstacle(8500, 4400, 150, 100, "./Bilder/stone_platform.png"),
   new Obstacle(8600, 4350, 100, 100, "./Bilder/stone_platform.png"),
-  //Här imellan hamnar skorna
-  new Obstacle(8650, 4400, 150, 100, "./Bilder/stone_platform.png"),
+  new Obstacle(8500, 4400, 300, 100, "./Bilder/stone_platform.png"),
 
   //Väggar på sidorna
   new Obstacle(worldWidth - 30, 0, 100, 10000, "./Bilder/wall_right.png"),
@@ -321,7 +320,7 @@ export function gameLoop(timestamp) {
     shirt.x = -1000;
 
     //  visa dialog när tröjan plockas upp
-    showDialog("Du hittade en tröja!\nDu kan nu dash:a (Shift)!");
+    showDialog("You found a shirt!\nYou can now dash! (by using Shift)");
     
 }
 
@@ -343,7 +342,7 @@ if (player.x < boots.x + boots.w &&
     boots.x = -1000;  
 
     //  visa dialog när skorna plockas upp
-    showDialog("Du hittade skor!\nDu kan nu dubbelhoppa!");
+    showDialog("You found shoes!\nYou can now double jump!");
 }
 
 //  upptäck höga plattformen innan caven (hint om dubbelhopp)
@@ -362,7 +361,7 @@ if (!player.seenCaveHint) {
   ) {
     player.seenCaveHint = true;
     showDialog(
-      "Hmm... den där plattformen ser lite för hög ut.\nKanske om jag kunde hoppa en gång till i luften...\n Behöver nog bättre skor för det här!"
+      "Hmm... that platform looks a bit too high.\nIf only I could jump once more in the air...\n (I probably need shoes for a jump like that!)"
     );
   }
 }
@@ -415,7 +414,7 @@ if (!player.seenCaveHint) {
         playerFeetY <= triggerZoneYMax
       ) {
         player.seenLava = true;
-        showDialog("Den där marken ser farlig ut, nästan som det vore lava...\nBäst att inte röra vid den! \n (Jag behöver nog kunna dasha för att ta mig över *wink-wink*)");
+        showDialog("That ground looks dangerous, almost like it's lava...\nBetter not touch it! \n (I probably need to be able to dash to get over it *wink-wink*)");
       }
     }
     // Trigger för controls-dialog
@@ -426,10 +425,19 @@ if (!player.seenCaveHint) {
         if (player.x >= triggerX1 && player.x <= triggerX2) {
             player.seenControls = true;
             showDialog(
-                "Såhär spelar du:\n\nGå Vänster/Höger: A/D eller ← →\nHoppa: W eller Mellanslag\n Spamtryck L + håll inne en rörelseknapp: för att ta sig ur combat"
+                "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space\n Spam L + hold a movement key: to get out of combat"
             );
         }
     }
+
+    // --- Placeholder: Trigger vid slutet av banan (testläge) ---
+    const inEndZone = player.x > 9500 && player.x < 11000 && player.y > 3800 && player.y < 4600;
+
+    if (inEndZone && hasAllTokens && !creditsActive) {
+      startCredits();
+    }
+
+
 
 
     ctx.restore();
@@ -459,7 +467,7 @@ if (!player.seenCaveHint) {
       });
 
       ctx.font = "18px Arial";
-      ctx.fillText("Klicka vänster musknapp för att fortsätta...", boxX + boxW - 350, boxY + boxH - 40);
+      ctx.fillText("Click left mouse button to continue...", boxX + boxW - 350, boxY + boxH - 40);
     }
 
 }
@@ -472,4 +480,81 @@ requestAnimationFrame(gameLoop);
 const startBtn = document.getElementById('start-btn');
 if (startBtn) {
   startBtn.addEventListener('click', () => startMap());
+}
+
+// === Credits-system (minimal) ===
+let creditsActive = false, creditsY = canvas.height, fadeAlpha = 1, holdTimer = 0;
+
+const creditEntities = [
+  { src: "./Goat_bilder/antonget.png", x: 50, y: 50 },
+  { src: "./Goat_bilder/gwget.png", x: 1700, y: 50 },
+  { src: "./Goat_bilder/stenget.png", x: 50, y: 700 },
+  { src: "./Goat_bilder/stefanget.png", x: 1700, y: 700 },
+  { src: "./character_bilder/meatball_horn.png", x: 500, y: 400 }
+];
+creditEntities.forEach(e => { e.img = new Image(); e.img.src = e.src; });
+
+const creditsText = [
+  "Thank you for playing!", "", "A game by:",
+  " - Alvin Sandgren (Logic & Gameplay)",
+  " - Jeffery (Lore & Music)",
+  " - Oliver (Goatdesign and Combat UI)",
+  " - Erik (Enemy AI & Combat System)",
+  " - Damien (Graphics and Character Design)",
+  "", "Special Thanks:",
+  " - Our goats Stefan, Gw, Anton & Sten",
+  " - Our music inspirations",
+  " - A stubborn meatball", "", " Music Credits:",
+  " - 'Epic Fantasy Adventure' by Scott Buckley (www.scottbuckley.com.au)",
+  " - 'Heroic Quest' by Alexander Nakarada (www.serpentsoundstudios.com)",
+  "", "", "JEODA GameOn - A Platformer Adventure",
+  "The End..."
+];
+
+function drawCredits() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (backgroundLoaded) ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (const e of creditEntities) {
+    if (!e.img.complete) continue;
+    ctx.drawImage(e.img, e.x, e.y, 200, 200);
+  }
+
+  ctx.fillStyle = "white";
+  ctx.font = "32px Arial";
+  ctx.textAlign = "center";
+
+  for (let i = 0; i < creditsText.length; i++) {
+    const line = creditsText[i];
+    const y = creditsY + i * 50;
+    if (i >= creditsText.length - 2) {
+      const targetY = canvas.height / 2 + (i === creditsText.length - 1 ? 50 : -50);
+      const drawY = y < targetY ? targetY : y;
+      ctx.globalAlpha = fadeAlpha;
+      ctx.fillText(line, canvas.width / 2 + 150, drawY);
+      ctx.globalAlpha = 1;
+      if (y < targetY) holdTimer += 1 / 60;
+    } else {
+      ctx.fillText(line, canvas.width / 2 + 150, y);
+    }
+  }
+
+  creditsY -= 1.8;
+
+  if (holdTimer >= 7) fadeAlpha = Math.max(0, fadeAlpha - 0.01);
+
+  if (fadeAlpha > 0) requestAnimationFrame(drawCredits);
+  else { creditsActive = false; window.location.reload(); }
+}
+
+function startCredits() {
+  if (creditsActive) return;
+  creditsActive = true;
+  paused = true;
+  creditsY = canvas.height;
+  fadeAlpha = 1;
+  holdTimer = 0;
+  requestAnimationFrame(drawCredits);
 }
