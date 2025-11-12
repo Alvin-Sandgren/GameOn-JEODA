@@ -176,13 +176,14 @@ let images = {};
         r.imageObj = images[r.img];
     });
 
-    startMap();
-    startGame();
+    // Här fanns en felaktig start och pause game vilket störde menyn
+
 })();
 
-playerCombatImg.onload = () => {
-    ctx.drawImage(playerCombatImg, 350, canvas.height/2 - 75, 150, 150);
-};
+//Här fanns buggen och den fucka menyn
+//  playerCombatImg.onload = () => {
+//    ctx.drawImage(playerCombatImg, 350, canvas.height/2 - 75, 150, 150);
+//};
 
 function startRuneSelection() {
     if (!currentGoat) return;
