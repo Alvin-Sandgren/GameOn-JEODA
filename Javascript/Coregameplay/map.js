@@ -472,7 +472,7 @@ export function gameLoop(timestamp) {
         player.seenControls = true;
 
         showDialog(
-          "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space"
+          "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space \n M = meny/pausa spelet"
         );
       }
     }
