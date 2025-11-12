@@ -11,6 +11,7 @@ export let dialogOnClose = null;
 // GameOver-trigger och flagga
 let hasShirt = false;
 let hasBoots = false;
+let helmetDropped = false;
 
 // Check för trigger av ending
 const hasAllTokens = true;
@@ -56,7 +57,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  2000, 2500, 100, 100, 10, 2,
+  200, 4000, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -82,7 +83,7 @@ player.seenCaveHint = player.seenCaveHint || false;
 
  // getter (fiender)
 export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./goat_bilder/gwget.png", "GWget");
-export const enemygoatsten = new Goat(1500, 2855, 150, 150, "./goat_bilder/stenget.png", "Stenget");
+export const enemygoatsten = new Goat(1500, 2780, 225, 225, "./goat_bilder/stenget.png", "Stenget");
 export const enemygoatstefan = new Goat(7300, 4300, 200, 200, "./goat_bilder/stefanget.png", "Stefanget");
 export const enemygoatanton = new Goat(600, 975, 450, 450, "./goat_bilder/antonget.png", "Antonget");
 
@@ -136,7 +137,7 @@ export const obstacles = [
   // platforms spawn
   new Obstacle(700, 4300, 300, 50, "./platforms/grass_platform.png"),
   new Obstacle(1200, 4200, 200, 50, "./platforms/grass_platform.png"),
-  new Obstacle(1600, 4100, 70, 50, "./platforms/grass_platform_small.png"),
+  new Obstacle(1600, 4100, 70, 50, "./platforms/grass_platform_s.png"),
   new Obstacle(1800, 4025, 800, 575, "./platforms/grass_platform_stor.png"),
 
   //Dropper shute
@@ -144,10 +145,10 @@ export const obstacles = [
 
   // Höger sida
   new Obstacle(2500, 2600, 100, 1275, "./platforms/right_dropper_pillar.png"),
-  new Obstacle(2000, 3600, 100, 50,"./platforms/grass_platform_small.png"),
-  new Obstacle(2200, 3800, 50, 50,"./platforms/grass_platform_small.png"),
-  new Obstacle(2000, 3400, 75, 50,"./platforms/grass_platform_small.png"),
-  new Obstacle(2200, 3200, 100, 50,"./platforms/grass_platform_small.png"),
+  new Obstacle(2000, 3600, 100, 50,"./platforms/grass_platform_s.png"),
+  new Obstacle(2200, 3800, 50, 50,"./platforms/grass_platform_s.png"),
+  new Obstacle(2000, 3400, 75, 50,"./platforms/grass_platform_s.png"),
+  new Obstacle(2200, 3200, 100, 50,"./platforms/grass_platform_s.png"),
 
   //platforms efter droppern som leder till lava
   new Obstacle(3000, 4400, 150, 200,"./platforms/grass_platform_l_t_lava.png"),
@@ -155,21 +156,7 @@ export const obstacles = [
 
   //Vänster sida plus tak på droppern och gången till dash/get nr 2
   new Obstacle(1300, 3000, 500, 100, "./platforms/stone_platform.png"),
-  new Obstacle(400, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(700, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(1000, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(1300, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(1600, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(1900, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(2200, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(2500, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(2800, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(3100, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(3400, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(3700, 2500, 300, 100, "./platforms/stone_platform.png"),
-  new Obstacle(4000, 2500, 300, 100, "./platforms/stone_platform.png"),
-
-  //Be Damien göra en bättre bild så jag kan göra en bättre plattform här 1300-4000 så 3000=bredd i x-led och 100=höjd i y-led
+  new Obstacle(400, 2500, 3900, 100, "./platforms/stone_platform_l.png"),
 
   //Cave entrance
   new Obstacle(4000, 0, 2600, 1900, "dimgray"),
@@ -189,35 +176,35 @@ export const obstacles = [
   new Obstacle(0, 1400, 2600, 200, "./platforms/grass_platform_medium.png"),
 
   //Obstacles mot nivå 3
-  new Obstacle(950, 3000, 45, 30, "./platforms/stone_platform.png"),
-  new Obstacle(500, 3000, 39, 30,"./platforms/stone_platform.png"),
-  new Obstacle(300, 2750, 30, 30,"./platforms/stone_platform.png"),
+  new Obstacle(950, 3000, 45, 30, "./platforms/grass_platform_s.png"),
+  new Obstacle(500, 3000, 39, 30,"./platforms/grass_platform_s.png"),
+  new Obstacle(300, 2750, 30, 30,"./platforms/grass_platform_s.png"),
 
   //Lavablock som hindrar progress när man inte har dash
-  new Obstacle(3400, 4475, 50 , 25, "./platforms/stone_platform.png"),
-  new Obstacle(3450, 4450, 50, 50, "./platforms/stone_platform.png"),
+  new Obstacle(3400, 4475, 50 , 25, "./platforms/stone_half_block.png"),
+  new Obstacle(3450, 4450, 50, 50, "./platforms/stone_block.png"),
   new Lava(3500, 4500, 600, 600),   // Lavan
-  new Obstacle(4100, 4450, 50, 50, "./platforms/stone_platform.png"),
-  new Obstacle(4150, 4475, 50, 25, "./platforms/stone_platform.png"),
+  new Obstacle(4100, 4450, 50, 50, "./platforms/stone_block.png"),
+  new Obstacle(4150, 4475, 50, 25, "./platforms/stone_half_block.png"),
 
   //platforms som leder till nivå 4
-  new Obstacle(5050, 4300, 75, 25, "./platforms/stone_platform.png"),
-  new Obstacle(5600, 4200, 100, 50, "./platforms/stone_platform.png"),
-  new Obstacle(5050, 4000, 75, 25, "./platforms/stone_platform.png"),
+  new Obstacle(5050, 4300, 75, 25, "./platforms/stone_half_block.png"),
+  new Obstacle(5600, 4200, 100, 50, "./platforms/stone_two_block.png"),
+  new Obstacle(5050, 4000, 75, 25, "./platforms/stone_half_block.png"),
 
   //Till nivå 4 trappor tillbaka
-  new Obstacle(5700, 3900, 100, 610, "gray"),
-  new Obstacle(5800, 4000, 100, 510, "gray"),
-  new Obstacle(5900, 4100, 100, 410, "gray"),
-  new Obstacle(6000, 4200, 100, 310, "gray"),
-  new Obstacle(6100, 4300, 100, 210, "gray"),
-  new Obstacle(6200, 4400, 100, 110, "gray"),
+  new Obstacle(5700, 3900, 100, 610, "./platforms/stair_six.png"),
+  new Obstacle(5800, 4000, 100, 510, "./platforms/stair_five.png"),
+  new Obstacle(5900, 4100, 100, 410, "./platforms/stair_four.png"),
+  new Obstacle(6000, 4200, 100, 310, "./platforms/stair_three.png"),
+  new Obstacle(6100, 4300, 100, 210, "./platforms/stair_two.png"),
+  new Obstacle(6200, 4400, 100, 110, "./platforms/stair_one.png"),
   //Be Damien göra bättre bilder på trappor så kan jag göra bättre trappa
 
   //Nivå 4 boss arena
   new Obstacle(7955, 3400, 100, 500, "./platforms/stone_platform.png"),
   new Obstacle(7993, 3900, 24, 600, "#ff6600"),
-  new Obstacle(7955, 4495, 100, 50, "./platforms/stone_platform.png"),
+  new Obstacle(7955, 4495, 100, 150, "./platforms/stone_platform.png"),
 
   new Obstacle(8600, 4350, 100, 100, "./platforms/stone_platform.png"),
   new Obstacle(8500, 4400, 300, 100, "./platforms/stone_platform.png"),
@@ -233,6 +220,11 @@ shirt.type = "shirt";
 let boots = new Obstacle(8625, 4330, 64, 20, "./equipment/equip_shoes.png");
 boots.type = "boots";
 
+let helmet = new Obstacle(-1000, -1000, 0, 0, "./equipment/equip_helmet.png");
+helmet.type = "helmet";
+helmetDropped = false;
+helmet.w = 0; helmet.h = 0; 
+
  const skyltar = [
     // Svart stolpe och outline
     new Skylt(2120, 3975, 25, 50, "black"),     
@@ -246,8 +238,6 @@ boots.type = "boots";
     new Skylt(2100, 3955, 65, 10, "black"),
     new Skylt(2145, 3945, 10, 30, "black"),
     new Skylt(2150, 3950, 10, 20, "black"),
-    
-
 ];
 
 const decorations = [
@@ -307,9 +297,6 @@ export function gameLoop(timestamp) {
     // Rita caveSign i världens koordinater
     caveSign.draw(ctx);
 
-    caveSign.image.onload = () => console.log("caveSign image loaded:", caveSign.image.complete);
-    caveSign.image.onerror = () => console.warn("Failed to load caveSign image:", caveSign.image.src);
-
     for (let skylt of skyltar) {
       skylt.draw(ctx);
     }
@@ -328,29 +315,34 @@ export function gameLoop(timestamp) {
     shirt.draw(ctx);
     boots.draw(ctx);
 
-  //  Kolla kollision med tröjan och visa dialog samt uppdatera spelarens förmåga att dash'a plus animationerna av walking
-    if (player.x < shirt.x + shirt.w &&
-    player.x + player.w > shirt.x &&
-    player.y < shirt.y + shirt.h &&
-    player.y + player.h > shirt.y) {
-    hasShirt = true;
-    player.canDash = true;
-    shirt.w = 0; shirt.h = 0; shirt.image = null;
-    localStorage.setItem("hasDash", "true");
-    player.imgIdle.src = "./character_bilder/meatball_ht.png";
-    player.imgLeftLeg.src = "./character_bilder/meatball_ht_lleg.png";
-    player.imgRightLeg.src = "./character_bilder/meatball_ht_rleg.png";
-    player.imgJump.src = "./character_bilder/meatball_ht_jump.png";
-    player.hasShirt = true;  
-    shirt.x = -1000;
-    showDialog("You found a shirt!\nYou can now dash! (by using Shift)");
-}
+    // --- NY / ÄNDRA --- Rita hjälmen om den existerar
+    if (helmet && helmet.w > 0 && helmet.h > 0) {
+      helmet.draw && helmet.draw(ctx);
+    }
 
-  // -||- som med tröjan fast skorna låser upp dubbelhopp
-  if (player.x < boots.x + boots.w &&
-      player.x + player.w > boots.x &&
-      player.y < boots.y + boots.h &&
-      player.y + player.h > boots.y) {
+    // Kolla kollision med tröjan
+    if (player.x < shirt.x + shirt.w &&
+        player.x + player.w > shirt.x &&
+        player.y < shirt.y + shirt.h &&
+        player.y + player.h > shirt.y) {
+      hasShirt = true;
+      player.canDash = true;
+      shirt.w = 0; shirt.h = 0; shirt.image = null;
+      localStorage.setItem("hasDash", "true");
+      player.imgIdle.src = "./character_bilder/meatball_ht.png";
+      player.imgLeftLeg.src = "./character_bilder/meatball_ht_lleg.png";
+      player.imgRightLeg.src = "./character_bilder/meatball_ht_rleg.png";
+      player.imgJump.src = "./character_bilder/meatball_ht_jump.png";
+      player.hasShirt = true;  
+      shirt.x = -1000;
+      showDialog("You found a shirt!\nYou can now dash! (by using Shift)");
+    }
+
+    // Kolla kollision med skorna
+    if (player.x < boots.x + boots.w &&
+        player.x + player.w > boots.x &&
+        player.y < boots.y + boots.h &&
+        player.y + player.h > boots.y) {
       hasBoots = true;
       player.maxJumps = Math.max(player.maxJumps, 2);
       boots.w = 0; boots.h = 0; boots.image = null;
@@ -362,37 +354,65 @@ export function gameLoop(timestamp) {
       player.hasShirt = true;  
       player.hasBoots = true;
       boots.x = -1000;  
-
       showDialog("You found shoes!\nYou can now double jump!");
-}
+    }
 
-//  upptäck höga plattformen innan caven (hint om dubbelhopp)
-if (!player.seenCaveHint) {
-  const triggerZoneX1 = 2800; 
-  const triggerZoneX2 = 3000; 
-  const triggerZoneYMin = 2400;
-  const triggerZoneYMax = 2800;
-  const playerFeetY = player.y + player.h;
+    if (!helmetDropped && enemygoatsten && enemygoatsten.health <= 0) {
+      helmetDropped = true;
+      helmet.x = enemygoatsten.x + (enemygoatsten.w / 2) - 24;
+      helmet.y = enemygoatsten.y - 10;
+      helmet.w = 68;
+      helmet.h = 52;
 
-  //Kollar om spelaren gått in i triggerzonen och visar dialogen enbart en gång
-  if (
-    player.x > triggerZoneX1 &&
-    player.x < triggerZoneX2 &&
-    playerFeetY >= triggerZoneYMin &&
-    playerFeetY <= triggerZoneYMax
-  ) {
-    player.seenCaveHint = true;
-    showDialog(
-      "Hmm... that platform looks a bit too high.\nIf only I could jump once more in the air...\n (I probably need shoes for a jump like that!)"
-    );
-  }
-}
+      showDialog("Sten dropped a helmet!");
+    }
 
-// Rita getter ur listan om de inte är döda
+    if (helmet.w > 0 && helmet.h > 0 &&
+        player.x < helmet.x + helmet.w &&
+        player.x + player.w > helmet.x &&
+        player.y < helmet.y + helmet.h &&
+        player.y + player.h > helmet.y) {
+
+      player.hasHelmet = true;
+      player.defense = (player.defense || 0) + 1;
+
+      helmet.w = 0; helmet.h = 0; helmet.image = null; helmet.x = -1000;
+      localStorage.setItem("hasHelmet", "true");
+
+      player.imgIdle.src = "./character_bilder/meatball_h_idle.png";
+      player.imgLeftLeg.src = "./character_bilder/meatball_h_lleg.png";
+      player.imgRightLeg.src = "./character_bilder/meatball_h_rleg.png";
+      player.imgJump.src = "./character_bilder/meatball_h_jump.png";
+
+      showDialog("You picked up a helmet!\nYou feel tougher already!");
+    }
+
+    // Upptäck höga plattformen innan caven
+    if (!player.seenCaveHint) {
+      const triggerZoneX1 = 2800; 
+      const triggerZoneX2 = 3000; 
+      const triggerZoneYMin = 2400;
+      const triggerZoneYMax = 2800;
+      const playerFeetY = player.y + player.h;
+
+      if (
+        player.x > triggerZoneX1 &&
+        player.x < triggerZoneX2 &&
+        playerFeetY >= triggerZoneYMin &&
+        playerFeetY <= triggerZoneYMax
+      ) {
+        player.seenCaveHint = true;
+        showDialog(
+          "Hmm... that platform looks a bit too high.\nIf only I could jump once more in the air...\n (I probably need shoes for a jump like that!)"
+        );
+      }
+    }
+
+    // Rita getter ur listan om de inte är döda
     for (let goat of combatGoats) {
-        if (goat.health > 0) {
-            goat.draw(ctx);
-        }
+      if (goat.health > 0) {
+        goat.draw(ctx);
+      }
     }
 
     // Kolla kollision med getter (combattrigger)
@@ -408,19 +428,18 @@ if (!player.seenCaveHint) {
       }
     }
 
-    //  Kolla kollision med Lava spelar ljudet av gubben som dör och pausar spelet samt sätter en i gameOver state
+    // Kolla kollision med Lava
     const lava = obstacles.find(o => o instanceof Lava);
-      if (lava && lava.checkCollision(player)) {
-        if (!gameOverTriggered) {
-          gameOverTriggered = true;
-          soundmanager.playGameover();
-          pauseMap();
-          if (onGameOver) onGameOver();
+    if (lava && lava.checkCollision(player)) {
+      if (!gameOverTriggered) {
+        gameOverTriggered = true;
+        soundmanager.playGameover();
+        pauseMap();
+        if (onGameOver) onGameOver();
       }
     }
 
-
-    //  upptäck lava (första gången spelaren ser den från höger vid droppern) 
+    // Upptäck lava
     if (!player.seenLava && !hasShirt) {
       const triggerZoneX1 = 3100;
       const triggerZoneX2 = 4200;
@@ -428,7 +447,6 @@ if (!player.seenCaveHint) {
       const triggerZoneYMax = 4700;
       const playerFeetY = player.y + player.h;
 
-      // Kollar om spelaren gått in i triggerzonen och visar dialogen för lava enbart en gång
       if (
         player.x > triggerZoneX1 &&
         player.x < triggerZoneX2 &&
@@ -439,30 +457,30 @@ if (!player.seenCaveHint) {
         showDialog("That ground looks dangerous, almost like it's lava...\nBetter not touch it! \n (I probably need to be able to dash to get over it *wink-wink*)");
       }
     }
-    // Trigger för controls-dialog visas när man spawnar in i spelet första gången
-    if (!player.seenControls) {
-        const triggerX1 = 200;
-        const triggerX2 = 400;
 
-        if (player.x >= triggerX1 && player.x <= triggerX2) {
-            player.seenControls = true;
-            showDialog(
-                "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space\n Spam L + hold a movement key: to get out of combat"
-            );
-        }
+    // Trigger för controls-dialog
+    if (!player.seenControls) {
+      const triggerX1 = 200;
+      const triggerX2 = 400;
+
+      if (player.x >= triggerX1 && player.x <= triggerX2) {
+        player.seenControls = true;
+        showDialog(
+          "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space\n Spam L + hold a movement key: to get out of combat"
+        );
+      }
     }
 
-    // Placeholder: Trigger vid slutet av banan (testläge) som visar credits
+    // Placeholder: Trigger vid slutet av banan
     const inEndZone = player.x > 9500 && player.x < 11000 && player.y > 3800 && player.y < 4600;
-
     if (inEndZone && hasAllTokens && !creditsActive) {
       startCredits();
     }
+
     ctx.restore();
 
-    //  Rita dialogruta i skärmlägen
+    // Rita dialogruta
     if (dialogActive) {
-      // bakgrundsruta
       ctx.fillStyle = "rgba(0, 0, 0, 1)";
       const boxW = 800;
       const boxH = 260;
@@ -477,7 +495,7 @@ if (!player.seenCaveHint) {
       ctx.fillStyle = "white";
       ctx.font = "26px Arial";
       ctx.textBaseline = "top";
-      //Gör så att dialogen kan ha flera rader
+
       const lines = dialogText.split("\n");
       lines.forEach((line, i) => {
         ctx.fillText(line, boxX + 24, boxY + 24 + i * 36);
@@ -486,8 +504,9 @@ if (!player.seenCaveHint) {
       ctx.font = "18px Arial";
       ctx.fillText("Click left mouse button to continue...", boxX + boxW - 350, boxY + boxH - 40);
     }
+  }
 }
-}
+
 
 // starta loopen
 requestAnimationFrame(gameLoop);

@@ -10,14 +10,14 @@ export class Character {
     // Position och storlek
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.speed = speed;
-    this.hasShirt = false; this.hasBoots = false;
+    this.hasShirt = false; this.hasBoots = false; this.hasHelmet = false;
+
 
     // Hälsa och skada
     this.maxHealth = 100;
     this.health = this.maxHealth;
     this.damage = 20;
     this.name = imgIdleSrc.split("/").pop().split(".")[0]; // ✅ fixat
-
 
     // Hopprelaterade variabler
     this.maxJumps = maxJumps; 

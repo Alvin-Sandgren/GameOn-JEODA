@@ -231,8 +231,9 @@ export function drawCombat(goat) {
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
 
-    ctx.fillText(`You have defeated: ${slays}/4`, 660, canvas.height - 660);
-    ctx.fillText(`Combat against: ${goat.name}`, 650, canvas.height - 720);
+        ctx.fillText(`Combat against: ${goat.name}`, 450, 80);
+        ctx.fillText(`You have defeated: ${slays}/4`, 450, 120);
+
 
     drawHealthBar(player.health, player.maxHealth, 230, 560, 350, 80);
     drawHealthBar(goat.health, goat.maxHealth, 1000, 560, 350, 80);
@@ -264,7 +265,7 @@ export function drawCombat(goat) {
             return `${move.name}${extra}`;
 
         }).join(" + ");
-        ctx.fillText(`Next enemy action: ${movesText}`, canvas.width - 1200, 200);
+        ctx.fillText(`Next enemy action: ${movesText}`, canvas.width - 1100, 300);
     }
 }
 
