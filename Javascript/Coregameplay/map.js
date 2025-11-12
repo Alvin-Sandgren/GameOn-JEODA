@@ -13,9 +13,6 @@ let hasShirt = false;
 let hasBoots = false;
 let helmetDropped = false;
 
-// Check för trigger av ending
-const hasAllTokens = true;
-
 
 export let onCombatTrigger = null;
 export let onGameOver = null;
@@ -57,7 +54,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  200, 4000, 100, 100, 10, 2,
+  200, 4400, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -180,7 +177,7 @@ export const obstacles = [
   new Obstacle(500, 3000, 39, 30,"./platforms/grass_platform_s.png"),
   new Obstacle(300, 2750, 30, 30,"./platforms/grass_platform_s.png"),
 
-  //Lavablock som hindrar progress när man inte har dash
+  //Lava som hindrar progress när man inte har dash
   new Obstacle(3400, 4475, 50 , 25, "./platforms/stone_half_block.png"),
   new Obstacle(3450, 4450, 50, 50, "./platforms/stone_block.png"),
   new Lava(3500, 4500, 600, 600),   // Lavan
@@ -203,7 +200,6 @@ export const obstacles = [
 
   //Nivå 4 boss arena
   new Obstacle(7955, 3400, 100, 500, "./platforms/stone_platform.png"),
-  new Obstacle(7993, 3900, 24, 600, "#ff6600"),
   new Obstacle(7955, 4495, 100, 150, "./platforms/stone_platform.png"),
 
   new Obstacle(8600, 4350, 100, 100, "./platforms/stone_platform.png"),
@@ -224,6 +220,14 @@ let helmet = new Obstacle(-1000, -1000, 0, 0, "./equipment/equip_helmet.png");
 helmet.type = "helmet";
 helmetDropped = false;
 helmet.w = 0; helmet.h = 0; 
+
+let shoesBarrier = new Obstacle(7993, 3900, 24, 600, "#ff6600"); // korrekt
+shoesBarrier.active = true; // extra flagga om du vill kunna "stänga av" barriären senare
+obstacles.push(shoesBarrier);
+
+let shirtBarrier = new Obstacle(6100, 1901, 20, 798, "#ff6600")
+shoesBarrier.active = true;
+obstacles.push(shirtBarrier)
 
  const skyltar = [
     // Svart stolpe och outline
@@ -465,16 +469,66 @@ export function gameLoop(timestamp) {
 
       if (player.x >= triggerX1 && player.x <= triggerX2) {
         player.seenControls = true;
+
         showDialog(
-          "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space\n Spam L + hold a movement key: to get out of combat"
+          "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space"
         );
       }
     }
 
-    // Placeholder: Trigger vid slutet av banan
-    const inEndZone = player.x > 9500 && player.x < 11000 && player.y > 3800 && player.y < 4600;
-    if (inEndZone && hasAllTokens && !creditsActive) {
-      startCredits();
+    // Trigger för uppföljande dialog direkt efter
+    if (player.seenControls && !player.seenGoatClues) {
+      const followUpX1 = 405; // precis lite till höger
+      const followUpX2 = 450;
+
+      if (player.x >= followUpX1 && player.x <= followUpX2) {
+        player.seenGoatClues = true;
+
+        showDialog(
+          "Oh no! all my goats have disappeared and turned evil!\n...\nWait, where are my clothes?! \nI need to go and find them both!"
+        );
+      }
+    }
+
+    if (enemygoatgw.health <= 0 && !player.seenGoatGwDead) {
+      player.seenGoatGwDead = true;
+      showDialog("You have defeated the goat GW! Well done! \n *click a barrier has disappeared from this land*");
+      shirtBarrier.w = 0; shirtBarrier.h = 0; 
+      shirtBarrier.active = false;
+      shirtBarrier.x = -1000;
+      shirtBarrier.y = -1000;
+    }
+
+    if (enemygoatstefan.health <= 0 && !player.seenGoatStefanDead) {
+      player.seenGoatStefanDead = true;
+      showDialog("You have defeated the goat Stefan! \n *click a barrier has disappeared from this land*");
+      shoesBarrier.active = false; 
+      shoesBarrier.x = -1000;
+      shoesBarrier.y = -1000;
+    }
+
+    if (
+      enemygoatgw.health <= 0 &&
+      enemygoatsten.health <= 0 &&
+      enemygoatstefan.health <= 0 &&
+      enemygoatanton.health <= 0 &&
+      !player.seenAllGoatsDead
+    ) {
+      player.seenAllGoatsDead = true;
+      showDialog("All goats have been defeated! Get back to your house to celebrate!");
+    }
+
+    // Trigger vid slutet av spelet rulla credits
+    const inEndZone = 
+        player.x > 0 && player.x < 400 &&
+        player.y > 3800 && player.y < 4600 &&
+        hasShirt === true &&
+        hasBoots === true &&
+        hasHelmet === true &&
+        player.seenAllGoatsDead;
+
+    if (inEndZone && !creditsActive) {
+        startCredits();
     }
 
     ctx.restore();
@@ -507,7 +561,6 @@ export function gameLoop(timestamp) {
   }
 }
 
-
 // starta loopen
 requestAnimationFrame(gameLoop);
 
@@ -536,7 +589,7 @@ creditEntities.forEach(e => { e.img = new Image(); e.img.src = e.src; });
 const creditsText = [
   "Thank you for playing!", "", "A game by:",
   " - Alvin Sandgren (Logic & Gameplay)",
-  " - Jeffery (Lore & Music)",
+  " - Jeffery (Story & Music)",
   " - Oliver (Goatdesign and Combat UI)",
   " - Erik (Enemy AI & Combat System)",
   " - Damien (Graphics and Character Design)",
