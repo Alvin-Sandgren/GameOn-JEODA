@@ -3,7 +3,7 @@ import { canvas, ctx, startMap, player, combatGoats, pauseMap } from "./map.js";
 import { startGame, gameOver } from "./overlay.js";
 
 const imagePaths = [
-    "../kartbilder/combat.png",
+    "../kartbilder/combatrunes.png",
     "./character_bilder/meatball_nack.png",
     "./Runes/rune_attack.png",
     "./Runes/rune_block.png",
@@ -19,7 +19,7 @@ export async function preloadImages(paths) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => resolve({ src, img });
-            img.onerror = () => reject(`Kunde inte ladda: ${src}`);
+            img.onerror = () => reject(`couldnt load: ${src}`);
             img.src = src;
         });
     };
@@ -31,7 +31,7 @@ export async function preloadImages(paths) {
 }
 
 const combatImg = new Image();
-combatImg.src = "../kartbilder/combat.png";
+combatImg.src = "../kartbilder/combatrunes.png";
 
 const playerCombatImg = new Image();
 playerCombatImg.src = "./character_bilder/meatball_nack.png";
@@ -153,11 +153,16 @@ export const EnemyActions = [
     {
         name: "Goat buff",
         apply: (goat) => {
-            goat.damage = Math.floor((goat.damage || 20) * 1.2);
-            console.log(`${goat.name} is enraged!`);
+            if (Math.random() < 0.3) { // 30% chans
+                goat.damage = Math.min((goat.damage || 20) + 2, 25); // max 25 dmg
+                console.log(`${goat.name} is enraged! Damage is now ${goat.damage}.`);
+            } else {
+                console.log(`${goat.name} tried to buff but failed.`);
+            }
         }
     },
 ];
+
 
 let images = {};
 
@@ -166,8 +171,8 @@ let images = {};
     images = await preloadImages(imagePaths);
     console.log("All images are loaded");
 
-    combatImg.src = "../kartbilder/combat.png";
-    combatImg.imageObj = images["./kartbilder/combat.png"];
+    combatImg.src = "../kartbilder/combatrunes.png";
+    combatImg.imageObj = images["../kartbilder/combatrunes.png"];
 
     playerCombatImg.src = "./character_bilder/meatball_nack.png";
     player.combatImg = images["./character_bilder/meatball_nack.png"];
@@ -179,6 +184,7 @@ let images = {};
     startMap();
     startGame();
 })();
+
 
 playerCombatImg.onload = () => {
     ctx.drawImage(playerCombatImg, 350, canvas.height/2 - 75, 150, 150);
@@ -276,7 +282,8 @@ export function drawCombat(goat) {
     if (!goat) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (combatImg.complete) ctx.drawImage(combatImg, 0, 0, canvas.width, canvas.height);
+    if (inCombat && combatImg.complete) ctx.drawImage(combatImg, 0, 0, canvas.width, canvas.height);
+
     if (player.combatImg && player.combatImg.complete) {
         const width = 250;
         const height = 250;
@@ -318,7 +325,7 @@ export function drawCombat(goat) {
                 extra = ` (will block 10)`;
 
             } else if (move.name === "Goat buff") {
-                extra = ` (damage x1.2)`;
+                extra = ` (damage +2)`;
             }
             return `${move.name}${extra}`;
 
@@ -326,6 +333,7 @@ export function drawCombat(goat) {
         ctx.fillText(`Next enemy action: ${movesText}`, canvas.width - 1200, 200);
     }
 }
+
 
 function drawStatus(x, y, target) {
     ctx.fillStyle = "yellow";
@@ -427,6 +435,25 @@ export function playerAction(actionIndex, goat) {
     }
 }
 
+function endCombat(victory, goat) {
+    inCombat = false;
+    playerTurn = false;
+    currentGoat = null;
+
+    if (victory) {
+        slays++;
+        console.log(`You defeated ${goat.name}!`);
+        // Reset HP vid vinst
+        player.health = 100;
+        startMap(); // eller vad du vill göra efter vinst
+    } else {
+        console.log("You were defeated!");
+        // Reset HP vid förlust
+        player.health = 100;
+        gameOver();
+    }
+}
+
 
 function enemyTurn(goat) {
     if (!goat || !player) return;
@@ -469,7 +496,7 @@ function enemyTurn(goat) {
 
     // Kolla om spelaren dog
     if (player.health <= 0) {
-        player.health = 0;
+        player.health = 100;
         inCombat = false;
         playerTurn = false;
         currentGoat = null;
