@@ -148,38 +148,29 @@ export const obstacles = [
   new Obstacle(3000, 4400, 150, 200,"./platforms/grass_platform_l_t_lava.png"),
   new Obstacle(2800, 4250, 150, 350,"./platforms/grass_platform_s_t_lava.png"),
 
+  //Lava som hindrar progress när man inte har dash
+  new Obstacle(3400, 4475, 50 , 25, "./platforms/stone_half_block.png"),
+  new Obstacle(3450, 4450, 50, 50, "./platforms/stone_block.png"),
+  new Lava(3500, 4500, 600, 600), 
+  new Obstacle(4100, 4450, 50, 50, "./platforms/stone_block.png"),
+  new Obstacle(4150, 4475, 50, 25, "./platforms/stone_half_block.png"),
+
   //Vänster sida plus tak på droppern och gången till dash/get nr 2
   new Obstacle(1300, 3000, 500, 100, "./platforms/stone_platform.png"),
   new Obstacle(400, 2500, 3900, 100, "./platforms/stone_platform_l.png"),
+
+  //Obstacles platform med hint om dubbelhopp
+  new Obstacle(950, 3000, 70, 40, "./platforms/grass_platform_s.png"),
+  new Obstacle(500, 3000, 60, 40,"./platforms/grass_platform_s.png"),
+  new Obstacle(300, 2750, 50, 45,"./platforms/grass_platform_s.png"),
 
   //Cave entrance
   new Obstacle(4000, 0, 2600, 1900, "dimgray"),
   new Obstacle(4300, 2500, 100, 205, "dimgray"),
   new Obstacle(4300, 2700, 2300, 430, "dimgray"),
-  //new Obstacle(6100, 1901, 20, 798, "red"),
   new Obstacle(6500, 1800, 1000, 1430, "dimgray"),
   new Obstacle(6250, 2550, 177, 100, "./platforms/stone_platform.png"),
   new Obstacle(6200, 2600, 275, 100, "./platforms/stone_platform.png"),
-
-
-  // Vägen till nivå 5
-  new Obstacle(3000, 2000, 200, 50, "./platforms/grass_platform.png"),
-
-  //Nivå 5 platformar
-  new Obstacle(3400, 1700, 300, 100, "./platforms/grass_platform.png"),
-  new Obstacle(0, 1400, 2600, 200, "./platforms/grass_platform_medium.png"),
-
-  //Obstacles mot nivå 3
-  new Obstacle(950, 3000, 45, 30, "./platforms/grass_platform_s.png"),
-  new Obstacle(500, 3000, 39, 30,"./platforms/grass_platform_s.png"),
-  new Obstacle(300, 2750, 30, 30,"./platforms/grass_platform_s.png"),
-
-  //Lava som hindrar progress när man inte har dash
-  new Obstacle(3400, 4475, 50 , 25, "./platforms/stone_half_block.png"),
-  new Obstacle(3450, 4450, 50, 50, "./platforms/stone_block.png"),
-  new Lava(3500, 4500, 600, 600),   // Lavan
-  new Obstacle(4100, 4450, 50, 50, "./platforms/stone_block.png"),
-  new Obstacle(4150, 4475, 50, 25, "./platforms/stone_half_block.png"),
 
   //platforms som leder till nivå 4
   new Obstacle(5050, 4300, 75, 25, "./platforms/stone_half_block.png"),
@@ -193,7 +184,6 @@ export const obstacles = [
   new Obstacle(6000, 4200, 100, 310, "./platforms/stair_three.png"),
   new Obstacle(6100, 4300, 100, 210, "./platforms/stair_two.png"),
   new Obstacle(6200, 4400, 100, 110, "./platforms/stair_one.png"),
-  //Be Damien göra bättre bilder på trappor så kan jag göra bättre trappa
 
   //Nivå 4 boss arena
   new Obstacle(7955, 3400, 100, 500, "./platforms/stair_four.png"),
@@ -201,6 +191,13 @@ export const obstacles = [
 
   new Obstacle(8600, 4350, 100, 100, "./platforms/stone_platform.png"),
   new Obstacle(8500, 4400, 300, 100, "./platforms/stone_platform.png"),
+
+  // Vägen till nivå 5
+  new Obstacle(3000, 2000, 200, 50, "./platforms/grass_platform.png"),
+
+  //Nivå 5 platformar
+  new Obstacle(3400, 1700, 300, 100, "./platforms/grass_platform.png"),
+  new Obstacle(0, 1400, 2600, 200, "./platforms/grass_platform_medium.png"),
 
   //Väggar på sidorna
   new Obstacle(worldWidth - 1300 , 0, 2000, 10000, "./platforms/dirt.png"),
