@@ -314,7 +314,7 @@ export function gameLoop(timestamp) {
     shirt.draw(ctx);
     boots.draw(ctx);
 
-    // --- NY / ÄNDRA --- Rita hjälmen om den existerar
+    // Rita hjälmen om den finns
     if (helmet && helmet.w > 0 && helmet.h > 0) {
       helmet.draw && helmet.draw(ctx);
     }
@@ -356,6 +356,7 @@ export function gameLoop(timestamp) {
       showDialog("You found shoes!\nYou can now double jump!");
     }
 
+    //Sätter ut hjälmen när Sten dör
     if (!helmetDropped && enemygoatsten && enemygoatsten.health <= 0) {
       helmetDropped = true;
       helmet.x = enemygoatsten.x + (enemygoatsten.w / 2) - 24;
@@ -366,6 +367,7 @@ export function gameLoop(timestamp) {
       showDialog("You defeated the goat Sten, He also dropped a helmet!");
     }
 
+    // Kollar om spelaren kollidar med hjälmen när Sten har dött och tar den utanför kartan efter kollision
     if (helmet.w > 0 && helmet.h > 0 &&
         player.x < helmet.x + helmet.w &&
         player.x + player.w > helmet.x &&
@@ -378,6 +380,7 @@ export function gameLoop(timestamp) {
       helmet.w = 0; helmet.h = 0; helmet.image = null; helmet.x = -1000;
       localStorage.setItem("hasHelmet", "true");
 
+      //Ändrar animations för Gubben med hjälm
       player.imgIdle.src = "./character_bilder/meatball_h_idle.png";
       player.imgLeftLeg.src = "./character_bilder/meatball_h_lleg.png";
       player.imgRightLeg.src = "./character_bilder/meatball_h_rleg.png";
@@ -485,6 +488,7 @@ export function gameLoop(timestamp) {
       }
     }
 
+    //Triggar dialog efter gwget dör och tar bort barriern bakom honom
     if (enemygoatgw.health <= 0 && !player.seenGoatGwDead) {
       player.seenGoatGwDead = true;
       showDialog("You have defeated the goat GW!  \n *click* (A barrier has disappeared from this land)");
@@ -494,6 +498,7 @@ export function gameLoop(timestamp) {
       shirtBarrier.y = -1000;
     }
 
+    //-||- stefanget dör och -||-
     if (enemygoatstefan.health <= 0 && !player.seenGoatStefanDead) {
       player.seenGoatStefanDead = true;
       showDialog("You have defeated the goat Stefan! \n *click* (A barrier has disappeared from this land)");
@@ -502,6 +507,7 @@ export function gameLoop(timestamp) {
       shoesBarrier.y = -1000;
     }
 
+    //Sätter win condition och directar spelaren mot slutet
     if (
       enemygoatgw.health <= 0 &&
       enemygoatsten.health <= 0 &&
@@ -519,6 +525,7 @@ export function gameLoop(timestamp) {
         player.y > 4200 && player.y < 4600 &&
         player.seenAllGoatsDead;
 
+    //Rolla credits om du har uppfyllt kraven
     if (inEndZone && !creditsActive) {
         startCredits();
     }
@@ -543,12 +550,11 @@ export function gameLoop(timestamp) {
     ctx.fill();
     ctx.restore();
 
-    // Gyllene kant
-    ctx.strokeStyle = "#285513ff"; // guld
+    // Nordisk Skogskant på textrutan
+    ctx.strokeStyle = "#285513ff"; 
     ctx.lineWidth = 5;
     ctx.strokeRect(boxX, boxY, boxW, boxH);
 
-    // Text
     ctx.fillStyle = "#f0e6c8"; 
     ctx.font = "26px serif"; 
     ctx.textBaseline = "top";
@@ -576,7 +582,7 @@ if (startBtn) {
   startBtn.addEventListener('click', () => startMap());
 }
 
-// Credits-system (minimal)
+// Credits-system
 let creditsActive = false, creditsY = canvas.height, fadeAlpha = 1, holdTimer = 0;
 
 // Ladda in bilder för credits och deras positioner
@@ -642,7 +648,7 @@ function drawCredits() {
     }
   }
 
-  //hur snabbt credits ska scrolla
+  //Hur snabbt credits ska scrolla
   creditsY -= 1.8;
   // Hantera fade-out för de sista raderna
   if (holdTimer >= 7) fadeAlpha = Math.max(0, fadeAlpha - 0.01);
