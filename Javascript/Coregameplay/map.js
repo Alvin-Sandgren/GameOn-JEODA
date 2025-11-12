@@ -186,7 +186,7 @@ export const obstacles = [
   new Obstacle(6200, 4400, 100, 110, "./platforms/stair_one.png"),
 
   //Nivå 4 boss arena
-  new Obstacle(7955, 3400, 100, 500, "./platforms/stair_four.png"),
+  new Obstacle(7955, 3400, 100, 500, "./platforms/barrier_pillar.png"),
   new Obstacle(7955, 4495, 100, 150, "./platforms/stair_two.png"),
 
   new Obstacle(8600, 4350, 100, 100, "./platforms/stone_platform.png"),
