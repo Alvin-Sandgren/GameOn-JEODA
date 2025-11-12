@@ -95,18 +95,16 @@ export const caveSign = new Skylt(4400, 1805, 2200, 900);
 caveSign.image = new Image();
 caveSign.image.src = "./kartbilder/cave_background.png";
 
-
 export function drawBackground() {
   if (backgroundLoaded) {
     // Rita bakgrundsbild
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-    // Rita permanent mörkning ovanpå bakgrunden
-    ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; // justera 0.05–0.15
+    // Rita permanent mörkning ovanpå bakgrunden för mörkare tema
+    ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
-
 
 export const groundImage = new Image();
 let groundLoaded = false;
@@ -205,6 +203,8 @@ export const obstacles = [
   new Obstacle(-70, 0, 100, 10000, "./platforms/wall_left.png")
 ];
 
+//Lägger ut all equipment och sådant som kommer justeras efter interaktion
+//T.ex x & y kordinat ändras efter kollision eller trigga dialogrutor
 let shirt = new Obstacle(6300, 2500, 80, 52, "./equipment/equip_shirt.png");
 shirt.type = "shirt";
 let boots = new Obstacle(8625, 4330, 64, 20, "./equipment/equip_shoes.png");
@@ -238,6 +238,7 @@ obstacles.push(shirtBarrier)
     new Skylt(2150, 3950, 10, 20, "black"),
 ];
 
+// Icke kollidbara objekt som gör världen mer levande
 const decorations = [
   new Decoration(580, 4406, 375, 104, "./kartbilder/fence.png"),
   new Decoration(100, 4250, 600, 256, "./kartbilder/house.png")
