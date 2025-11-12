@@ -416,7 +416,7 @@ export function gameLoop(timestamp) {
 
     // Kolla kollision med getter (combattrigger)
     for (let goat of combatGoats) {
-      if (
+      if (goat.health > 0 && 
         player.x < goat.x + goat.w &&
         player.x + player.w > goat.x &&
         player.y < goat.y + goat.h &&

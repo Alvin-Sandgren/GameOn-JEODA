@@ -85,6 +85,10 @@ function resetToMenu() {
 
 //  Combat state
 export function enterCombat(collidedGoat) {
+    if (!collidedGoat || collidedGoat.health <= 0) {
+        return;
+    }
+    
     pauseMap();
     soundmanager.playCombat();
     fadeInOverlay(() => {
@@ -97,6 +101,13 @@ export function enterCombat(collidedGoat) {
           drawCombat(collidedGoat);
         }
     });
+}
+
+// Exit combat and return to overworld
+export function exitCombat() {
+    currentState = "overworld";
+    soundmanager.playOverworld();
+    currentCombatGoat = null;
 }
 
 //  Start Game 
