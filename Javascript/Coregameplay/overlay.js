@@ -10,7 +10,10 @@ export const soundmanager = new Soundmanager();
 
 const startBtn = document.getElementById('start-btn');
 const menuImg = new Image();
-menuImg.src = "./kartbilder/meny.png";
+menuImg.src = "./kartbilder/menu.png";
+
+const menuImage = new Image();
+menuImage.src = './kartbilder/startbutton.png';
 
 //  Combat & Game Over Triggers 
 window.addEventListener("DOMContentLoaded", () => {
@@ -56,6 +59,16 @@ export function showMenu() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
   pauseMap();
+}
+
+function resizeCanvas() {
+  // justera storlek
+  if (!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  // rita menybild direkt
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(menuImage, 0, 0, canvas.width, canvas.height);
 }
 
 //  Game Over gamestate
@@ -165,3 +178,5 @@ export function drawGameOverText() {
 
   canvas.addEventListener("click", () => resetToMenu(), { once: true });
 }
+
+menuImage.onload = () => resizeCanvas();

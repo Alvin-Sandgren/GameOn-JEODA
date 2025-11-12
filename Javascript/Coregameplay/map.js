@@ -363,7 +363,7 @@ export function gameLoop(timestamp) {
       helmet.w = 68;
       helmet.h = 52;
 
-      showDialog("You defeated the goat Sten, He also dropped our helmet!");
+      showDialog("You defeated the goat Sten, He also dropped a helmet!");
     }
 
     if (helmet.w > 0 && helmet.h > 0 &&
@@ -383,7 +383,7 @@ export function gameLoop(timestamp) {
       player.imgRightLeg.src = "./character_bilder/meatball_h_rleg.png";
       player.imgJump.src = "./character_bilder/meatball_h_jump.png";
 
-      showDialog("You picked up a helmet!\nYou feel tougher already!");
+      showDialog("You picked up a helmet!\nYou feel tougher already! \n(+20 hp)");
     }
 
     // Upptäck höga plattformen innan caven
@@ -440,7 +440,7 @@ export function gameLoop(timestamp) {
 
     // Upptäck lava
     if (!player.seenLava && !hasShirt) {
-      const triggerZoneX1 = 3100;
+      const triggerZoneX1 = 3050;
       const triggerZoneX2 = 4200;
       const triggerZoneYMin = 4000;
       const triggerZoneYMax = 4700;
@@ -466,7 +466,7 @@ export function gameLoop(timestamp) {
         player.seenControls = true;
 
         showDialog(
-          "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space \n M = meny/pausa spelet"
+          "This is how you play:\n\nMove Left/Right: A/D or ← →\nJump: W or Space \n M = meny/pause the game"
         );
       }
     }
@@ -480,14 +480,14 @@ export function gameLoop(timestamp) {
         player.seenGoatClues = true;
 
         showDialog(
-          "Oh no! all my goats have disappeared and turned evil!\n...\nWait, where are my clothes?! \nI need to go and find them both!"
+          "Oh no! all my goats have disappeared and turned evil!\n...\nWait, where are my clothes?! \nI need to go and kill the goats, before they go haywire!"
         );
       }
     }
 
     if (enemygoatgw.health <= 0 && !player.seenGoatGwDead) {
       player.seenGoatGwDead = true;
-      showDialog("You have defeated the goat GW! Well done! \n *click a barrier has disappeared from this land*");
+      showDialog("You have defeated the goat GW!  \n *click* (A barrier has disappeared from this land)");
       shirtBarrier.w = 0; shirtBarrier.h = 0; 
       shirtBarrier.active = false;
       shirtBarrier.x = -1000;
@@ -496,7 +496,7 @@ export function gameLoop(timestamp) {
 
     if (enemygoatstefan.health <= 0 && !player.seenGoatStefanDead) {
       player.seenGoatStefanDead = true;
-      showDialog("You have defeated the goat Stefan! \n *click a barrier has disappeared from this land*");
+      showDialog("You have defeated the goat Stefan! \n *click* (A barrier has disappeared from this land)");
       shoesBarrier.active = false; 
       shoesBarrier.x = -1000;
       shoesBarrier.y = -1000;
@@ -516,7 +516,7 @@ export function gameLoop(timestamp) {
     // Trigger vid slutet av spelet rulla credits
     const inEndZone = 
         player.x > 0 && player.x < 400 &&
-        player.y > 3800 && player.y < 4600 &&
+        player.y > 4200 && player.y < 4600 &&
         player.seenAllGoatsDead;
 
     if (inEndZone && !creditsActive) {
@@ -531,11 +531,11 @@ export function gameLoop(timestamp) {
     const boxX = canvas.width / 2 - boxW / 2;
     const boxY = canvas.height / 2 - boxH / 2;
 
-    // --- Bakgrund i träton med rundade hörn ---
+    // Bakgrund i träton med rundade hörn
     ctx.save();
     const gradient = ctx.createLinearGradient(boxX, boxY, boxX, boxY + boxH);
-    gradient.addColorStop(0, "#3b2615"); // mörkbrun topp
-    gradient.addColorStop(1, "#6b4423"); // ljusare brun botten
+    gradient.addColorStop(0, "#3b2615"); 
+    gradient.addColorStop(1, "#6b4423"); 
     ctx.fillStyle = gradient;
 
     ctx.beginPath();
@@ -543,14 +543,14 @@ export function gameLoop(timestamp) {
     ctx.fill();
     ctx.restore();
 
-    // --- Gyllene kant ---
+    // Gyllene kant
     ctx.strokeStyle = "#285513ff"; // guld
     ctx.lineWidth = 5;
     ctx.strokeRect(boxX, boxY, boxW, boxH);
 
-    // --- Text ---
-    ctx.fillStyle = "#f0e6c8"; // benvit text
-    ctx.font = "26px serif";  // enkel serif ger lite gammal känsla
+    // Text
+    ctx.fillStyle = "#f0e6c8"; 
+    ctx.font = "26px serif"; 
     ctx.textBaseline = "top";
 
     const lines = dialogText.split("\n");
@@ -558,7 +558,7 @@ export function gameLoop(timestamp) {
       ctx.fillText(line, boxX + 30, boxY + 34 + i * 38);
     });
 
-    // --- Fortsätt-text i guld ---
+    // Fortsätt-text i guld
     ctx.font = "18px serif";
     ctx.fillStyle = "#c8a34a";
     ctx.fillText("⚔ Tryck för att fortsätta...", boxX + boxW - 320, boxY + boxH - 40);
