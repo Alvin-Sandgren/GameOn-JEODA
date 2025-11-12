@@ -183,6 +183,7 @@ export class Character {
   }
 }
 
+//Klass för hinder platforms etc
 export class Obstacle {
   constructor(x, y, w, h, imageOrColor = null) {
     this.x = x;
@@ -207,7 +208,7 @@ export class Obstacle {
       };
     } else {
       this.image = null;
-      this.color = imageOrColor || "green"; // fallbackgrön om inget skickas
+      this.color = imageOrColor || "green";
     }
   }
 
@@ -221,6 +222,7 @@ export class Obstacle {
   }
 }
 
+//Tar element från Obstacle men gör kollisionen med den dödlig
 export class Lava extends Obstacle {
   constructor(x, y, w, h, imageOrColor = null) {
     super(x, y, w, h, imageOrColor || "red");
