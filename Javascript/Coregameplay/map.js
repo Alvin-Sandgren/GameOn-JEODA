@@ -4,9 +4,9 @@ import { Soundmanager } from "./ljud.js";
 export const soundmanager = new Soundmanager();
 
 //  Dialog & overlay-variabler och flags
-let dialogActive = false;
-let dialogText = "";
-let dialogOnClose = null;
+export let dialogActive = false;
+export let dialogText = "";
+export let dialogOnClose = null;
 
 // GameOver-trigger och flagga
 let hasShirt = false;
@@ -56,7 +56,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  200, 4400, 100, 100, 10, 2,
+  2000, 2500, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -68,6 +68,12 @@ export const player = new Character(
   ],
   "./character_bilder/meatball_jump_nack.png"      
 );
+
+// bild på player i combat
+player.combatImg = new Image();
+player.combatImg.src = "./character_bilder/meatball_nack.png";
+
+
 
 //  se till att spelaren har en flagga för första-gången-händelser
 player.seenLava = player.seenLava || false;
@@ -200,12 +206,12 @@ export const obstacles = [
   new Obstacle(5050, 4000, 75, 25, "./platforms/stone_platform.png"),
 
   //Till nivå 4 trappor tillbaka
-  new Obstacle(5700, 3900, 100, 1000, "gray"),
-  new Obstacle(5800, 4000, 100, 700, "gray"),
-  new Obstacle(5900, 4100, 100, 700, "gray"),
-  new Obstacle(6000, 4200, 100, 500, "gray"),
-  new Obstacle(6100, 4300, 100, 300, "gray"),
-  new Obstacle(6200, 4400, 100, 200, "gray"),
+  new Obstacle(5700, 3900, 100, 610, "gray"),
+  new Obstacle(5800, 4000, 100, 510, "gray"),
+  new Obstacle(5900, 4100, 100, 410, "gray"),
+  new Obstacle(6000, 4200, 100, 310, "gray"),
+  new Obstacle(6100, 4300, 100, 210, "gray"),
+  new Obstacle(6200, 4400, 100, 110, "gray"),
   //Be Damien göra bättre bilder på trappor så kan jag göra bättre trappa
 
   //Nivå 4 boss arena
@@ -257,7 +263,7 @@ function updateCamera() {
 }
 
 //  Funktion för att visa dialog (pausar spelet)
-function showDialog(text, onClose = null) {
+export function showDialog(text, onClose = null) {
   paused = true;
   dialogActive = true;
   dialogText = text;

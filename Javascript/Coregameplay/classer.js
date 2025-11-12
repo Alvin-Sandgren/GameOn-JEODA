@@ -12,10 +12,12 @@ export class Character {
     this.speed = speed;
     this.hasShirt = false; this.hasBoots = false;
 
-    // Spelarens stats
-    this.mana = this.maxMana = 100;
-    this.health = this.maxHealth = 100;
-    this.damage = 10;
+    // Hälsa och skada
+    this.maxHealth = 100;
+    this.health = this.maxHealth;
+    this.damage = 20;
+    this.name = imgIdleSrc.split("/").pop().split(".")[0]; // ✅ fixat
+
 
     // Hopprelaterade variabler
     this.maxJumps = maxJumps; 
