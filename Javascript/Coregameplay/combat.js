@@ -2,7 +2,7 @@ import { canvas, ctx, startMap, player, combatGoats } from "./map.js";
 import { startGame, gameOver } from "./overlay.js";
 
 const combatImg = new Image();
-combatImg.src = "./Bilder/combatRunes.png";
+combatImg.src = "./kartbilder/combatRunes.png";
 
 const playerCombatImg = new Image();
 playerCombatImg.src = "./character_bilder/meatball_nack.png";
@@ -36,7 +36,7 @@ export const PlayerActions = [
     {
         name: "Viking strike",
         damage: () => player.damage,
-        img: "./Runes/rune_attack.png"
+        img: "./runes/rune_attack.png"
     },
     {
         name: "Shield up",
@@ -44,12 +44,12 @@ export const PlayerActions = [
             player.block = 10; 
             console.log(`You prepare a shield! Will block ${player.block} damage next turn.`);
         },
-        img: "./Runes/rune_block.png"
+        img: "./runes/rune_block.png"
     },
     {
         name: "Horn of Mjöd",
         heal: () => 5,
-        img: "./Runes/rune_heal.png"
+        img: "./runes/rune_heal.png"
     },
     {
         name: "Wildfire",
@@ -58,7 +58,7 @@ export const PlayerActions = [
             currentGoat.burnDamage = player.damage / 2; 
             console.log(`${currentGoat.name} was set on fire!`); 
         },
-        img: "./Runes/rune_burn.png"
+        img: "./runes/rune_burn.png"
     },
     {
         name: "Loki's insult",
@@ -66,7 +66,7 @@ export const PlayerActions = [
             currentGoat.tempDamage = Math.floor((currentGoat.damage || 20) * 0.5); 
             console.log(`${currentGoat.name} was weakened!`); 
         },
-        img: "./Runes/rune_weak.png"
+        img: "./runes/rune_weak.png"
     },
     {
         name: "Exposed flesh",
@@ -89,7 +89,7 @@ export const PlayerActions = [
                 console.log(`Lost the gamble! Dealt only ${dmg} damage.`);
             }
         },
-        img: "./Runes/rune_risk.png"
+        img: "./runes/rune_risk.png"
     }
 ];
 
