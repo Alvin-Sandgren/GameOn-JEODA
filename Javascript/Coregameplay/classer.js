@@ -16,7 +16,7 @@ export class Character {
     // Hälsa och skada
     this.maxHealth = 100;
     this.health = this.maxHealth;
-    this.damage = 50;
+    this.damage = 20;
     this.name = imgIdleSrc.split("/").pop().split(".")[0]; // ✅ fixat
 
     // Hopprelaterade variabler

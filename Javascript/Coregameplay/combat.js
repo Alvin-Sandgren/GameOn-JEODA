@@ -1,9 +1,9 @@
 export { startCombat };
-import { canvas, ctx, startMap, player, combatGoats, pauseMap } from "./map.js";
-import { startGame, gameOver } from "./overlay.js";
+import { canvas, ctx, startMap, player, combatGoats, pauseMap, soundmanager } from "./map.js";
+import { startGame, gameOver, exitCombat } from "./overlay.js";
 
 const imagePaths = [
-    "../kartbilder/combat.png",
+    "../kartbilder/combatrunes.png",
     "./character_bilder/meatball_nack.png",
     "./Runes/rune_attack.png",
     "./Runes/rune_block.png",
@@ -19,7 +19,7 @@ export async function preloadImages(paths) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => resolve({ src, img });
-            img.onerror = () => reject(`Kunde inte ladda: ${src}`);
+            img.onerror = () => reject(`couldnt load: ${src}`);
             img.src = src;
         });
     };
@@ -31,7 +31,7 @@ export async function preloadImages(paths) {
 }
 
 const combatImg = new Image();
-combatImg.src = "../kartbilder/combat.png";
+combatImg.src = "../kartbilder/combatrunes.png";
 
 const playerCombatImg = new Image();
 playerCombatImg.src = "./character_bilder/meatball_nack.png";
@@ -49,15 +49,15 @@ let discardedRunes = [];
 let runeUsesThisTurn = 0;
 
 const runeSlots = [
-    { x: 15, y: 100 },
-    { x: 15, y: 200 },
-    { x: 15, y: 300 },
-    { x: 15, y: 400 },
-    { x: 15, y: 500 },
-    { x: 15, y: 600 }
+    { x: 15, y: 150 },
+    { x: 15, y: 250 },
+    { x: 15, y: 350 },
+    { x: 15, y: 450 },
+    { x: 15, y: 550 },
+    { x: 15, y: 650 }
 ];
 
-player.damage=10;
+player.damage = 10;
 
 export const PlayerActions = [
     {
@@ -90,7 +90,8 @@ export const PlayerActions = [
     {
         name: "Loki's insult",
         apply: () => { 
-            currentGoat.tempDamage = Math.floor((currentGoat.damage || 20) * 0.5); 
+            if (currentGoat.tempDamage == null) currentGoat.tempDamage = currentGoat.damage || 20;
+            currentGoat.tempDamage = Math.floor(currentGoat.tempDamage * 0.5); 
             console.log(`${currentGoat.name} was weakened!`); 
         },
         img: "./Runes/rune_weak.png"
@@ -103,25 +104,25 @@ export const PlayerActions = [
         },
         img: "./Runes/rune_expose.png"
     },
-{
-    name: "Tyr's gamble",
-    apply: () => {
-        const outcome = Math.random();
-        if (outcome < 0.4) { // 40% chance: mer damage
-            const dmg = Math.floor(player.damage * 0.4); 
-            currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
-            console.log(`Won the gamble! Dealt ${dmg} damage!`);
-        } else if (outcome < 0.8) { // 40% chance: låg damage
-            const dmg = Math.floor(player.damage * 0.1);
-            currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
-            console.log(`Lost the gamble! Dealt only ${dmg} damage.`);
-        } else { // 20% chance: självskada
-            const selfDmg = Math.floor(player.maxHealth * 0.1);
-            player.health -= selfDmg;
-            console.log(`Oh no! Tyr's gamble backfired. You took ${selfDmg} damage!`);
-        }
-    },
-    img: "./Runes/rune_risk.png"
+    {
+        name: "Tyr's gamble",
+        apply: () => {
+            const outcome = Math.random();
+            if (outcome < 0.4) { 
+                const dmg = Math.floor(player.damage * 0.4); 
+                currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
+                console.log(`Won the gamble! Dealt ${dmg} damage!`);
+            } else if (outcome < 0.8) { 
+                const dmg = Math.floor(player.damage * 0.1);
+                currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
+                console.log(`Lost the gamble! Dealt only ${dmg} damage.`);
+            } else { 
+                const selfDmg = Math.floor(player.maxHealth * 0.1);
+                player.health -= selfDmg;
+                console.log(`Oh no! Tyr's gamble backfired. You took ${selfDmg} damage!`);
+            }
+        },
+        img: "./Runes/rune_risk.png"
     }
 ];
 
@@ -138,9 +139,9 @@ export const EnemyActions = [
             let damage = goat.tempDamage || goat.damage || 20;
             const blocked = Math.min(damage, player.block || 0);
             damage -= blocked;
-            player.block = 0;
             player.health = (player.health || player.maxHealth) - damage;
             console.log(`${goat.name} attacked and dealt ${damage} damage (${blocked} blocked)!`);
+            player.block = Math.max(player.block - blocked, 0);
         }
     },
     {
@@ -153,8 +154,12 @@ export const EnemyActions = [
     {
         name: "Goat buff",
         apply: (goat) => {
-            goat.damage = Math.floor((goat.damage || 20) * 1.2);
-            console.log(`${goat.name} is enraged!`);
+            if (Math.random() < 0.3) { 
+                goat.damage = Math.min((goat.damage || 20) + 2, 25); 
+                console.log(`${goat.name} is enraged! Damage is now ${goat.damage}.`);
+            } else {
+                console.log(`${goat.name} tried to buff but failed.`);
+            }
         }
     },
 ];
@@ -166,24 +171,13 @@ let images = {};
     images = await preloadImages(imagePaths);
     console.log("All images are loaded");
 
-    combatImg.src = "../kartbilder/combat.png";
-    combatImg.imageObj = images["./kartbilder/combat.png"];
+    combatImg.src = "../kartbilder/combatrunes.png";
+    combatImg.imageObj = images["../kartbilder/combatrunes.png"];
 
     playerCombatImg.src = "./character_bilder/meatball_nack.png";
     player.combatImg = images["./character_bilder/meatball_nack.png"];
 
-    PlayerActions.forEach(r => {
-        r.imageObj = images[r.img];
-    });
-
-    // Här fanns en felaktig start och pause game vilket störde menyn
-
 })();
-
-//Här fanns buggen och den fucka menyn
-//  playerCombatImg.onload = () => {
-//    ctx.drawImage(playerCombatImg, 350, canvas.height/2 - 75, 150, 150);
-//};
 
 function startRuneSelection() {
     if (!currentGoat) return;
@@ -200,14 +194,12 @@ function startRuneSelection() {
     currentGoat.maxHealth = currentGoat.maxHealth || 100;
     currentGoat.health = currentGoat.health ?? currentGoat.maxHealth;
 
-    currentGoat.vulnerable = false;
-    currentGoat.tempDamage = currentGoat.damage;
+    if (currentGoat.tempDamage == null) currentGoat.tempDamage = currentGoat.damage || 20;
 
     currentGoat.blockRemaining = currentGoat.block || 0;
 
     drawCombat(currentGoat);
 }
-
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -220,7 +212,6 @@ function shuffleArray(array) {
 function drawRunes(alwaysVisible = false) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "white";
-    ctx.fillText("Your runes:", 30, 100);
 
     const runesToShow = discardedRunes.slice(0, 6);
     runesToShow.forEach((rune, index) => {
@@ -244,6 +235,7 @@ function drawRunes(alwaysVisible = false) {
     });
     if (selectingRunes) {
         ctx.fillStyle = "white";
+        ctx.font = "40px arial";
         ctx.fillText("Select 3 runes for next round", 30, 30);
     }
 }
@@ -277,25 +269,26 @@ export function drawCombat(goat) {
     if (!goat) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (combatImg.complete) ctx.drawImage(combatImg, 0, 0, canvas.width, canvas.height);
+    if (inCombat && combatImg.complete) ctx.drawImage(combatImg, 0, 0, canvas.width, canvas.height);
+
     if (player.combatImg && player.combatImg.complete) {
         const width = 250;
-        const height = 250;
-        const x = 300; 
-        const y = 320;
+        const height = 300;
+        const x = 350; 
+        const y = 420;
         ctx.drawImage(player.combatImg, x, y, width, height);
     }
 
-    if (goat.image && goat.image.complete) ctx.drawImage(goat.image, canvas.width - 400, canvas.height / 2 - 175, 400, 400);
+    if (goat.image && goat.image.complete) ctx.drawImage(goat.image, 1400, 330, 400, 400);
 
     ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
+    ctx.font = "40px Arial";
 
-    ctx.fillText(`You have defeated: ${slays}/4`, 660, canvas.height - 660);
-    ctx.fillText(`Combat against: ${goat.name}`, 650, canvas.height - 720);
+    ctx.fillText(`You have defeated: ${slays}/4`, 760, canvas.height - 860);
+    ctx.fillText(`Combat against: ${goat.name}`, 750, canvas.height - 920);
 
-    drawHealthBar(player.health, player.maxHealth, 230, 560, 350, 80);
-    drawHealthBar(goat.health, goat.maxHealth, 1000, 560, 350, 80);
+    drawHealthBar(player.health, player.maxHealth, 285, 725, 440, 95);
+    drawHealthBar(goat.health, goat.maxHealth, 1260, 725, 440, 95);
 
     drawStatus(400, 250, player);
     drawStatus(canvas.width - 570, 280, goat);
@@ -319,12 +312,12 @@ export function drawCombat(goat) {
                 extra = ` (will block 10)`;
 
             } else if (move.name === "Goat buff") {
-                extra = ` (damage x1.2)`;
+                extra = ` (damage +2)`;
             }
             return `${move.name}${extra}`;
 
         }).join(" + ");
-        ctx.fillText(`Next enemy action: ${movesText}`, canvas.width - 1200, 200);
+        ctx.fillText(`Next enemy action: ${movesText}`, canvas.width - 1300, 300);
     }
 }
 
@@ -355,35 +348,65 @@ function drawHealthBar(current, max, x, y, width, height) {
 
 function startCombat(goat) {
     if (!goat) return;
+    
+    if (goat.health <= 0) return;
 
     inCombat = true;
     playerTurn = true;
-    currentGoat = goat; 
+    currentGoat = goat;
+
+    selectingRunes = false;
+    selectedRunes = [];
+    currentTurnRunes = [];
+    discardedRunes = [];
+    runeUsesThisTurn = 0;
 
     currentGoat.maxHealth = currentGoat.maxHealth || 100;
-    currentGoat.health = currentGoat.health ?? currentGoat.maxHealth;
+    currentGoat.health = currentGoat.maxHealth;
 
-    currentGoat.nextMove = [EnemyActions[Math.floor(Math.random() * EnemyActions.length)], EnemyActions[Math.floor(Math.random() * EnemyActions.length)]];
+    currentGoat.nextMove = [
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
+    ];
 
     currentGoat.burnTurns = 0;
     currentGoat.burnDamage = 0;
     currentGoat.vulnerable = false;
-
-    currentGoat.tempDamage = currentGoat.damage || 20;
-    player.block = 0;
+    currentGoat.damage = 5;
+    currentGoat.tempDamage = 5;
     currentGoat.block = 0;
-    currentGoat.damage = currentGoat.damage || 20;
+    currentGoat.blockRemaining = 0;
+
+    player.block = 0;
 
     console.log(`An evil ${goat.name} has appeared!`);
+
     startRuneSelection();
+    drawCombat(currentGoat);
 }
 
 export function playerAction(actionIndex, goat) {
     if (!playerTurn || !inCombat || !goat) return;
+
     const action = currentTurnRunes[actionIndex];
     if (!action) return;
 
     currentTurnRunes.splice(actionIndex, 1);
+
+    //  startar ljud för varje rune
+    if (action.name === "Viking strike") {
+        soundmanager.playAxe();
+    } else if (action.name === "Shield up") {
+        soundmanager.playBlock();
+    } else if (action.name === "Horn of Mjöd") {
+        soundmanager.playHealing();
+    } else if (action.name === "Wildfire") {
+        soundmanager.playBurn();
+    } else if (action.name === "Loki's insult" || action.name === "Exposed flesh") {
+        soundmanager.playRune();
+    } else if (action.name === "Tyr's gamble") {
+        soundmanager.playAnvil();
+    }
 
     if (action.apply) action.apply();
 
@@ -410,27 +433,62 @@ export function playerAction(actionIndex, goat) {
         console.log(`You healed ${healed} HP`);
     }
 
-    if (goat.health <= 0) { endCombat(true, goat); return; }
+    runeUsesThisTurn++; 
 
-    runeUsesThisTurn++;
+    
+    if (goat.health <= 0) { 
+        endCombat(true, goat); 
+        return; 
+    }
+
     if (runeUsesThisTurn >= 3) {
         runeUsesThisTurn = 0;
         playerTurn = false;
 
-        //reset alla effecter förutom burn efter varje omgång
+        if (!inCombat) return;
+
         goat.vulnerable = false;
         goat.tempDamage = goat.damage;
         goat.block = 0;
         goat.blockRemaining = 0;
-        player.block = 0;
 
         setTimeout(() => enemyTurn(goat), 1000);
     }
 }
 
+function endCombat(victory, goat) {
+    inCombat = false;
+    playerTurn = false;
+
+    // Nollställ stridsvariabler
+    selectingRunes = false;
+    selectedRunes = [];
+    currentTurnRunes = [];
+    discardedRunes = [];
+    runeUsesThisTurn = 0;
+
+    if (victory) {
+        slays++;
+        console.log(`You defeated ${goat.name}!`);
+        player.health = player.maxHealth;
+        goat.health = 0;
+
+        setTimeout(() => {
+            startMap();
+            currentGoat = null;
+            exitCombat();
+        }, 500);
+
+    } else {
+        console.log("You were defeated!");
+        player.health = player.maxHealth;
+        gameOver();
+    }
+}
+
 
 function enemyTurn(goat) {
-    if (!goat || !player) return;
+    if (!inCombat || !goat || !player) return; 
 
     // burn skada
     if (goat.burnTurns > 0) {
@@ -439,6 +497,7 @@ function enemyTurn(goat) {
         console.log(`${goat.name} took ${goat.burnDamage} burn damage!`);
         if (goat.health <= 0) {
             endCombat(true, goat);
+            soundmanager.playGoatDeath();
             return;
         }
     }
@@ -447,20 +506,17 @@ function enemyTurn(goat) {
     goat.tempDamage = goat.damage || 20;
     player.block = player.block ?? 0;
 
-    // Använd redan valda moves (nästa drag)
     const actions = goat.nextMove || [];
 
-    // Applicera icke-attack effekter först
+    // Icke-attack effekter först
     actions.forEach(action => {
         if (action.name !== "Attack") action.apply(goat, player);
     });
 
-    // Beräkna attackskada efter block
+    // Attack damage
     let totalDamage = 0;
     actions.forEach(action => {
-        if (action.name === "Attack") {
-            totalDamage += goat.tempDamage || goat.damage || 20;
-        }
+        if (action.name === "Attack") totalDamage += goat.tempDamage || goat.damage || 20;
     });
 
     const blocked = Math.min(totalDamage, player.block);
@@ -468,9 +524,10 @@ function enemyTurn(goat) {
     player.health -= damageToTake;
     console.log(`${goat.name} dealt ${damageToTake} damage (${blocked} blocked)!`);
 
-    // Kolla om spelaren dog
+    player.block = 0;
+
     if (player.health <= 0) {
-        player.health = 0;
+        player.health = 100;
         inCombat = false;
         playerTurn = false;
         currentGoat = null;
@@ -479,7 +536,6 @@ function enemyTurn(goat) {
         return;
     }
 
-    // Förbered nästa drag
     goat.nextMove = [
         EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
         EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
@@ -497,6 +553,7 @@ let hoveredRuneIndex = null;
 let hoveredSelectedRuneIndex = null;
 
 canvas.addEventListener("mousemove", (event) => {
+    if (!currentGoat) return; 
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
@@ -528,6 +585,7 @@ canvas.addEventListener("mousemove", (event) => {
 });
 
 canvas.addEventListener("click", (event) => {
+    if (!currentGoat) return; 
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;

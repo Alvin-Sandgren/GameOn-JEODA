@@ -54,7 +54,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  200, 4400, 100, 100, 10, 2,
+  200, 4450, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 

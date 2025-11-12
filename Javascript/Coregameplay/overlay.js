@@ -112,6 +112,13 @@ export function enterCombat(collidedGoat) {
     });
 }
 
+// Exit combat and return to overworld
+export function exitCombat() {
+    currentState = "overworld";
+    soundmanager.playOverworld();
+    currentCombatGoat = null;
+}
+
 //  Start Game 
 export function startGame() {
     currentState = "overworld";
