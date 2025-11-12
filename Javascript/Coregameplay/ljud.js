@@ -6,13 +6,16 @@ export class Soundmanager {
     constructor() {
         this.menuMusic = new Audio("Ljud/menumusic.wav");
         this.menuMusic.loop = true;
-        this.backgroundMusic = new Audio("Ljud/background-music.wav");
+        this.backgroundMusic = new Audio("Ljud/backgroundmusic.wav");
         this.backgroundMusic.loop = true;
         this.combatMusic = new Audio("Ljud/combatmusik.wav");
         this.combatMusic.loop = true;
         this.dashsfx = new Audio("Ljud/dash.wav");
         this.gameoversfx = new Audio("Ljud/gameover.wav");
         this.jump = new Audio("Ljud/jump.wav");
+        this.jump.volume = 0.1;
+        this.backgroundMusic.volume = 0.2;
+        this.combatMusic.volume = 0.85;
     }
     playMenu() {
         this.backgroundMusic.pause();

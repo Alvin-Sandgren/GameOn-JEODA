@@ -71,12 +71,9 @@ export const player = new Character(
 player.combatImg = new Image();
 player.combatImg.src = "./character_bilder/meatball_nack.png";
 
-
-
 //  se till att spelaren har en flagga för första-gången-händelser
 player.seenLava = player.seenLava || false;
 player.seenCaveHint = player.seenCaveHint || false;
-
 
  // getter (fiender)
 export const enemygoatgw = new Goat(5450, 2200, 300, 300, "./goat_bilder/gwget.png", "GWget");
@@ -396,7 +393,7 @@ export function gameLoop(timestamp) {
     if (!player.seenCaveHint) {
       const triggerZoneX1 = 2800; 
       const triggerZoneX2 = 3000; 
-      const triggerZoneYMin = 2400;
+      const triggerZoneYMin = 2000;
       const triggerZoneYMax = 2800;
       const playerFeetY = player.y + player.h;
 
@@ -523,9 +520,6 @@ export function gameLoop(timestamp) {
     const inEndZone = 
         player.x > 0 && player.x < 400 &&
         player.y > 3800 && player.y < 4600 &&
-        hasShirt === true &&
-        hasBoots === true &&
-        hasHelmet === true &&
         player.seenAllGoatsDead;
 
     if (inEndZone && !creditsActive) {
@@ -534,32 +528,46 @@ export function gameLoop(timestamp) {
 
     ctx.restore();
 
-    // Rita dialogruta
     if (dialogActive) {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
-      const boxW = 800;
-      const boxH = 260;
-      const boxX = canvas.width / 2 - boxW / 2;
-      const boxY = canvas.height / 2 - boxH / 2;
-      ctx.fillRect(boxX, boxY, boxW, boxH);
+    const boxW = 800;
+    const boxH = 260;
+    const boxX = canvas.width / 2 - boxW / 2;
+    const boxY = canvas.height / 2 - boxH / 2;
 
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 5;
-      ctx.strokeRect(boxX, boxY, boxW, boxH);
+    // --- Bakgrund i träton med rundade hörn ---
+    ctx.save();
+    const gradient = ctx.createLinearGradient(boxX, boxY, boxX, boxY + boxH);
+    gradient.addColorStop(0, "#3b2615"); // mörkbrun topp
+    gradient.addColorStop(1, "#6b4423"); // ljusare brun botten
+    ctx.fillStyle = gradient;
 
-      ctx.fillStyle = "white";
-      ctx.font = "26px Arial";
-      ctx.textBaseline = "top";
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxW, boxH, 20);
+    ctx.fill();
+    ctx.restore();
 
-      const lines = dialogText.split("\n");
-      lines.forEach((line, i) => {
-        ctx.fillText(line, boxX + 24, boxY + 24 + i * 36);
-      });
+    // --- Gyllene kant ---
+    ctx.strokeStyle = "#285513ff"; // guld
+    ctx.lineWidth = 5;
+    ctx.strokeRect(boxX, boxY, boxW, boxH);
 
-      ctx.font = "18px Arial";
-      ctx.fillText("Click left mouse button to continue...", boxX + boxW - 350, boxY + boxH - 40);
-    }
+    // --- Text ---
+    ctx.fillStyle = "#f0e6c8"; // benvit text
+    ctx.font = "26px serif";  // enkel serif ger lite gammal känsla
+    ctx.textBaseline = "top";
+
+    const lines = dialogText.split("\n");
+    lines.forEach((line, i) => {
+      ctx.fillText(line, boxX + 30, boxY + 34 + i * 38);
+    });
+
+    // --- Fortsätt-text i guld ---
+    ctx.font = "18px serif";
+    ctx.fillStyle = "#c8a34a";
+    ctx.fillText("⚔ Tryck för att fortsätta...", boxX + boxW - 320, boxY + boxH - 40);
   }
+
+}
 }
 
 // starta loopen
@@ -571,7 +579,7 @@ if (startBtn) {
   startBtn.addEventListener('click', () => startMap());
 }
 
-// === Credits-system (minimal) ===
+// Credits-system (minimal)
 let creditsActive = false, creditsY = canvas.height, fadeAlpha = 1, holdTimer = 0;
 
 // Ladda in bilder för credits och deras positioner
