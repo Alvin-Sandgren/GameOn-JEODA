@@ -2,18 +2,21 @@ export { startCombat };
 import { canvas, ctx, startMap, player, combatGoats, pauseMap, soundmanager } from "./map.js";
 import { startGame, gameOver, exitCombat } from "./overlay.js";
 
+// Lista med bildvägar som ska laddas
 const imagePaths = [
     "../kartbilder/combatrunes.png",
     "./character_bilder/meatball_nack.png",
-    "./Runes/rune_attack.png",
-    "./Runes/rune_block.png",
-    "./Runes/rune_heal.png",
-    "./Runes/rune_burn.png",
-    "./Runes/rune_weak.png",
-    "./Runes/rune_expose.png",
-    "./Runes/rune_risk.png",
+    "./Runes/rune_attackb.png",
+    "./Runes/rune_blockb.png",
+    "./Runes/rune_healb.png",
+    "./Runes/rune_burnb.png",
+    "./Runes/rune_weakb.png",
+    "./Runes/rune_exposeb.png",
+    "./Runes/rune_riskb.png",
+    "./Runes/action_stone.png",
 ];
 
+// Funktion för att ladda bilder
 export async function preloadImages(paths) {
     const loadImage = (src) => {
         return new Promise((resolve, reject) => {
@@ -30,40 +33,47 @@ export async function preloadImages(paths) {
     return imageMap;
 }
 
+// Skapa bilder för combat och spelare
 const combatImg = new Image();
 combatImg.src = "../kartbilder/combatrunes.png";
 
 const playerCombatImg = new Image();
 playerCombatImg.src = "./character_bilder/meatball_nack.png";
 
+// Stridsstatusvariabler
 let inCombat = false;
 let playerTurn = true;
 let slays = 0;
 let currentGoat = null;
 let currentTurn = 0;
 
+// Run-relaterade variabler
+let actionStoneSlots = [null, null, null]; 
 let selectingRunes = false;
 let selectedRunes = [];
 let currentTurnRunes = [];
 let discardedRunes = [];
 let runeUsesThisTurn = 0;
 
+// Positionskonfiguration för runor
 const runeSlots = [
-    { x: 15, y: 150 },
-    { x: 15, y: 250 },
-    { x: 15, y: 350 },
-    { x: 15, y: 450 },
-    { x: 15, y: 550 },
-    { x: 15, y: 650 }
+    { x: 0, y: 102 },
+    { x: 0, y: 227 },
+    { x: 0, y: 350 },
+    { x: 0, y: 477 },
+    { x: 0, y: 600 },
+    { x: 0, y: 723 }
 ];
 
+// Spelarens grundskada
 player.damage = 10;
 
+// Spelarens tillgängliga actions
 export const PlayerActions = [
     {
         name: "Viking strike",
         damage: () => player.damage,
-        img: "./Runes/rune_attack.png"
+        img: "./Runes/rune_attackb.png"
     },
     {
         name: "Shield up",
@@ -71,12 +81,12 @@ export const PlayerActions = [
             player.block = 10; 
             console.log(`You prepare a shield! Will block ${player.block} damage next turn.`);
         },
-        img: "./Runes/rune_block.png"
+        img: "./Runes/rune_blockb.png"
     },
     {
         name: "Horn of Mjöd",
         heal: () => 5,
-        img: "./Runes/rune_heal.png"
+        img: "./Runes/rune_healb.png"
     },
     {
         name: "Wildfire",
@@ -85,7 +95,7 @@ export const PlayerActions = [
             currentGoat.burnDamage = Math.floor(player.damage / 3); 
             console.log(`${currentGoat.name} was set on fire!`); 
         },
-        img: "./Runes/rune_burn.png"
+        img: "./Runes/rune_burnb.png"
     },
     {
         name: "Loki's insult",
@@ -94,7 +104,7 @@ export const PlayerActions = [
             currentGoat.tempDamage = Math.floor(currentGoat.tempDamage * 0.5); 
             console.log(`${currentGoat.name} was weakened!`); 
         },
-        img: "./Runes/rune_weak.png"
+        img: "./Runes/rune_weakb.png"
     },
     {
         name: "Exposed flesh",
@@ -102,7 +112,7 @@ export const PlayerActions = [
             currentGoat.vulnerable = true; 
             console.log(`${currentGoat.name} is vulnerable!`); 
         },
-        img: "./Runes/rune_expose.png"
+        img: "./Runes/rune_exposeb.png"
     },
     {
         name: "Tyr's gamble",
@@ -122,40 +132,45 @@ export const PlayerActions = [
                 console.log(`Oh no! Tyr's gamble backfired. You took ${selfDmg} damage!`);
             }
         },
-        img: "./Runes/rune_risk.png"
+        img: "./Runes/rune_riskb.png"
     }
 ];
 
+// Ladda bilder för alla runor
 PlayerActions.forEach(r => {
     const img = new Image();
     img.src = r.img;
     r.imageObj = img;
 });
 
+// Fiendens möjliga actions
 export const EnemyActions = [
     {
         name: "Attack",
         apply: (goat, player) => {
             let damage = goat.tempDamage || goat.damage || 20;
-            const blocked = Math.min(damage, player.block || 0);
-            damage -= blocked;
-            player.health = (player.health || player.maxHealth) - damage;
-            console.log(`${goat.name} attacked and dealt ${damage} damage (${blocked} blocked)!`);
-            player.block = Math.max(player.block - blocked, 0);
+            const blockedByPlayer = Math.min(damage, player.block || 0);
+            damage -= blockedByPlayer;
+            player.health -= damage;
+            console.log(`${goat.name} attacked for ${damage} damage (blocked ${blockedByPlayer})`);
+            
+            // Reset spelarens block efter attack
+            player.block = 0;
         }
     },
     {
         name: "Defensive stance",
         apply: (goat) => {
+            // Fiendens block gäller bara nästa gång den tar skada
             goat.block = 10;
-            console.log(`${goat.name} is preparing to block ${goat.block} damage next turn!`);
+            console.log(`${goat.name} prepares to block ${goat.block} damage!`);
         }
     },
     {
         name: "Goat buff",
         apply: (goat) => {
-            if (Math.random() < 0.3) { 
-                goat.damage = Math.min((goat.damage || 20) + 2, 25); 
+            if (Math.random() < 0.5) { 
+                goat.damage += 5; // högre skada
                 console.log(`${goat.name} is enraged! Damage is now ${goat.damage}.`);
             } else {
                 console.log(`${goat.name} tried to buff but failed.`);
@@ -164,8 +179,10 @@ export const EnemyActions = [
     },
 ];
 
+
 let images = {};
 
+// Ladda alla bilder vid start
 (async () => {
     console.log("Loading images");
     images = await preloadImages(imagePaths);
@@ -181,36 +198,43 @@ let images = {};
         r.imageObj = images[r.img];
     });
 
-    startMap();
-    startGame();
+    startMap(); // Starta kartan
+    startGame(); // Starta spelet
 })();
 
+// Rita spelaren på canvas när bilden är laddad
 playerCombatImg.onload = () => {
     ctx.drawImage(playerCombatImg, 350, canvas.height/2 - 75, 150, 150);
 };
 
+// Funktion för att starta runval
 function startRuneSelection() {
     if (!currentGoat) return;
 
     selectingRunes = true;
+    actionStoneSlots = [null, null, null]; 
     selectedRunes = [];
-    currentTurnRunes = [];
-    runeUsesThisTurn = 0;
 
     discardedRunes = shuffleArray([...PlayerActions]);
+
     hoveredRuneIndex = null;
     hoveredSelectedRuneIndex = null;
 
-    currentGoat.maxHealth = currentGoat.maxHealth || 100;
-    currentGoat.health = currentGoat.health ?? currentGoat.maxHealth;
-
-    if (currentGoat.tempDamage == null) currentGoat.tempDamage = currentGoat.damage || 20;
-
-    currentGoat.blockRemaining = currentGoat.block || 0;
+    discardedRunes.slice(0, 6).forEach((rune, index) => {
+        const slot = runeSlots[index];
+        if (!slot) return;
+        rune._clickArea = {
+            x: slot.x,
+            y: slot.y,
+            width: rune.imageObj?.width || 200,
+            height: rune.imageObj?.height || 50
+        };
+    });
 
     drawCombat(currentGoat);
 }
 
+// Funktion för att slumpa array
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -219,62 +243,110 @@ function shuffleArray(array) {
     return array;
 }
 
+// Konfiguration för action stone
+const actionStoneConfig = {
+    x: 740,
+    y: 500,
+    width: 450,
+    height: 470
+};
+
+const actionStoneRunes = [
+    { x: 60,  y: 50,  width: 320, height: 130 },
+    { x: 60,  y: 160, width: 320, height: 130 },
+    { x: 60,  y: 280, width: 320, height: 130 }
+]
+
+// Rita action stone och runor i stone
+function drawActionStone() {
+    const stone = images["./Runes/action_stone.png"];
+    if (!stone || !stone.complete) return;
+
+    ctx.drawImage(stone, actionStoneConfig.x, actionStoneConfig.y, actionStoneConfig.width, actionStoneConfig.height);
+
+    actionStoneSlots.forEach((rune, index) => {
+        if (!rune || !rune.imageObj?.complete) return;
+
+        const config = actionStoneRunes[index];
+        const runeX = actionStoneConfig.x + config.x;
+        const runeY = actionStoneConfig.y + config.y;
+        const runeW = config.width;
+        const runeH = config.height;
+
+        ctx.drawImage(rune.imageObj, runeX, runeY, runeW, runeH);
+
+        // Uppdaterar klickområde
+        rune._clickArea = { x: runeX, y: runeY, width: runeW, height: runeH };
+    });
+}
+
+// Rita alla runor på canvas
 function drawRunes(alwaysVisible = false) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "white";
 
     const runesToShow = discardedRunes.slice(0, 6);
     runesToShow.forEach((rune, index) => {
+        if (rune.selected) return; 
         const slot = runeSlots[index];
-        if (!slot) return;
+        if (!slot || !rune.imageObj?.complete) return;
+
         const x = slot.x;
         const y = slot.y;
-        const w = 200;
-        const h = 50;
+
+        let w = rune.imageObj.width;
+        let h = rune.imageObj.height;
 
         let scale = (hoveredRuneIndex === index) ? 1.1 : 1;
         const scaledW = w * scale;
         const scaledH = h * scale;
         const offsetX = x - (scaledW - w) / 2;
         const offsetY = y - (scaledH - h) / 2;
-        if (rune.imageObj?.complete) {
-            if (!selectingRunes) ctx.globalAlpha = 0.5;
-            ctx.drawImage(rune.imageObj, offsetX, offsetY, scaledW, scaledH);
-            ctx.globalAlpha = 1;
-        }
+
+        if (!selectingRunes) ctx.globalAlpha = 0.5;
+        ctx.drawImage(rune.imageObj, offsetX, offsetY, scaledW, scaledH);
+        ctx.globalAlpha = 1;
+
+        rune._clickArea = { x: offsetX, y: offsetY, width: scaledW, height: scaledH };
     });
+
     if (selectingRunes) {
         ctx.fillStyle = "white";
-        ctx.font = "40px arial";
+        ctx.font = "40px Arial";
         ctx.fillText("Select 3 runes for next round", 30, 30);
     }
 }
 
+// Rita valda runor under strid
 function drawSelectedRunes() {
-    const runesToDraw = selectingRunes ? selectedRunes : currentTurnRunes;
+    if (selectingRunes) {
 
-    if (runesToDraw.length === 0) return;
-    const totalWidth = runesToDraw.length * 220 - 20;
-    const startX = (canvas.width - totalWidth) / 2;
-    const y = canvas.height - 220;
+        const runesToDraw = selectedRunes;
+        if (runesToDraw.length === 0) return;
 
-    runesToDraw.forEach((rune, index) => {
-        let x = startX + index * 220;
-        const w = 200;
-        const h = 50;
+        const totalWidth = runesToDraw.reduce((sum, rune) => sum + (rune.imageObj?.width || 200) + 20, -20);
+        const startX = (canvas.width - totalWidth) / 2;
+        const y = canvas.height - 220;
 
-        let scale = (hoveredSelectedRuneIndex === index) ? 1.1 : 1;
-        const scaledW = w * scale;
-        const scaledH = h * scale;
-        const offsetX = x - (scaledW - w) / 2;
-        const offsetY = y - (scaledH - h) / 2;
+        let xOffset = startX;
+        runesToDraw.forEach((rune, index) => {
+            if (!rune.imageObj?.complete) return;
 
-        if (rune.imageObj?.complete) {
+            let w = rune.imageObj.width;
+            let h = rune.imageObj.height;
+
+            let scale = (hoveredSelectedRuneIndex === index) ? 1.1 : 1;
+            const scaledW = w * scale;
+            const scaledH = h * scale;
+            const offsetX = xOffset - (scaledW - w) / 2;
+            const offsetY = y - (scaledH - h) / 2;
+
             ctx.drawImage(rune.imageObj, offsetX, offsetY, scaledW, scaledH);
-        }
-    });
+        });
+    }
 }
 
+// Rita hela striden
 export function drawCombat(goat) {
     if (!goat) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -305,6 +377,7 @@ export function drawCombat(goat) {
 
     drawRunes(true);
     drawSelectedRunes();
+    drawActionStone();
 
     if (goat.nextMove && goat.nextMove.length) {
         ctx.fillStyle = "white";
@@ -331,6 +404,7 @@ export function drawCombat(goat) {
     }
 }
 
+// Rita status (burn, block, vulnerable)
 function drawStatus(x, y, target) {
     ctx.fillStyle = "yellow";
     ctx.font = "20px Arial";
@@ -342,6 +416,7 @@ function drawStatus(x, y, target) {
     ctx.fillText(statusText.join(" | "), x, y);
 }
 
+// Rita livsfält
 function drawHealthBar(current, max, x, y, width, height) {
     current = Number(current) || 0;
     max = Number(max) || 1;
@@ -382,8 +457,8 @@ function startCombat(goat) {
     currentGoat.burnTurns = 0;
     currentGoat.burnDamage = 0;
     currentGoat.vulnerable = false;
-    currentGoat.damage = 5;
-    currentGoat.tempDamage = 5;
+    currentGoat.damage = 10;
+    currentGoat.tempDamage = currentGoat.damage;
     currentGoat.block = 0;
     currentGoat.blockRemaining = 0;
 
@@ -495,16 +570,14 @@ function endCombat(victory, goat) {
         gameOver();
     }
 }
-
-
+// Fiendens tur (fungerar ish)
 function enemyTurn(goat) {
-    if (!inCombat || !goat || !player) return; 
+    if (!inCombat || !goat || !player) return;
 
-    // burn skada
     if (goat.burnTurns > 0) {
         goat.health -= goat.burnDamage;
-        goat.burnTurns -= 1;
-        console.log(`${goat.name} took ${goat.burnDamage} burn damage!`);
+        goat.burnTurns--;
+        console.log(`${goat.name} took ${goat.burnDamage} burn damage! (${goat.burnTurns} rounds left)`);
         if (goat.health <= 0) {
             endCombat(true, goat);
             soundmanager.playGoatDeath();
@@ -512,32 +585,51 @@ function enemyTurn(goat) {
         }
     }
 
-    goat.vulnerable = false;
-    goat.tempDamage = goat.damage || 20;
-    player.block = player.block ?? 0;
+    goat.tempDamage = goat.damage;
 
-    const actions = goat.nextMove || [];
+    let actions = [
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
+    ];
 
-    // Icke-attack effekter först
+    goat.nextMove = actions;
+
+    let totalBlock = 0;
     actions.forEach(action => {
-        if (action.name !== "Attack") action.apply(goat, player);
+        if (action.name === "Defensive stance") {
+            totalBlock += 10; 
+        }
     });
+    goat.block = totalBlock;
+    goat.blockRemaining = totalBlock;
 
-    // Attack damage
-    let totalDamage = 0;
     actions.forEach(action => {
-        if (action.name === "Attack") totalDamage += goat.tempDamage || goat.damage || 20;
+        if (action.name === "Attack") {
+            let damage = goat.tempDamage || goat.damage || 10;
+
+            const blockedByPlayer = Math.min(damage, player.block || 0);
+            damage -= blockedByPlayer;
+            player.block -= blockedByPlayer;
+
+            const blockedByGoat = Math.min(damage, goat.blockRemaining || 0);
+            damage -= blockedByGoat;
+            goat.blockRemaining -= blockedByGoat;
+
+            player.health -= damage;
+            console.log(`${goat.name} attacked for ${damage} damage (blocked ${blockedByPlayer} by player, ${blockedByGoat} by enemy)`);
+        }
+        else if (action.name === "Goat buff") {
+            if (Math.random() < 0.5) {
+                goat.damage += 5;
+                console.log(`${goat.name} is enraged! Damage now ${goat.damage}`);
+            } else {
+                console.log(`${goat.name} tried to buff but failed.`);
+            }
+        }
     });
-
-    const blocked = Math.min(totalDamage, player.block);
-    const damageToTake = Math.max(totalDamage - blocked, 0);
-    player.health -= damageToTake;
-    console.log(`${goat.name} dealt ${damageToTake} damage (${blocked} blocked)!`);
-
-    player.block = 0;
 
     if (player.health <= 0) {
-        player.health = 100;
+        player.health = player.maxHealth;
         inCombat = false;
         playerTurn = false;
         currentGoat = null;
@@ -546,18 +638,13 @@ function enemyTurn(goat) {
         return;
     }
 
-    goat.nextMove = [
-        EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
-        EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
-    ];
-
     playerTurn = true;
-    currentTurn += 1;
+    currentTurn++;
     runeUsesThisTurn = 0;
-    player.block = 0;
-
     startRuneSelection();
 }
+
+
 
 let hoveredRuneIndex = null;
 let hoveredSelectedRuneIndex = null;
@@ -595,28 +682,38 @@ canvas.addEventListener("mousemove", (event) => {
 });
 
 canvas.addEventListener("click", (event) => {
-    if (!currentGoat) return; 
+    if (!currentGoat) return;
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
     if (selectingRunes) {
-        const runesToShow = discardedRunes.slice(0, 6);
-        runesToShow.forEach((rune, index) => {
-            const slot = runeSlots[index];
-            if (!slot) return;
-            if (x >= slot.x && x <= slot.x + 200 && y >= slot.y && y <= slot.y + 50) {
-                if (!selectedRunes.includes(rune) && selectedRunes.length < 3) {
-                    selectedRunes.push(rune);
-                    discardedRunes = discardedRunes.filter(r => r !== rune);
-                } else {
-                    selectedRunes = selectedRunes.filter(r => r !== rune);
-                    discardedRunes.push(rune);
+        discardedRunes.slice(0, 6).forEach((rune) => {
+            if (!rune._clickArea || rune.selected) return;
+            const area = rune._clickArea;
+
+            if (x >= area.x && x <= area.x + area.width &&
+                y >= area.y && y <= area.y + area.height) {
+
+                const firstEmptyIndex = actionStoneSlots.findIndex(s => s === null);
+                if (firstEmptyIndex !== -1) {
+                    actionStoneSlots[firstEmptyIndex] = rune;
+                    rune.selected = true; // markera runan som vald
+
+                    const config = actionStoneRunes[firstEmptyIndex];
+                    rune._clickArea = {
+                        x: actionStoneConfig.x + config.x,
+                        y: actionStoneConfig.y + config.y,
+                        width: config.width,
+                        height: config.height
+                    };
                 }
+
                 drawCombat(currentGoat);
-                if (selectedRunes.length === 3) {
+
+                if (!actionStoneSlots.includes(null)) {
                     selectingRunes = false;
-                    currentTurnRunes = [...selectedRunes];
+                    currentTurnRunes = [...actionStoneSlots];
                     runeUsesThisTurn = 0;
                 }
             }
@@ -624,22 +721,24 @@ canvas.addEventListener("click", (event) => {
         return;
     }
 
-    if (inCombat && !selectingRunes) {
-        const totalWidth = currentTurnRunes.length * 220 - 20;
-        const startX = (canvas.width - totalWidth) / 2;
-        const yTop = canvas.height - 220;
-        const yBottom = yTop + 50;
+    if (inCombat) {
+        actionStoneSlots.forEach((rune, index) => {
+            if (!rune || !rune._clickArea) return;
 
-        for (let index = currentTurnRunes.length - 1; index >= 0; index--) {
-            const rune = currentTurnRunes[index];
-            const xLeft = startX + index * 220;
-            const xRight = xLeft + 200;
+            const area = rune._clickArea;
+            if (x >= area.x && x <= area.x + area.width &&
+                y >= area.y && y <= area.y + area.height) {
 
-            if (x >= xLeft && x <= xRight && y >= yTop && y <= yBottom) {
                 playerAction(index, currentGoat);
+                actionStoneSlots[index] = null;
                 drawCombat(currentGoat);
-                break; 
+
+                if (!actionStoneSlots.some(slot => slot !== null)) {
+                    // Återställ selected-flag för alla runor
+                    discardedRunes.forEach(r => r.selected = false);
+                    startRuneSelection();
+                }
             }
-        }
+        });
     }
 });
