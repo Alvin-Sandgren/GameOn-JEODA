@@ -121,7 +121,7 @@ groundImage.onload = () => {
 export function drawGround() {
   if (groundLoaded) {
     // Rita markbild längst ner på världen
-    ctx.drawImage(groundImage, 0, worldHeight - 100, worldWidth, 100);
+    ctx.drawImage(groundImage, 0, worldHeight - 100, worldWidth -1300, 100);
   } else {
     // Fallback (om bilden inte hunnit ladda)
     ctx.fillStyle = "#654321"; // brunaktig reservfärg
@@ -199,17 +199,17 @@ export const obstacles = [
   //Be Damien göra bättre bilder på trappor så kan jag göra bättre trappa
 
   //Nivå 4 boss arena
-  new Obstacle(7955, 3400, 100, 500, "./platforms/stone_platform.png"),
-  new Obstacle(7955, 4495, 100, 150, "./platforms/stone_platform.png"),
+  new Obstacle(7955, 3400, 100, 500, "./platforms/stair_four.png"),
+  new Obstacle(7955, 4495, 100, 150, "./platforms/stair_two.png"),
 
   new Obstacle(8600, 4350, 100, 100, "./platforms/stone_platform.png"),
   new Obstacle(8500, 4400, 300, 100, "./platforms/stone_platform.png"),
 
   //Väggar på sidorna
-  new Obstacle(worldWidth - 30, 0, 100, 10000, "./platforms/wall_right.png"),
+  new Obstacle(worldWidth - 1300 , 0, 2000, 10000, "./platforms/dirt.png"),
+  new Obstacle(worldWidth - 1305, 0, 100, 4525, "./platforms/wall_right.png"),
   new Obstacle(-70, 0, 100, 10000, "./platforms/wall_left.png")
 ];
-
 
 let shirt = new Obstacle(6300, 2500, 80, 52, "./equipment/equip_shirt.png");
 shirt.type = "shirt";
@@ -222,7 +222,7 @@ helmetDropped = false;
 helmet.w = 0; helmet.h = 0; 
 
 let shoesBarrier = new Obstacle(7993, 3900, 24, 600, "#ff6600"); // korrekt
-shoesBarrier.active = true; // extra flagga om du vill kunna "stänga av" barriären senare
+shoesBarrier.active = true; 
 obstacles.push(shoesBarrier);
 
 let shirtBarrier = new Obstacle(6100, 1901, 20, 798, "#ff6600")
@@ -245,7 +245,8 @@ obstacles.push(shirtBarrier)
 ];
 
 const decorations = [
-  new Decoration(100, 4400 - 150, 600, 256, "./kartbilder/house.png")
+  new Decoration(580, 4406, 375, 104, "./kartbilder/fence.png"),
+  new Decoration(100, 4250, 600, 256, "./kartbilder/house.png")
 ];
 
 // kamera
@@ -368,7 +369,7 @@ export function gameLoop(timestamp) {
       helmet.w = 68;
       helmet.h = 52;
 
-      showDialog("Sten dropped a helmet!");
+      showDialog("You defeated the goat Sten, He also dropped our helmet!");
     }
 
     if (helmet.w > 0 && helmet.h > 0 &&
@@ -535,7 +536,7 @@ export function gameLoop(timestamp) {
 
     // Rita dialogruta
     if (dialogActive) {
-      ctx.fillStyle = "rgba(0, 0, 0, 1)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
       const boxW = 800;
       const boxH = 260;
       const boxX = canvas.width / 2 - boxW / 2;
