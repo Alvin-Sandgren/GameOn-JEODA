@@ -66,7 +66,7 @@ const runeSlots = [
 ];
 
 // Spelarens grundskada
-player.damage = 10;
+player.damage = 100;
 
 // Spelarens tillgängliga actions
 export const PlayerActions = [
@@ -688,7 +688,7 @@ canvas.addEventListener("click", (event) => {
                 const firstEmptyIndex = actionStoneSlots.findIndex(s => s === null);
                 if (firstEmptyIndex !== -1) {
                     actionStoneSlots[firstEmptyIndex] = rune;
-                    rune.selected = true; // markera runan som vald
+                    rune.selected = true;
 
                     const config = actionStoneRunes[firstEmptyIndex];
                     rune._clickArea = {

@@ -13,6 +13,7 @@ export class Soundmanager {
         this.dashsfx = new Audio("Ljud/dash.wav");
         this.gameoversfx = new Audio("Ljud/gameover.wav");
         this.jump = new Audio("Ljud/jump.wav");
+        this.popupSfx = new Audio("ljud/popup.wav");
 
          // Ability ljud
         this.axeSound = new Audio("Ljud/axe.wav");
@@ -23,7 +24,6 @@ export class Soundmanager {
         this.anvilSound = new Audio("Ljud/anvil.wav");
 
         //getljud
-        this.goatDeathSound = new Audio("Ljud/goatdeath.wav");
         this.blockSound.volume = 0,5;
         this.jump.volume = 0.08;
         this.backgroundMusic.volume = 0.1;
@@ -114,11 +114,21 @@ export class Soundmanager {
         this.anvilSound.play().catch(e => console.log("Could not play anvil sound:", e));
     }
 
-
-    
-    playGoatDeath() {
-        this.goatDeathSound.currentTime = 0;
-        this.goatDeathSound.play().catch(e => console.log("Could not play goat death sound:", e));
+    playpopupSfx() {
+        this.popupSfx.play();
+        this.menuMusic.pause();
+        this.backgroundMusic.pause();
+        this.combatMusic.pause();
+        this.dashsfx.pause();
+        this.gameoversfx.pause();    
+        this.jump.pause();
+        this.anvilsfx.pause();
+        this.axesfx.pause();
+        this.blocksfx.pause();
+        this.burnsfx.pause();
+        this.healingsfx.pause();
+        this.runesfx.pause();
     }
+
     
 }

@@ -251,13 +251,19 @@ function updateCamera() {
   cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
 }
 
-//  Funktion för att visa dialog (pausar spelet)
 export function showDialog(text, onClose = null) {
-  paused = true;
-  dialogActive = true;
-  dialogText = text;
+  paused = true;                
+  dialogActive = true;           
+  dialogText = text;            
+  // Spela popup-ljudet (utan att krascha om det inte går)
+  try {
+    soundmanager.playpopupSfx();
+  } catch (err) {
+    console.warn("Popup SFX kunde inte spelas:", err);
+  }
   dialogOnClose = typeof onClose === 'function' ? onClose : null;
 }
+
 
 //  Klick-hanterare för att stänga dialog (vänsterklick)
 canvas.addEventListener('mousedown', (e) => {
@@ -514,12 +520,24 @@ for (let goat of combatGoats) {
       enemygoatstefan.y = -1000;
     }
 
-    //Sätter win condition och directar spelaren mot slutet
-    if (
+    // Sätter win condition och directar spelaren mot slutet
+    const allGoatsDead =
       enemygoatgw.health <= 0 &&
       enemygoatsten.health <= 0 &&
       enemygoatstefan.health <= 0 &&
-      enemygoatanton.health <= 0 &&
+      enemygoatanton.health <= 0;
+
+    const antonDead = enemygoatanton.health <= 0;
+
+    // Triggerzon: lite till höger om Anton (x mellan 650 och 800, nära hans y-position)
+    const inAntonTriggerZone =
+      player.x > 1200 && player.x < 1500 &&
+      player.y > 0 && player.y < 1600; // runt y = 975
+
+    if (
+      antonDead &&
+      allGoatsDead && // ta bort denna rad om du bara vill kräva att Anton är död
+      inAntonTriggerZone &&
       !player.seenAllGoatsDead
     ) {
       player.seenAllGoatsDead = true;
@@ -618,6 +636,7 @@ const creditsText = [
   " - A stubborn meatball", "", " Music Credits:",
   " - Zen_Man, background music",
   " - OB-LIX, menu music",
+  " - u_r7cny11q7r Game over",
   " - Alvin Sandgren, Jump sound",
   "", "", "JEODA GameOn - A Platformer Adventure",
   "The End..."
@@ -675,6 +694,3 @@ function startCredits() {
   holdTimer = 0;
   requestAnimationFrame(drawCredits);
 }
-
-pauseMap();
-startCredits(); 
