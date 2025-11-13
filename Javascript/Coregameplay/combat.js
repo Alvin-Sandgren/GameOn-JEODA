@@ -2,7 +2,7 @@ export { startCombat };
 import { canvas, ctx, startMap, player, combatGoats, pauseMap, soundmanager, showDialog } from "./map.js";
 import { startGame, gameOver, exitCombat } from "./overlay.js";
 
-// --- dialog / bok popup ---
+//  dialog / bok popup 
 let combatDialogActive = false;
 let combatDialogText = "";
 let combatDialogOnClose = null;
@@ -517,7 +517,7 @@ export function showCombatDialog(text, onClose = null, x = null, y = null) {
     drawCombat(currentGoat);
 }
 
-// --- centraliserad klick-hanterare ---
+//  centraliserad klick-hanterare 
 // Den här hanteraren stänger dialog först, annars kör den resterande click-logiken (rune selection / action stone)
 canvas.addEventListener("click", (event) => {
     const rect = canvas.getBoundingClientRect();
