@@ -1,6 +1,20 @@
 export { startCombat };
-import { canvas, ctx, startMap, player, combatGoats, pauseMap, soundmanager } from "./map.js";
+import { canvas, ctx, startMap, player, combatGoats, pauseMap, soundmanager, showDialog } from "./map.js";
 import { startGame, gameOver, exitCombat } from "./overlay.js";
+
+// --- dialog / bok popup ---
+let combatDialogActive = false;
+let combatDialogText = "";
+let combatDialogOnClose = null;
+let combatDialogPosX = null;
+let combatDialogPosY = null;
+let combatDialogShownOnce = false;
+
+// bok-området (200x200 från högra hörnet)
+const bookW = 200;
+const bookH = 200;
+const bookX = canvas.width - bookW;
+const bookY = 0;
 
 // Lista med bildvägar som ska laddas
 const imagePaths = [
@@ -47,7 +61,7 @@ let currentGoat = null;
 let currentTurn = 0;
 
 // Run-relaterade variabler
-let actionStoneSlots = [null, null, null]; 
+let actionStoneSlots = [null, null, null];
 let selectingRunes = false;
 let selectedRunes = [];
 let currentTurnRunes = [];
@@ -76,8 +90,8 @@ export const PlayerActions = [
     },
     {
         name: "Shield up",
-        apply: () => { 
-            player.block = 10; 
+        apply: () => {
+            player.block = 10;
         },
         img: "./Runes/rune_blockb.png"
     },
@@ -88,24 +102,24 @@ export const PlayerActions = [
     },
     {
         name: "Wildfire",
-        apply: () => { 
-            currentGoat.burnTurns = 3; 
-            currentGoat.burnDamage = Math.floor(player.damage / 3); 
+        apply: () => {
+            currentGoat.burnTurns = 3;
+            currentGoat.burnDamage = Math.floor(player.damage / 3);
         },
         img: "./Runes/rune_burnb.png"
     },
     {
         name: "Loki's insult",
-        apply: () => { 
+        apply: () => {
             if (currentGoat.tempDamage == null) currentGoat.tempDamage = currentGoat.damage || 20;
-            currentGoat.tempDamage = Math.floor(currentGoat.tempDamage * 0.5); 
+            currentGoat.tempDamage = Math.floor(currentGoat.tempDamage * 0.5);
         },
         img: "./Runes/rune_weakb.png"
     },
     {
         name: "Exposed flesh",
-        apply: () => { 
-            currentGoat.vulnerable = true; 
+        apply: () => {
+            currentGoat.vulnerable = true;
         },
         img: "./Runes/rune_exposeb.png"
     },
@@ -113,13 +127,13 @@ export const PlayerActions = [
         name: "Tyr's gamble",
         apply: () => {
             const outcome = Math.random();
-            if (outcome < 0.4) { 
-                const dmg = Math.floor(player.damage * 0.4); 
+            if (outcome < 0.4) {
+                const dmg = Math.floor(player.damage * 0.4);
                 currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
-            } else if (outcome < 0.8) { 
+            } else if (outcome < 0.8) {
                 const dmg = Math.floor(player.damage * 0.1);
                 currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
-            } else { 
+            } else {
                 const selfDmg = Math.floor(player.maxHealth * 0.1);
                 player.health -= selfDmg;
             }
@@ -162,7 +176,7 @@ export const EnemyActions = [
             const blockedByPlayer = Math.min(damage, player.block || 0);
             damage -= blockedByPlayer;
             player.health -= damage;
-            
+
             // Reset spelarens block efter attack
             player.block = 0;
         }
@@ -170,16 +184,14 @@ export const EnemyActions = [
     {
         name: "Defensive stance",
         apply: (goat) => {
-            // Fiendens block gäller bara nästa gång den tar skada
             goat.block = 10;
         }
     },
     {
         name: "Goat buff",
         apply: (goat) => {
-            if (Math.random() < 0.5) { 
-                goat.damage += 5; // högre skada           
-            } else {
+            if (Math.random() < 0.5) {
+                goat.damage += 5;
             }
         }
     },
@@ -189,13 +201,16 @@ let images = {};
 
 // Ladda alla bilder vid start
 (async () => {
-    images = await preloadImages(imagePaths);
+    try {
+        images = await preloadImages(imagePaths);
+        combatImg.src = "../kartbilder/combatrunes.png";
+        combatImg.imageObj = images["../kartbilder/combatrunes.png"];
 
-    combatImg.src = "../kartbilder/combatrunes.png";
-    combatImg.imageObj = images["../kartbilder/combatrunes.png"];
-
-    playerCombatImg.src = "./character_bilder/meatball_nack.png";
-    player.combatImg = images["./character_bilder/meatball_nack.png"];
+        playerCombatImg.src = "./character_bilder/meatball_nack.png";
+        player.combatImg = images["./character_bilder/meatball_nack.png"];
+    } catch (err) {
+        console.warn("Could not preload combat images:", err);
+    }
 })();
 
 // Funktion för att starta runval
@@ -203,7 +218,7 @@ function startRuneSelection() {
     if (!currentGoat) return;
 
     selectingRunes = true;
-    actionStoneSlots = [null, null, null]; 
+    actionStoneSlots = [null, null, null];
     selectedRunes = [];
 
     discardedRunes = shuffleArray([...AllRunes]);
@@ -243,9 +258,9 @@ const actionStoneConfig = {
 };
 
 const actionStoneRunes = [
-    { x: 60,  y: 50,  width: 320, height: 130 },
-    { x: 60,  y: 160, width: 320, height: 130 },
-    { x: 60,  y: 280, width: 320, height: 130 }
+    { x: 60, y: 50, width: 320, height: 130 },
+    { x: 60, y: 160, width: 320, height: 130 },
+    { x: 60, y: 280, width: 320, height: 130 }
 ]
 
 // Rita action stone och runor i stone
@@ -278,7 +293,7 @@ function drawRunes(alwaysVisible = false) {
 
     const runesToShow = discardedRunes.slice(0, 6);
     runesToShow.forEach((rune, index) => {
-        if (rune.selected) return; 
+        if (rune.selected) return;
         const slot = runeSlots[index];
         if (!slot || !rune.imageObj?.complete) return;
 
@@ -333,6 +348,7 @@ function drawSelectedRunes() {
             const offsetY = y - (scaledH - h) / 2;
 
             ctx.drawImage(rune.imageObj, offsetX, offsetY, scaledW, scaledH);
+            xOffset += scaledW + 20;
         });
     }
 }
@@ -344,11 +360,11 @@ export function drawCombat(goat) {
 
     if (inCombat && combatImg.complete) ctx.drawImage(combatImg, 0, 0, canvas.width, canvas.height);
 
-    //spelaren ritas
+    // spelaren ritas
     if (player.combatImg && player.combatImg.complete) {
         const width = 250;
         const height = 300;
-        const x = 400; 
+        const x = 400;
         const y = 450;
         ctx.drawImage(player.combatImg, x, y, width, height);
     }
@@ -381,7 +397,7 @@ export function drawCombat(goat) {
             if (move.name === "Attack") {
                 const potentialDmg = Math.floor(goat.tempDamage || goat.damage || 20);
                 const blocked = player.block || 0;
-                extra = ` (${potentialDmg} dmg → ${Math.max(potentialDmg - blocked,0)} after block)`;
+                extra = ` (${potentialDmg} dmg → ${Math.max(potentialDmg - blocked, 0)} after block)`;
 
             } else if (move.name === "Defensive stance") {
                 extra = ` (will block 10)`;
@@ -394,6 +410,72 @@ export function drawCombat(goat) {
         }).join(" + ");
         ctx.fillText(`Next enemy action: ${movesText}`, canvas.width - 1300, 300);
     }
+
+    // Rita combat-dialog om aktiv (större och centrerad)
+    if (combatDialogActive) {
+        const boxW = 900;   // större ruta
+        const boxH = 500;   // större ruta
+
+        // Om pos ej satt => centrera
+        const centerX = (canvas.width / 2);
+        const centerY = (canvas.height / 2);
+
+        const boxX = centerX - boxW / 2;
+        const boxY = centerY - boxH / 2;
+
+        ctx.save();
+        const gradient = ctx.createLinearGradient(boxX, boxY, boxX, boxY + boxH);
+        gradient.addColorStop(0, "#3b2615");
+        gradient.addColorStop(1, "#6b4423");
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(boxX, boxY, boxW, boxH, 15);
+            ctx.fill();
+        } else {
+            // fallback om roundRect saknas
+            ctx.fillRect(boxX, boxY, boxW, boxH);
+        }
+        ctx.restore();
+
+        ctx.strokeStyle = "#285513ff";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+        ctx.fillStyle = "#f0e6c8";
+        ctx.font = "20px serif";
+        ctx.textBaseline = "top";
+
+        // enkel radbrytning som passar boxen
+        const padding = 20;
+        const maxWidth = boxW - padding * 2;
+        const lines = wrapTextToLines(ctx, combatDialogText, maxWidth);
+
+        lines.forEach((line, i) => ctx.fillText(line, boxX + padding, boxY + padding + i * 30));
+
+        ctx.font = "16px serif";
+        ctx.fillStyle = "#c8a34a";
+        ctx.fillText("⚔ Click to close", boxX + boxW - 160, boxY + boxH - 36);
+    }
+}
+
+// enkel wrapper för att bryta text till rader som passar boxen
+function wrapTextToLines(context, text, maxWidth) {
+    const words = text.split(" ");
+    const lines = [];
+    let current = "";
+
+    for (let word of words) {
+        const test = current ? current + " " + word : word;
+        if (context.measureText(test).width > maxWidth) {
+            if (current) lines.push(current);
+            current = word;
+        } else {
+            current = test;
+        }
+    }
+    if (current) lines.push(current);
+    return lines;
 }
 
 // Rita status (burn, block, vulnerable)
@@ -423,49 +505,143 @@ function drawHealthBar(current, max, x, y, width, height) {
     ctx.strokeRect(x, y, width, height);
 }
 
-function startCombat(goat) {
-    if (!goat) return;
-    if (goat.health <= 0) return;
+// showCombatDialog med valfri position
+export function showCombatDialog(text, onClose = null, x = null, y = null) {
+    combatDialogActive = true;
+    combatDialogText = text;
+    combatDialogOnClose = typeof onClose === 'function' ? onClose : null;
 
-    inCombat = true;
-    playerTurn = true;
-    currentGoat = goat;
-
-    selectingRunes = false;
-    selectedRunes = [];
-    currentTurnRunes = [];
-    discardedRunes = [];
-    runeUsesThisTurn = 0;
-
-    // Nollställ getens stats helt inför ny strid
-    currentGoat.baseMaxHealth = 100; 
-    currentGoat.maxHealth = 100;
-    currentGoat.health = 100;
-    currentGoat.baseDamage = 20;       // Standard damage
-    currentGoat.damage = 20;
-    currentGoat.tempDamage = currentGoat.damage;
-    currentGoat.block = 0;
-    currentGoat.blockRemaining = 0;
-    currentGoat.burnTurns = 0;
-    currentGoat.burnDamage = 0;
-    currentGoat.vulnerable = false;
-
-    // Slumpa första fiendehandlingar
-    currentGoat.nextMove = [
-        EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
-        EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
-    ];
-
-    //  Spelaren börjar utan block
-    player.block = 0;
-
-    //Kollar vilken equipment spelaren har
-    player.combatImg = player.imgIdle;
-
-    startRuneSelection();
+    // Om position inte anges -> null (centering i drawCombat)
+    combatDialogPosX = x ?? null;
+    combatDialogPosY = y ?? null;
     drawCombat(currentGoat);
 }
 
+// --- centraliserad klick-hanterare ---
+// Den här hanteraren stänger dialog först, annars kör den resterande click-logiken (rune selection / action stone)
+canvas.addEventListener("click", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    // Om combat-dialog är aktiv -> stäng och returnera (förhindra övrig klick-logik)
+    if (combatDialogActive) {
+        combatDialogActive = false;
+        if (combatDialogOnClose) {
+            try { combatDialogOnClose(); } catch (err) { console.error(err); }
+            combatDialogOnClose = null;
+        }
+        drawCombat(currentGoat);
+        return;
+    }
+
+    // Klick på boken (visar dialog) - endast i combat
+    if (inCombat && mouseX >= bookX && mouseX <= bookX + bookW &&
+        mouseY >= bookY && mouseY <= bookY + bookH) {
+
+        // Visa dialog centrerad
+        showCombatDialog("");
+        return;
+    }
+
+    // Hantera rune-val om vi är i selectingRunes-mode
+    if (selectingRunes) {
+        const runesToShow = discardedRunes.slice(0, 6);
+        for (let rune of runesToShow) {
+            if (!rune._clickArea || rune.selected) continue;
+            const area = rune._clickArea;
+            if (mouseX >= area.x && mouseX <= area.x + area.width &&
+                mouseY >= area.y && mouseY <= area.y + area.height) {
+
+                const firstEmptyIndex = actionStoneSlots.findIndex(s => s === null);
+                if (firstEmptyIndex !== -1) {
+                    actionStoneSlots[firstEmptyIndex] = rune;
+                    rune.selected = true; // markera runan som vald
+
+                    const config = actionStoneRunes[firstEmptyIndex];
+                    rune._clickArea = {
+                        x: actionStoneConfig.x + config.x,
+                        y: actionStoneConfig.y + config.y,
+                        width: config.width,
+                        height: config.height
+                    };
+                }
+
+                drawCombat(currentGoat);
+
+                if (!actionStoneSlots.includes(null)) {
+                    selectingRunes = false;
+                    currentTurnRunes = [...actionStoneSlots];
+                    runeUsesThisTurn = 0;
+                }
+
+                return;
+            }
+        }
+        return;
+    }
+
+    // Hantera klick på action stone slots under inCombat
+    if (inCombat) {
+        for (let i = 0; i < actionStoneSlots.length; i++) {
+            const rune = actionStoneSlots[i];
+            if (!rune || !rune._clickArea) continue;
+            const area = rune._clickArea;
+            if (mouseX >= area.x && mouseX <= area.x + area.width &&
+                mouseY >= area.y && mouseY <= area.y + area.height) {
+
+                playerAction(i, currentGoat);
+                actionStoneSlots[i] = null;
+                drawCombat(currentGoat);
+
+                if (!actionStoneSlots.some(slot => slot !== null)) {
+                    // Återställ selected för alla runor
+                    discardedRunes.forEach(r => r.selected = false);
+                    startRuneSelection();
+                }
+                return;
+            }
+        }
+    }
+});
+
+// Musrörelse (hover) - oförändrad logik
+let hoveredRuneIndex = null;
+let hoveredSelectedRuneIndex = null;
+
+canvas.addEventListener("mousemove", (event) => {
+    if (!currentGoat) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    hoveredRuneIndex = null;
+    hoveredSelectedRuneIndex = null;
+
+    if (selectingRunes) {
+        const runesToShow = discardedRunes.slice(0, 6);
+        runesToShow.forEach((rune, index) => {
+            const slot = runeSlots[index];
+            if (!slot) return;
+            if (x >= slot.x && x <= slot.x + 200 && y >= slot.y && y <= slot.y + 50) hoveredRuneIndex = index;
+        });
+    }
+    if (selectedRunes.length > 0) {
+        const totalWidth = selectedRunes.length * 220 - 20;
+        const startX = (canvas.width - totalWidth) / 2;
+        const yTop = canvas.height - 220;
+        const yBottom = yTop + 50;
+
+        selectedRunes.forEach((rune, index) => {
+            const xLeft = startX + index * 220;
+            const xRight = xLeft + 200;
+            if (x >= xLeft && x <= xRight && y >= yTop && y <= yBottom) hoveredSelectedRuneIndex = index;
+        });
+    }
+    drawCombat(currentGoat);
+});
+
+// playerAction, enemyTurn, endCombat och övrig logik (oförändrad utom att startCombat innehåller auto-show)
 export function playerAction(actionIndex, goat) {
     if (!playerTurn || !inCombat || !goat) return;
 
@@ -489,11 +665,11 @@ export function playerAction(actionIndex, goat) {
         player.health = Math.min(player.health + healed, player.maxHealth);
     }
 
-    runeUsesThisTurn++; 
+    runeUsesThisTurn++;
 
-    if (goat.health <= 0) { 
-        endCombat(true, goat); 
-        return; 
+    if (goat.health <= 0) {
+        endCombat(true, goat);
+        return;
     }
 
     if (runeUsesThisTurn >= 3) {
@@ -536,7 +712,8 @@ function endCombat(victory, goat) {
         gameOver();
     }
 }
-// Fiendens tur (fungerar ish)
+
+// Fiendens tur
 function enemyTurn(goat) {
     if (!inCombat || !goat || !player) return;
 
@@ -577,14 +754,12 @@ function enemyTurn(goat) {
             player.health -= actualDamage;
             player.block = Math.max((player.block || 0) - damage, 0);
 
-        } 
-        else if (action.name === "Goat buff") {
+        } else if (action.name === "Goat buff") {
             if (Math.random() < 0.5) {
                 goat.damage += 5;
-            } 
-        } 
-        else if (action.name === "Defensive stance") {
-            goat.blockRemaining = (goat.blockRemaining || 0) + 10; 
+            }
+        } else if (action.name === "Defensive stance") {
+            goat.blockRemaining = (goat.blockRemaining || 0) + 10;
         }
     });
 
@@ -611,99 +786,54 @@ function enemyTurn(goat) {
     startRuneSelection();
 }
 
-let hoveredRuneIndex = null;
-let hoveredSelectedRuneIndex = null;
+// startCombat (endast en implementation, med auto-show första gången)
+function startCombat(goat) {
+    if (!goat) return;
+    if (goat.health <= 0) return;
 
-canvas.addEventListener("mousemove", (event) => {
-    if (!currentGoat) return; 
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    inCombat = true;
+    playerTurn = true;
+    currentGoat = goat;
 
-    hoveredRuneIndex = null;
-    hoveredSelectedRuneIndex = null;
-
-    if (selectingRunes) {
-        const runesToShow = discardedRunes.slice(0, 6);
-        runesToShow.forEach((rune, index) => {
-            const slot = runeSlots[index];
-            if (!slot) return;
-            if (x >= slot.x && x <= slot.x + 200 && y >= slot.y && y <= slot.y + 50) hoveredRuneIndex = index;
-        });
+    // Visa combat-guide automatiskt första gången
+    if (!combatDialogShownOnce) {
+        combatDialogShownOnce = true;
+        showCombatDialog(
+            "📖 Combat guide:\nSelect 3 runes for the next round.\nClick the stones to place runes."
+        );
     }
-    if (selectedRunes.length > 0) {
-        const totalWidth = selectedRunes.length * 220 - 20;
-        const startX = (canvas.width - totalWidth) / 2;
-        const yTop = canvas.height - 220;
-        const yBottom = yTop + 50;
 
-        selectedRunes.forEach((rune, index) => {
-            const xLeft = startX + index * 220;
-            const xRight = xLeft + 200;
-            if (x >= xLeft && x <= xRight && y >= yTop && y <= yBottom) hoveredSelectedRuneIndex = index;
-        });
-    }
+    selectingRunes = false;
+    selectedRunes = [];
+    currentTurnRunes = [];
+    discardedRunes = [];
+    runeUsesThisTurn = 0;
+
+    // Nollställ getens stats helt inför ny strid
+    currentGoat.baseMaxHealth = 100;
+    currentGoat.maxHealth = 100;
+    currentGoat.health = 100;
+    currentGoat.baseDamage = 20;       // Standard damage
+    currentGoat.damage = 20;
+    currentGoat.tempDamage = currentGoat.damage;
+    currentGoat.block = 0;
+    currentGoat.blockRemaining = 0;
+    currentGoat.burnTurns = 0;
+    currentGoat.burnDamage = 0;
+    currentGoat.vulnerable = false;
+
+    // Slumpa första fiendehandlingar
+    currentGoat.nextMove = [
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
+    ];
+
+    // Spelaren börjar utan block
+    player.block = 0;
+
+    // Kollar vilken equipment spelaren har
+    player.combatImg = player.imgIdle;
+
+    startRuneSelection();
     drawCombat(currentGoat);
-});
-
-canvas.addEventListener("click", (event) => {
-    if (!currentGoat) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    if (selectingRunes) {
-        discardedRunes.slice(0, 6).forEach((rune) => {
-            if (!rune._clickArea || rune.selected) return;
-            const area = rune._clickArea;
-
-            if (x >= area.x && x <= area.x + area.width &&
-                y >= area.y && y <= area.y + area.height) {
-
-                const firstEmptyIndex = actionStoneSlots.findIndex(s => s === null);
-                if (firstEmptyIndex !== -1) {
-                    actionStoneSlots[firstEmptyIndex] = rune;
-                    rune.selected = true; // markera runan som vald
-
-                    const config = actionStoneRunes[firstEmptyIndex];
-                    rune._clickArea = {
-                        x: actionStoneConfig.x + config.x,
-                        y: actionStoneConfig.y + config.y,
-                        width: config.width,
-                        height: config.height
-                    };
-                }
-
-                drawCombat(currentGoat);
-
-                if (!actionStoneSlots.includes(null)) {
-                    selectingRunes = false;
-                    currentTurnRunes = [...actionStoneSlots];
-                    runeUsesThisTurn = 0;
-                }
-            }
-        });
-        return;
-    }
-
-    if (inCombat) {
-        actionStoneSlots.forEach((rune, index) => {
-            if (!rune || !rune._clickArea) return;
-
-            const area = rune._clickArea;
-            if (x >= area.x && x <= area.x + area.width &&
-                y >= area.y && y <= area.y + area.height) {
-
-                playerAction(index, currentGoat);
-                actionStoneSlots[index] = null;
-                drawCombat(currentGoat);
-
-                if (!actionStoneSlots.some(slot => slot !== null)) {
-                    // Återställ selected för alla runor
-                    discardedRunes.forEach(r => r.selected = false);
-                    startRuneSelection();
-                }
-            }
-        });
-    }
-});
+}
