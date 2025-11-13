@@ -492,7 +492,7 @@ for (let goat of combatGoats) {
         player.seenGoatClues = true;
 
         showDialog(
-          "Oh no! all my goats have disappeared and turned evil!\n...\nWait, where are my clothes?! \nI need to go and kill the goats, before they go haywire!"
+          "Oh no! all my goats have disappeared and turned evil!\n...\nWait, where are my clothes?! \nI need to go and kill the goats, before they destroy the world!"
         );
       }
     }
