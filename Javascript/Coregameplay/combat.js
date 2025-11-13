@@ -55,7 +55,6 @@ const runeSlots = [
 
 player.damage = player.damage ?? 10;
 
-
 export const PlayerActions = [
     {
         name: "Viking strike",

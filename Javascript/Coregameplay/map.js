@@ -13,7 +13,6 @@ let hasShirt = false;
 let hasBoots = false;
 let helmetDropped = false;
 
-
 export let onCombatTrigger = null;
 export let onGameOver = null;
 let gameOverTriggered = false;
@@ -617,8 +616,8 @@ const creditsText = [
   " - Our goats Stefan, Gw, Anton & Sten",
   " - Our music inspirations",
   " - A stubborn meatball", "", " Music Credits:",
-  " - 'Epic Fantasy Adventure' by Scott Buckley (www.scottbuckley.com.au)",
-  " - 'Heroic Quest' by Alexander Nakarada (www.serpentsoundstudios.com)",
+  " - Zen_Man, background music",
+  " - OB-LIX, menu music",
   "", "", "JEODA GameOn - A Platformer Adventure",
   "The End..."
 ];
