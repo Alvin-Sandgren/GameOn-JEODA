@@ -26,7 +26,6 @@ export async function preloadImages(paths) {
             img.src = src;
         });
     };
-
     const loaded = await Promise.all(paths.map(loadImage));
     const imageMap = {};
     loaded.forEach(({ src, img }) => imageMap[src] = img);
@@ -186,7 +185,6 @@ export const EnemyActions = [
     },
 ];
 
-
 let images = {};
 
 // Ladda alla bilder vid start
@@ -198,9 +196,7 @@ let images = {};
 
     playerCombatImg.src = "./character_bilder/meatball_nack.png";
     player.combatImg = images["./character_bilder/meatball_nack.png"];
-
 })();
-
 
 // Funktion för att starta runval
 function startRuneSelection() {
@@ -470,7 +466,6 @@ function startCombat(goat) {
     drawCombat(currentGoat);
 }
 
-
 export function playerAction(actionIndex, goat) {
     if (!playerTurn || !inCombat || !goat) return;
 
@@ -615,10 +610,6 @@ function enemyTurn(goat) {
     runeUsesThisTurn = 0;
     startRuneSelection();
 }
-
-
-
-
 
 let hoveredRuneIndex = null;
 let hoveredSelectedRuneIndex = null;
