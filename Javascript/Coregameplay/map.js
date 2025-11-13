@@ -53,7 +53,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  1800, 2500, 100, 100, 10, 2,
+  200, 4450, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -465,7 +465,7 @@ for (let goat of combatGoats) {
         playerFeetY <= triggerZoneYMax
       ) {
         player.seenLava = true;
-        showDialog("That ground looks dangerous, almost like it's lava...\nBetter not touch it! \n (I probably need to be able to dash to get over it *wink-wink*)");
+        showDialog("That ground looks dangerous, almost like it's lava...\nBetter not touch it! \n I probably need to be able to dash to get over it (*wink-wink*)");
       }
     }
 
@@ -592,7 +592,7 @@ for (let goat of combatGoats) {
     // Fortsätt-text i guld
     ctx.font = "18px serif";
     ctx.fillStyle = "#c8a34a";
-    ctx.fillText("⚔ Clcik to close...", boxX + boxW - 320, boxY + boxH - 40);
+    ctx.fillText("⚔ Click to close...", boxX + boxW - 320, boxY + boxH - 40);
   }
 
 }
@@ -632,6 +632,8 @@ const creditsText = [
   " - Damien (Graphics and Character Design)",
   "", "Special Thanks:",
   " - Our goats Stefan, GW, Anton & Sten",
+  " - Our school for this opportunity",
+  " - The uncomfortable chairs that gave us back problems",
   "", "",
   " - MusicCredits",
   " - Zen_Man, background music",
