@@ -1,8 +1,5 @@
 export class Soundmanager {
-    menuMusic;
-    backgroundMusic;
-    combatMusic;
-    dashsfx;
+//Ljudfiler
     constructor() {
         this.menuMusic = new Audio("Ljud/menumusic.wav");
         this.menuMusic.loop = true;
@@ -14,21 +11,18 @@ export class Soundmanager {
         this.gameoversfx = new Audio("Ljud/gameover.wav");
         this.jump = new Audio("Ljud/jump.wav");
         this.popupSfx = new Audio("ljud/popup.wav");
-
-         // Ability ljud
         this.axeSound = new Audio("Ljud/axe.wav");
         this.blockSound = new Audio("Ljud/block.wav");
         this.healingSound = new Audio("Ljud/healing.wav");
         this.burnSound = new Audio("Ljud/burn.wav");
         this.runeSound = new Audio("Ljud/rune.wav");
         this.anvilSound = new Audio("Ljud/anvil.wav");
-
-        //getljud
         this.blockSound.volume = 0,5;
         this.jump.volume = 0.08;
         this.backgroundMusic.volume = 0.1;
         this.combatMusic.volume = 0.05;
     }
+    //Spela olika ljud beroende på vad som händer i spelet
     playMenu() {
         this.backgroundMusic.pause();
         this.combatMusic.pause();
