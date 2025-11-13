@@ -592,7 +592,7 @@ for (let goat of combatGoats) {
     // Fortsätt-text i guld
     ctx.font = "18px serif";
     ctx.fillStyle = "#c8a34a";
-    ctx.fillText("⚔ Tryck för att fortsätta...", boxX + boxW - 320, boxY + boxH - 40);
+    ctx.fillText("⚔ Clcik to close...", boxX + boxW - 320, boxY + boxH - 40);
   }
 
 }
