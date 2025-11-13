@@ -214,10 +214,6 @@ let images = {};
 
 })();
 
-// Rita spelaren på canvas när bilden är laddad
-playerCombatImg.onload = () => {
-    ctx.drawImage(playerCombatImg, 350, canvas.height/2 - 75, 150, 150);
-};
 
 // Funktion för att starta runval
 function startRuneSelection() {
@@ -460,7 +456,7 @@ function startCombat(goat) {
 
     // Nollställ getens stats helt inför ny strid
     currentGoat.baseMaxHealth = 100;   // Alla getter har 200 HP
-    currentGoat.maxHealth = 200;
+    currentGoat.maxHealth = 100;
     currentGoat.health = 100;
     currentGoat.baseDamage = 20;       // Standard damage
     currentGoat.damage = 20;
