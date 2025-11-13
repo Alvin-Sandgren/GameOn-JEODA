@@ -586,7 +586,7 @@ canvas.addEventListener("click", (event) => {
         mouseY >= bookY && mouseY <= bookY + bookH) {
 
         // Visa dialog centrerad
-        showCombatDialog("HOW TO PLAY MJÖD BELLY COMBAT:\n- Combat is turn based. You always play first.\n- At the start of your turn, you get 6 random RUNES (left side).\n- Place 3 runes in the ACTION STONE (AS). Click each rune in order to use it.\n\n Enemy Actions:\n- Above the enemy, see what they will do AFTER your turn.\n- Choose your runes to counter it.\n  Example: Enemy plans to ATTACK 10 → place a BLOCK rune.\n\n Next Turn:\n- Your runes refresh each turn. Old runes are discarded.\n- You never run out of runes.\n\n Runes:\n- ATTACK 10 – Deal 10 damage\n- BLOCK 10 – Block 10 damage\n- HEAL 5 – Heal 5 HP\n- WEAK GOAT – Enemy deals 50% damage\n- EXPOSE GOAT – Enemy takes 50% more damage\n- RISK? – Deal more or less damage");
+        showCombatDialog("HOW TO PLAY MJÖD BELLY COMBAT:\n- Combat is turn based. You always play first.\n- At the start of your turn, you get 6 random RUNES (left side).\n- Place 3 runes in the ACTION STONE (AS). Click each rune in order to use it.\n\n Enemy Actions:\n- Above the enemy, see what they will do AFTER your turn.\n- Choose your runes to counter it.\n  Example: Enemy plans to ATTACK 10 → place a BLOCK rune.\n\n Next Turn:\n- Your runes refresh each turn. Old runes are discarded.\n- You never run out of runes.\n\n Runes:\n- ATTACK – Deal 10 damage\n- BLOCK – Block 10 damage\n- HEAL – Heal 5 HP\n- WEAK GOAT – Enemy deals 50% damage\n- EXPOSE GOAT – Enemy takes 50% more damage\n- RISK? – Deal more or less damage \n- BURN - deals 5 damage for 3 rounds (Could backfire and burn you too)")
         return;
     }
 
@@ -864,7 +864,7 @@ function startCombat(goat) {
     if (!combatDialogShownOnce) {
         combatDialogShownOnce = true;
         showCombatDialog(
-    "HOW TO PLAY MJÖD BELLY COMBAT:\n- Combat is turn based. You always play first.\n- At the start of your turn, you get 6 random RUNES (left side).\n- Place 3 runes in the ACTION STONE (AS). Click each rune in order to use it.\n\n Enemy Actions:\n- Above the enemy, see what they will do AFTER your turn.\n- Choose your runes to counter it.\n  Example: Enemy plans to ATTACK 10 → place a BLOCK rune.\n\n Next Turn:\n- Your runes refresh each turn. Old runes are discarded.\n- You never run out of runes.\n\n Runes:\n- ATTACK 10 – Deal 10 damage\n- BLOCK 10 – Block 10 damage\n- HEAL 5 – Heal 5 HP\n- WEAK GOAT – Enemy deals 50% damage\n- EXPOSE GOAT – Enemy takes 50% more damage\n- RISK? – Deal more or less damage"
+    "HOW TO PLAY MJÖD BELLY COMBAT:\n- Combat is turn based. You always play first.\n- At the start of your turn, you get 6 random RUNES (left side).\n- Place 3 runes in the ACTION STONE (AS). Click each rune in order to use it.\n\n Enemy Actions:\n- Above the enemy, see what they will do AFTER your turn.\n- Choose your runes to counter it.\n  Example: Enemy plans to ATTACK 10 → place a BLOCK rune.\n\n Next Turn:\n- Your runes refresh each turn. Old runes are discarded.\n- You never run out of runes.\n\n Runes:\n- ATTACK – Deal 10 damage\n- BLOCK – Block 10 damage\n- HEAL – Heal 5 HP\n- WEAK GOAT – Enemy deals 50% damage\n- EXPOSE GOAT – Enemy takes 50% more damage\n- RISK? – Deal more or less damage \n- BURN - deals 5 damage for 3 rounds (Could backfire and burn you too)"
 );
     }
 

@@ -53,7 +53,7 @@ document.addEventListener('keyup', e => keys[e.key] = false);
 
 // Skapa spelaren
 export const player = new Character(
-  200, 4450, 100, 100, 10, 2,
+  1800, 2500, 100, 100, 10, 2,
   "./character_bilder/meatball_nack.png",      
   "./character_bilder/meatball_lleg.png",      
   "./character_bilder/meatball_nack_rleg.png", 
@@ -631,7 +631,7 @@ const creditsText = [
   " - Erik (Enemy AI & Combat System)",
   " - Damien (Graphics and Character Design)",
   "", "Special Thanks:",
-  " - Our goats Stefan, Gw, Anton & Sten",
+  " - Our goats Stefan, GW, Anton & Sten",
   "", "",
   " - MusicCredits",
   " - Zen_Man, background music",
