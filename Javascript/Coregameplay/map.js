@@ -640,6 +640,8 @@ const creditsText = [
   " - Dragon studio, Dash",
   " - u_r7cny11q7r, Game over",
   " - floraphonic, Dialog/popup",
+  " - u_xjrmmgxfru hit, burn",
+  " - yodguard, block",
   " - Alvin Sandgren, Jump sound",
   "", "", "JEODA GameOn - A Platformer Adventure",
   "The End..."
