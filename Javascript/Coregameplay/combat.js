@@ -214,7 +214,6 @@ let images = {};
 
 })();
 
-
 // Funktion för att starta runval
 function startRuneSelection() {
     if (!currentGoat) return;
@@ -455,14 +454,13 @@ function startCombat(goat) {
     runeUsesThisTurn = 0;
 
     // Nollställ getens stats helt inför ny strid
-    currentGoat.baseMaxHealth = 100;   // Alla getter har 200 HP
+    currentGoat.baseMaxHealth = 100;   // Alla getter har 100 HP
     currentGoat.maxHealth = 100;
     currentGoat.health = 100;
     currentGoat.baseDamage = 20;       // Standard damage
     currentGoat.damage = 20;
     currentGoat.tempDamage = currentGoat.damage;
     currentGoat.block = 0;
-    currentGoat.blockRemaining = 0;
     currentGoat.burnTurns = 0;
     currentGoat.burnDamage = 0;
     currentGoat.vulnerable = false;
@@ -475,9 +473,6 @@ function startCombat(goat) {
 
     //  Spelaren börjar utan block
     player.block = 0;
-
-    //Kollar vilken equipment spelaren har
-    player.combatImg = player.imgIdle;
 
     console.log(`An evil ${goat.name} has appeared!`);
     startRuneSelection();
@@ -511,10 +506,9 @@ export function playerAction(actionIndex, goat) {
             let dmg = action.damage();
             if (goat.vulnerable) dmg = Math.floor(dmg * 1.3);
 
-            const blocked = Math.min(dmg, goat.blockRemaining || 0);
+            const blocked = Math.min(dmg, goat.block || 0);
             dmg -= blocked;
-            goat.blockRemaining -= blocked;
-
+            goat.block -= blocked;
             goat.health -= dmg;
             console.log(`You dealt ${dmg} damage to ${goat.name} (${blocked} blocked)`);
         }
@@ -575,7 +569,8 @@ function endCombat(victory, goat) {
         gameOver();
     }
 }
-// Fiendens tur (fungerar ish)
+
+// Fiendens tur
 function enemyTurn(goat) {
     if (!inCombat || !goat || !player) return;
 
@@ -591,49 +586,22 @@ function enemyTurn(goat) {
         }
     }
 
-    goat.tempDamage = goat.damage;
+    // Slumpa nya handlingar för nästa tur först
+    goat.nextMove = [
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
+        EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
+    ];
 
-    // Slumpa handlingar om inga finns
-    let actions = goat.nextMove || [];
-    if (actions.length === 0) {
-        actions = [
-            EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
-            EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
-        ];
-    }
+    // Kopiera och utför dessa actions
+    const actionsToPerform = [...goat.nextMove];
 
-    // Se till att minst en Attack finns
-    if (!actions.some(a => a.name === "Attack")) {
-        actions[0] = EnemyActions.find(a => a.name === "Attack");
-    }
-
-    // Utför handlingarna
-    actions.forEach(action => {
-        if (action.name === "Attack") {
-            let damage = goat.tempDamage || goat.damage || 10;
-            const blockedByPlayer = Math.min(damage, player.block || 0);
-            const actualDamage = Math.max(damage - blockedByPlayer, 0);
-
-            player.health -= actualDamage;
-            player.block = Math.max((player.block || 0) - damage, 0);
-
-            console.log(`${goat.name} attacked for ${actualDamage} damage (blocked ${blockedByPlayer})`);
-        } 
-        else if (action.name === "Goat buff") {
-            if (Math.random() < 0.5) {
-                goat.damage += 5;
-                console.log(`${goat.name} is enraged! Damage now ${goat.damage}`);
-            } else {
-                console.log(`${goat.name} tried to buff but failed.`);
-            }
-        } 
-        else if (action.name === "Defensive stance") {
-            goat.blockRemaining = (goat.blockRemaining || 0) + 10; 
-            console.log(`${goat.name} prepares to block 10 damage! Total block: ${goat.blockRemaining}`);
+    actionsToPerform.forEach(action => {
+        if (action.apply) {
+            if (action.name === "Attack") action.apply(goat, player);
+            else action.apply(goat);
         }
     });
 
-    // Kontrollera om spelaren dog
     if (player.health <= 0) {
         player.health = player.maxHealth;
         inCombat = false;
@@ -644,22 +612,13 @@ function enemyTurn(goat) {
         return;
     }
 
-    // Slumpa nya handlingar för nästa tur
-    goat.nextMove = [
-        EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
-        EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
-    ];
-
     // Ge kontrollen tillbaka till spelaren
     playerTurn = true;
     currentTurn++;
     runeUsesThisTurn = 0;
     startRuneSelection();
+    drawCombat(goat);
 }
-
-
-
-
 
 let hoveredRuneIndex = null;
 let hoveredSelectedRuneIndex = null;
