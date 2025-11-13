@@ -1,0 +1,30 @@
+
+Chatgpt gjorde;
+
+    // Funktion för att ladda bilder
+    export async function preloadImages(paths) {
+        const loadImage = (src) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve({ src, img });
+                img.onerror = () => reject(`couldnt load: ${src}`);
+                img.src = src;
+            });
+        };
+
+        const loaded = await Promise.all(paths.map(loadImage));
+        const imageMap = {};
+        loaded.forEach(({ src, img }) => imageMap[src] = img);
+        return imageMap;
+    }
+
+    // Funktion för att slumpa array
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    hjälpte också med rådgivnig och buggfixande
