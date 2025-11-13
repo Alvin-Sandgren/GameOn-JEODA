@@ -162,45 +162,47 @@ for (let i = 0; i < 5; i++) {
 
 export const AllRunes = [...PlayerActions, ...extraRunes];
 
+// Applicerar skada på den nuvarande geten, tar hänsyn till vulnerablehet och block
 function applyDamageToGoat(amount, options = {}) {
     if (!currentGoat || typeof amount !== "number") return 0;
-
     let dmg = Math.max(Math.round(amount), 0);
     if (currentGoat.vulnerable) {
-        dmg = Math.floor(dmg * 1.5);
+        dmg = Math.floor(dmg * 1.5); 
         if (currentGoat.vulnerableTurns) {
-            currentGoat.vulnerableTurns--;
-            if (currentGoat.vulnerableTurns <= 0) currentGoat.vulnerable = false;
+            currentGoat.vulnerableTurns--; 
+            if (currentGoat.vulnerableTurns <= 0) currentGoat.vulnerable = false; 
         }
     }
-
     if (!options.ignoreBlock && currentGoat.block > 0) {
-        const blocked = Math.min(currentGoat.block, dmg);
-        dmg -= blocked;
-        currentGoat.block = Math.max(currentGoat.block - blocked, 0);
+        const blocked = Math.min(currentGoat.block, dmg); // Skada som blockeras
+        dmg -= blocked; // Minska skadan med blockerad mängd
+        currentGoat.block = Math.max(currentGoat.block - blocked, 0); // Uppdatera blockvärdet utan att gå under 0
     }
-
-    currentGoat.health = Math.max(currentGoat.health - dmg, 0);
+    currentGoat.health = Math.max(currentGoat.health - dmg, 0); // Hälsan kan inte bli negativ
     return dmg;
 }
 
+// Applicerar brännskada på en get varje tur och minskar antalet turer kvar
 function applyBurnTick(goat) {
     if (!goat || goat.burnTurns <= 0 || !goat.burnDamage) return;
-    applyDamageToGoat(goat.burnDamage, { ignoreBlock: true });
-    goat.burnTurns--;
+    applyDamageToGoat(goat.burnDamage, { ignoreBlock: true }); // Brännskada ignorerar block
+    goat.burnTurns--; // Minska antal brännskadeturner
     if (goat.burnTurns <= 0) {
-        goat.burnDamage = 0;
+        goat.burnDamage = 0; // Nollställ skadan när brännskadorna tar slut
     }
 }
 
+// Uppdaterar getens skada baserat på basvärde, bonus och eventuell försvagning
 function refreshGoatDamage(goat) {
     if (!goat) return;
-    const base = goat.baseDamage || goat.damage || 20;
+
+    const base = goat.baseDamage || goat.damage || 20; // Basvärde, fallback till damage eller 20
     const bonus = goat.damageBonus || 0;
     const weaken = goat.weakenAmount || 0;
-    const raw = base + bonus - weaken;
-    goat.damage = Math.max(Math.floor(raw), Math.floor(base * 0.4));
+    const raw = base + bonus - weaken; // Beräkna rå skada
+    goat.damage = Math.max(Math.floor(raw), Math.floor(base * 0.4)); // Säkerställ minst 40% av basvärdet
 }
+
 
 AllRunes.forEach(r => {
     const img = new Image();
