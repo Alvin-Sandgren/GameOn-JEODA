@@ -618,6 +618,7 @@ const creditsText = [
   " - A stubborn meatball", "", " Music Credits:",
   " - Zen_Man, background music",
   " - OB-LIX, menu music",
+  " - Alvin Sandgren, Jump sound",
   "", "", "JEODA GameOn - A Platformer Adventure",
   "The End..."
 ];
@@ -674,3 +675,6 @@ function startCredits() {
   holdTimer = 0;
   requestAnimationFrame(drawCredits);
 }
+
+pauseMap();
+startCredits(); 

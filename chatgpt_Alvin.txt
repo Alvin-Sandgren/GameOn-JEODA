@@ -2874,10 +2874,3 @@ Normaliserar rörelse och gravitation till 60 FPS så att hastigheten inte blir 
 Behåller alla core mechanics (hopp, dash, gravitation, kollisioner) oförändrade.
 
 Om du vill kan jag skriva hela den uppdaterade Character-klassen med dessa ändringar redan inbyggda, redo att använda. Vill du att jag gör det?
-
-
-
-
-Ingen fil har valtsIngen fil har valts
-ChatGPT kan begå misstag. Kontrollera viktig information.
-

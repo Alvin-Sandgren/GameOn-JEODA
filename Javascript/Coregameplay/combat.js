@@ -57,7 +57,7 @@ let runeUsesThisTurn = 0;
 
 // Positionskonfiguration för runor
 const runeSlots = [
-    { x: 0, y: 102 },
+    { x: 0, y: 102 }, 
     { x: 0, y: 227 },
     { x: 0, y: 350 },
     { x: 0, y: 477 },
@@ -194,18 +194,7 @@ let images = {};
     playerCombatImg.src = "./character_bilder/meatball_nack.png";
     player.combatImg = images["./character_bilder/meatball_nack.png"];
 
-    PlayerActions.forEach(r => {
-        r.imageObj = images[r.img];
-    });
-
-    startMap(); // Starta kartan
-    startGame(); // Starta spelet
 })();
-
-// Rita spelaren på canvas när bilden är laddad
-playerCombatImg.onload = () => {
-    ctx.drawImage(playerCombatImg, 350, canvas.height/2 - 75, 150, 150);
-};
 
 // Funktion för att starta runval
 function startRuneSelection() {
@@ -462,6 +451,7 @@ function startCombat(goat) {
     currentGoat.block = 0;
     currentGoat.blockRemaining = 0;
 
+    player.combatImg = player.imgIdle;
     player.block = 0;
 
     console.log(`An evil ${goat.name} has appeared!`);
