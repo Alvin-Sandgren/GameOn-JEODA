@@ -219,9 +219,9 @@ let shoesBarrier = new Obstacle(7993, 3900, 24, 600, "#ff6600"); // korrekt
 shoesBarrier.active = true; 
 obstacles.push(shoesBarrier);
 
-let shirtBarrier = new Obstacle(6100, 1901, 20, 798, "#ff6600")
-shoesBarrier.active = true;
-obstacles.push(shirtBarrier)
+let shirtBarrier = new Obstacle(6100, 1901, 20, 798, "#ff6600");
+shirtBarrier.active = true;
+obstacles.push(shirtBarrier);
 
  const skyltar = [
     // Svart stolpe och outline
@@ -335,6 +335,7 @@ export function gameLoop(timestamp) {
       player.imgJump.src = "./character_bilder/meatball_ht_jump.png";
       player.hasShirt = true;  
       shirt.x = -1000;
+      shirt.y = -1000;
       showDialog("You found a shirt!\nYou can now dash! (by using Shift)");
     }
 
@@ -364,6 +365,8 @@ export function gameLoop(timestamp) {
       helmet.y = enemygoatsten.y - 10;
       helmet.w = 68;
       helmet.h = 52;
+      enemygoatsten.x = -1000;
+      enemygoatsten.y = -1000;
 
       showDialog("You defeated the goat Sten, He also dropped a helmet!");
     }
@@ -411,25 +414,25 @@ export function gameLoop(timestamp) {
       }
     }
 
-    // Rita getter ur listan om de inte är döda
     for (let goat of combatGoats) {
-      if (goat.health > 0) {
+      if (goat.health > 0) { // rita bara levande getter
         goat.draw(ctx);
-      }
-    }
+       }
+        }
 
-    // Kolla kollision med getter (combattrigger)
-    for (let goat of combatGoats) {
-      if (
-        player.x < goat.x + goat.w &&
-        player.x + player.w > goat.x &&
-        player.y < goat.y + goat.h &&
-        player.y + player.h > goat.y
-      ) {
-        if (onCombatTrigger) onCombatTrigger(goat);
-        break;
-      }
-    }
+for (let goat of combatGoats) {
+  if (goat.health <= 0 || goat._defeated) continue; // IGNORERA döda eller markerade getter
+  if (
+    player.x < goat.x + goat.w &&
+    player.x + player.w > goat.x &&
+    player.y < goat.y + goat.h &&
+    player.y + player.h > goat.y
+  ) {
+    if (onCombatTrigger) onCombatTrigger(goat);
+    break;
+  }
+}
+
 
     // Kolla kollision med Lava
     const lava = obstacles.find(o => o instanceof Lava);
@@ -497,6 +500,8 @@ export function gameLoop(timestamp) {
       shirtBarrier.active = false;
       shirtBarrier.x = -1000;
       shirtBarrier.y = -1000;
+      enemygoatgw.x = -1000;
+      enemygoatgw.y = -1000;
     }
 
     //-||- stefanget dör och -||-
@@ -506,6 +511,8 @@ export function gameLoop(timestamp) {
       shoesBarrier.active = false; 
       shoesBarrier.x = -1000;
       shoesBarrier.y = -1000;
+      enemygoatstefan.x = -1000;
+      enemygoatstefan.y = -1000;
     }
 
     //Sätter win condition och directar spelaren mot slutet

@@ -96,21 +96,22 @@ function resetToMenu() {
   showMenu();
 }
 
-//  Combat state
+//CombatState
 export function enterCombat(collidedGoat) {
     pauseMap();
     soundmanager.playCombat();
-    fadeInOverlay(() => {
-        currentState = "combat";
-        startCombat(collidedGoat);
-        currentCombatGoat = collidedGoat;
+    fadeInOverlay();
 
-        // Om drawCombat finns exporterat så rita upp combaten direkt
-        if (typeof drawCombat === "function") {
-          drawCombat(collidedGoat);
-        }
-    });
+    currentState = "combat";
+    currentCombatGoat = collidedGoat;
+    startCombat(collidedGoat);
+
+    // Rita combaten direkt
+    if (typeof drawCombat === "function") {
+        drawCombat(collidedGoat);
+    }
 }
+
 
 // Exit combat and return to overworld
 export function exitCombat() {
@@ -133,9 +134,6 @@ startBtn.addEventListener('click', startGame);
 window.addEventListener('keydown', e => {
     if (currentState === "menu" && e.key === "Enter") startGame();
     else if (e.key.toLowerCase() === "m") showMenu();
-    //test keys
-    else if (e.key.toLowerCase() === "å") gameOver();
-    else if (e.key.toLowerCase() === "l") startGame();
 });
 
 canvas.addEventListener("click", (e) => {

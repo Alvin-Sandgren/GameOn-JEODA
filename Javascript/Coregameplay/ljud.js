@@ -24,10 +24,10 @@ export class Soundmanager {
 
         //getljud
         this.goatDeathSound = new Audio("Ljud/goatdeath.wav");
-
-        this.jump.volume = 0.1;
-        this.backgroundMusic.volume = 0.2;
-        this.combatMusic.volume = 0.85;
+        this.blockSound.volume = 0,5;
+        this.jump.volume = 0.08;
+        this.backgroundMusic.volume = 0.1;
+        this.combatMusic.volume = 0.05;
     }
     playMenu() {
         this.backgroundMusic.pause();

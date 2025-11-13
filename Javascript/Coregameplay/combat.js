@@ -1,4 +1,3 @@
-export { startCombat };
 import { canvas, ctx, startMap, player, combatGoats, pauseMap, soundmanager } from "./map.js";
 import { startGame, gameOver, exitCombat } from "./overlay.js";
 
@@ -33,9 +32,6 @@ export async function preloadImages(paths) {
 const combatImg = new Image();
 combatImg.src = "../kartbilder/combatrunes.png";
 
-const playerCombatImg = new Image();
-playerCombatImg.src = "./character_bilder/meatball_nack.png";
-
 let inCombat = false;
 let playerTurn = true;
 let slays = 0;
@@ -57,7 +53,8 @@ const runeSlots = [
     { x: 15, y: 650 }
 ];
 
-player.damage = 10;
+player.damage = player.damage ?? 10;
+
 
 export const PlayerActions = [
     {
@@ -174,9 +171,6 @@ let images = {};
     combatImg.src = "../kartbilder/combatrunes.png";
     combatImg.imageObj = images["../kartbilder/combatrunes.png"];
 
-    playerCombatImg.src = "./character_bilder/meatball_nack.png";
-    player.combatImg = images["./character_bilder/meatball_nack.png"];
-
 })();
 
 function startRuneSelection() {
@@ -266,10 +260,11 @@ function drawSelectedRunes() {
 }
 
 export function drawCombat(goat) {
+    if (!inCombat) return; 
     if (!goat) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (inCombat && combatImg.complete) ctx.drawImage(combatImg, 0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (combatImg.complete) ctx.drawImage(combatImg, 0, 0, canvas.width, canvas.height);
 
     if (player.combatImg && player.combatImg.complete) {
         const width = 250;
@@ -346,10 +341,9 @@ function drawHealthBar(current, max, x, y, width, height) {
     ctx.strokeRect(x, y, width, height);
 }
 
-function startCombat(goat) {
+export function startCombat(goat) {
     if (!goat) return;
-    
-    if (goat.health <= 0) return;
+    if (goat.health <= 0 || goat._defeated) return; // <-- här fixar vi problemet
 
     inCombat = true;
     playerTurn = true;
@@ -361,29 +355,31 @@ function startCombat(goat) {
     discardedRunes = [];
     runeUsesThisTurn = 0;
 
-    currentGoat.maxHealth = currentGoat.maxHealth || 100;
-    currentGoat.health = currentGoat.maxHealth;
+    player.block = 0;
+    player.combatImg = player.imgIdle;
 
-    currentGoat.nextMove = [
+    // initiera goat combat-state
+    goat.maxHealth = goat.maxHealth || 100;
+    goat.health = goat.maxHealth;
+    goat.burnTurns = 0;
+    goat.burnDamage = 0;
+    goat.vulnerable = false;
+    goat.damage = goat.damage ?? 5;
+    goat.tempDamage = goat.damage;
+    goat.block = 0;
+    goat.blockRemaining = 0;
+    goat.nextMove = [
         EnemyActions[Math.floor(Math.random() * EnemyActions.length)],
         EnemyActions[Math.floor(Math.random() * EnemyActions.length)]
     ];
-
-    currentGoat.burnTurns = 0;
-    currentGoat.burnDamage = 0;
-    currentGoat.vulnerable = false;
-    currentGoat.damage = 5;
-    currentGoat.tempDamage = 5;
-    currentGoat.block = 0;
-    currentGoat.blockRemaining = 0;
-
-    player.block = 0;
 
     console.log(`An evil ${goat.name} has appeared!`);
 
     startRuneSelection();
     drawCombat(currentGoat);
 }
+
+
 
 export function playerAction(actionIndex, goat) {
     if (!playerTurn || !inCombat || !goat) return;
@@ -460,7 +456,6 @@ function endCombat(victory, goat) {
     inCombat = false;
     playerTurn = false;
 
-    // Nollställ stridsvariabler
     selectingRunes = false;
     selectedRunes = [];
     currentTurnRunes = [];
@@ -473,15 +468,17 @@ function endCombat(victory, goat) {
         player.health = player.maxHealth;
         goat.health = 0;
 
-        setTimeout(() => {
-            startMap();
-            currentGoat = null;
-            exitCombat();
-        }, 500);
+        // markera geten som defeated så combat inte triggas igen
+        goat._defeated = true;
+
+        currentGoat = null;
+        startMap();
+        exitCombat();
 
     } else {
         console.log("You were defeated!");
         player.health = player.maxHealth;
+        currentGoat = null;
         gameOver();
     }
 }
