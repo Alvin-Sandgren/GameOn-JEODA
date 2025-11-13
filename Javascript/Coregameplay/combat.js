@@ -234,14 +234,7 @@ export const EnemyActions = [
             goat.block = Math.min((goat.block || 0) + 12, 30);
         }
     },
-    {
-        name: "Goat buff",
-        apply: (goat) => {
-            goat.damageBonus = Math.min((goat.damageBonus || 0) + 2, 8);
-            goat.buffTurns = 2;
-            refreshGoatDamage(goat);
-        }
-    },
+
 ];
 
 let images = {};
@@ -543,7 +536,7 @@ function drawStatus(x, y, target) {
     ctx.fillText(statusText.join(" | "), x, y);
 }
 
-// Rita livsfält
+// Rita healthbar
 function drawHealthBar(current, max, x, y, width, height) {
     current = Number(current) || 0;
     max = Number(max) || 1;
@@ -882,8 +875,8 @@ function startCombat(goat) {
     runeUsesThisTurn = 0;
 
     // Nollställ getens stats helt inför ny strid
-    const baseHealth = 90 + slays * 15;
-    const baseDamage = 18 + slays * 2;
+    const baseHealth = 100
+    const baseDamage =  20
     currentGoat.baseMaxHealth = baseHealth;
     currentGoat.maxHealth = baseHealth;
     currentGoat.health = baseHealth;

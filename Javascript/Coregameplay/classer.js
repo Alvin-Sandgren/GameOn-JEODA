@@ -14,7 +14,7 @@ export class Character {
 
 
     // Hälsa och skada
-    this.maxHealth = 100;
+    this.maxHealth = 200;
     this.health = this.maxHealth;
     this.damage = 10;
     this.name = imgIdleSrc.split("/").pop().split(".")[0]; // ✅ fixat
