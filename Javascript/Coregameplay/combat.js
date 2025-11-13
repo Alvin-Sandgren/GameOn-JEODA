@@ -91,7 +91,7 @@ export const PlayerActions = [
     {
         name: "Shield up",
         apply: () => {
-            player.block = 10;
+            player.block = Math.min((player.block || 0) + 10, 30);
         },
         img: "./Runes/rune_blockb.png"
     },
@@ -103,23 +103,30 @@ export const PlayerActions = [
     {
         name: "Wildfire",
         apply: () => {
+            if (!currentGoat) return;
+            const burn = Math.max(Math.floor(player.damage / 3), 3);
+            currentGoat.burnDamage = burn;
             currentGoat.burnTurns = 3;
-            currentGoat.burnDamage = Math.floor(player.damage / 3);
         },
         img: "./Runes/rune_burnb.png"
     },
     {
         name: "Loki's insult",
         apply: () => {
-            if (currentGoat.tempDamage == null) currentGoat.tempDamage = currentGoat.damage || 20;
-            currentGoat.tempDamage = Math.floor(currentGoat.tempDamage * 0.5);
+            if (!currentGoat) return;
+            const weaken = Math.max(Math.floor((currentGoat.damage || currentGoat.baseDamage || 20) * 0.4), 3);
+            currentGoat.weakenAmount = Math.min((currentGoat.weakenAmount || 0) + weaken, 20);
+            currentGoat.weakenTurns = 2;
+            refreshGoatDamage(currentGoat);
         },
         img: "./Runes/rune_weakb.png"
     },
     {
         name: "Exposed flesh",
         apply: () => {
+            if (!currentGoat) return;
             currentGoat.vulnerable = true;
+            currentGoat.vulnerableTurns = 2;
         },
         img: "./Runes/rune_exposeb.png"
     },
@@ -129,10 +136,10 @@ export const PlayerActions = [
             const outcome = Math.random();
             if (outcome < 0.4) {
                 const dmg = Math.floor(player.damage * 0.4);
-                currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
+                applyDamageToGoat(dmg);
             } else if (outcome < 0.8) {
                 const dmg = Math.floor(player.damage * 0.1);
-                currentGoat.health = (currentGoat.health || currentGoat.maxHealth) - dmg;
+                applyDamageToGoat(dmg);
             } else {
                 const selfDmg = Math.floor(player.maxHealth * 0.1);
                 player.health -= selfDmg;
@@ -155,6 +162,46 @@ for (let i = 0; i < 5; i++) {
 
 export const AllRunes = [...PlayerActions, ...extraRunes];
 
+function applyDamageToGoat(amount, options = {}) {
+    if (!currentGoat || typeof amount !== "number") return 0;
+
+    let dmg = Math.max(Math.round(amount), 0);
+    if (currentGoat.vulnerable) {
+        dmg = Math.floor(dmg * 1.5);
+        if (currentGoat.vulnerableTurns) {
+            currentGoat.vulnerableTurns--;
+            if (currentGoat.vulnerableTurns <= 0) currentGoat.vulnerable = false;
+        }
+    }
+
+    if (!options.ignoreBlock && currentGoat.block > 0) {
+        const blocked = Math.min(currentGoat.block, dmg);
+        dmg -= blocked;
+        currentGoat.block = Math.max(currentGoat.block - blocked, 0);
+    }
+
+    currentGoat.health = Math.max(currentGoat.health - dmg, 0);
+    return dmg;
+}
+
+function applyBurnTick(goat) {
+    if (!goat || goat.burnTurns <= 0 || !goat.burnDamage) return;
+    applyDamageToGoat(goat.burnDamage, { ignoreBlock: true });
+    goat.burnTurns--;
+    if (goat.burnTurns <= 0) {
+        goat.burnDamage = 0;
+    }
+}
+
+function refreshGoatDamage(goat) {
+    if (!goat) return;
+    const base = goat.baseDamage || goat.damage || 20;
+    const bonus = goat.damageBonus || 0;
+    const weaken = goat.weakenAmount || 0;
+    const raw = base + bonus - weaken;
+    goat.damage = Math.max(Math.floor(raw), Math.floor(base * 0.4));
+}
+
 AllRunes.forEach(r => {
     const img = new Image();
     img.src = r.img;
@@ -172,27 +219,25 @@ export const EnemyActions = [
     {
         name: "Attack",
         apply: (goat, player) => {
-            let damage = goat.tempDamage || goat.damage || 20;
-            const blockedByPlayer = Math.min(damage, player.block || 0);
-            damage -= blockedByPlayer;
-            player.health -= damage;
-
-            // Reset spelarens block efter attack
-            player.block = 0;
+            const base = goat.damage || goat.tempDamage || 20;
+            const blocked = Math.min(base, player.block || 0);
+            const dealt = Math.max(base - blocked, 0);
+            player.block = Math.max((player.block || 0) - base, 0);
+            player.health = Math.max(player.health - dealt, 0);
         }
     },
     {
         name: "Defensive stance",
         apply: (goat) => {
-            goat.block = 10;
+            goat.block = Math.min((goat.block || 0) + 12, 30);
         }
     },
     {
         name: "Goat buff",
         apply: (goat) => {
-            if (Math.random() < 0.5) {
-                goat.damage += 5;
-            }
+            goat.damageBonus = Math.min((goat.damageBonus || 0) + 2, 8);
+            goat.buffTurns = 2;
+            refreshGoatDamage(goat);
         }
     },
 ];
@@ -400,10 +445,10 @@ export function drawCombat(goat) {
                 extra = ` (${potentialDmg} dmg → ${Math.max(potentialDmg - blocked, 0)} after block)`;
 
             } else if (move.name === "Defensive stance") {
-                extra = ` (will block 10)`;
+                extra = ` (will gain 12 block)`;
 
             } else if (move.name === "Goat buff") {
-                extra = ` (damage +2)`;
+                extra = ` (+2 damage for upcoming turns)`;
             }
             return `${move.name}${extra}`;
 
@@ -486,7 +531,9 @@ function drawStatus(x, y, target) {
     let statusText = [];
     if (target.burnTurns > 0) statusText.push(`Burn rounds left: ${target.burnTurns}`);
     if (target.vulnerable) statusText.push(`Vulnerable`);
-    if (target.block > 0) statusText.push(`Block: ${target.block}`);
+    if (target.block > 0) statusText.push(`Block: ${Math.round(target.block)}`);
+    if (target.buffTurns > 0) statusText.push(`Enraged: ${target.buffTurns}`);
+    if (target.weakenTurns > 0) statusText.push(`Weakened: ${target.weakenTurns}`);
     ctx.fillText(statusText.join(" | "), x, y);
 }
 
@@ -557,6 +604,7 @@ canvas.addEventListener("click", (event) => {
                 if (firstEmptyIndex !== -1) {
                     actionStoneSlots[firstEmptyIndex] = rune;
                     rune.selected = true; // markera runan som vald
+                    selectedRunes.push(rune);
 
                     const config = actionStoneRunes[firstEmptyIndex];
                     rune._clickArea = {
@@ -648,7 +696,7 @@ export function playerAction(actionIndex, goat) {
     const action = currentTurnRunes[actionIndex];
     if (!action) return;
 
-    currentTurnRunes.splice(actionIndex, 1);
+    currentTurnRunes[actionIndex] = null;
 
     // Starta ljud för varje rune
     if (action.name === "Viking strike") soundmanager.playAxe();
@@ -657,6 +705,12 @@ export function playerAction(actionIndex, goat) {
     else if (action.name === "Wildfire") soundmanager.playBurn();
     else if (action.name === "Loki's insult" || action.name === "Exposed flesh") soundmanager.playRune();
     else if (action.name === "Tyr's gamble") soundmanager.playAnvil();
+
+    if (typeof action.damage === "function") {
+        applyDamageToGoat(action.damage());
+    } else if (typeof action.damage === "number") {
+        applyDamageToGoat(action.damage);
+    }
 
     if (action.apply) action.apply();
 
@@ -668,11 +722,19 @@ export function playerAction(actionIndex, goat) {
     runeUsesThisTurn++;
 
     if (goat.health <= 0) {
+        soundmanager.playGoatDeath?.();
         endCombat(true, goat);
         return;
     }
 
-    if (runeUsesThisTurn >= 3) {
+    if (player.health <= 0) {
+        endCombat(false, goat);
+        return;
+    }
+
+    const allUsed = currentTurnRunes.every(rune => !rune);
+
+    if (runeUsesThisTurn >= 3 || allUsed) {
         runeUsesThisTurn = 0;
         playerTurn = false;
 
@@ -718,15 +780,28 @@ function enemyTurn(goat) {
     if (!inCombat || !goat || !player) return;
 
     // Brännskada först
-    if (goat.burnTurns > 0) {
-        goat.health -= goat.burnDamage;
-        goat.burnTurns--;
-        if (goat.health <= 0) {
-            endCombat(true, goat);
-            soundmanager.playGoatDeath();
-            return;
+    applyBurnTick(goat);
+    if (goat.health <= 0) {
+        soundmanager.playGoatDeath?.();
+        endCombat(true, goat);
+        return;
+    }
+
+    if (goat.buffTurns > 0) {
+        goat.buffTurns--;
+        if (goat.buffTurns <= 0) {
+            goat.damageBonus = 0;
         }
     }
+
+    if (goat.weakenTurns > 0) {
+        goat.weakenTurns--;
+        if (goat.weakenTurns <= 0) {
+            goat.weakenAmount = 0;
+        }
+    }
+
+    refreshGoatDamage(goat);
 
     goat.tempDamage = goat.damage;
 
@@ -746,20 +821,8 @@ function enemyTurn(goat) {
 
     // Utför handlingarna
     actions.forEach(action => {
-        if (action.name === "Attack") {
-            let damage = goat.tempDamage || goat.damage || 10;
-            const blockedByPlayer = Math.min(damage, player.block || 0);
-            const actualDamage = Math.max(damage - blockedByPlayer, 0);
-
-            player.health -= actualDamage;
-            player.block = Math.max((player.block || 0) - damage, 0);
-
-        } else if (action.name === "Goat buff") {
-            if (Math.random() < 0.5) {
-                goat.damage += 5;
-            }
-        } else if (action.name === "Defensive stance") {
-            goat.blockRemaining = (goat.blockRemaining || 0) + 10;
+        if (action && typeof action.apply === "function") {
+            action.apply(goat, player);
         }
     });
 
@@ -772,6 +835,9 @@ function enemyTurn(goat) {
         gameOver();
         return;
     }
+
+    refreshGoatDamage(goat);
+    goat.tempDamage = goat.damage;
 
     // Slumpa nya handlingar för nästa tur
     goat.nextMove = [
@@ -810,17 +876,25 @@ function startCombat(goat) {
     runeUsesThisTurn = 0;
 
     // Nollställ getens stats helt inför ny strid
-    currentGoat.baseMaxHealth = 100;
-    currentGoat.maxHealth = 100;
-    currentGoat.health = 100;
-    currentGoat.baseDamage = 20;       // Standard damage
-    currentGoat.damage = 20;
+    const baseHealth = 90 + slays * 15;
+    const baseDamage = 18 + slays * 2;
+    currentGoat.baseMaxHealth = baseHealth;
+    currentGoat.maxHealth = baseHealth;
+    currentGoat.health = baseHealth;
+    currentGoat.baseDamage = baseDamage;
+    currentGoat.damage = baseDamage;
     currentGoat.tempDamage = currentGoat.damage;
     currentGoat.block = 0;
-    currentGoat.blockRemaining = 0;
     currentGoat.burnTurns = 0;
     currentGoat.burnDamage = 0;
     currentGoat.vulnerable = false;
+    currentGoat.vulnerableTurns = 0;
+    currentGoat.damageBonus = 0;
+    currentGoat.buffTurns = 0;
+    currentGoat.weakenAmount = 0;
+    currentGoat.weakenTurns = 0;
+    refreshGoatDamage(currentGoat);
+    AllRunes.forEach(r => r.selected = false);
 
     // Slumpa första fiendehandlingar
     currentGoat.nextMove = [
